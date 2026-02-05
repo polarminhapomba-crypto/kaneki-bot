@@ -1,1 +1,8 @@
-[phases.setup]\nnixPkgs = ["nodePackages.pnpm", "ffmpeg", "python3"]\n\n[phases.build]\ncmds = ["npm install"]\n\n[start]\ncmd = "npm start"
+[phases.setup]
+nixPkgs = ["ffmpeg", "python3"]
+
+[phases.build]
+cmds = ["npm install"]
+
+[start]
+cmd = "npm start"
