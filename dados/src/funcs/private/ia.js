@@ -1852,7 +1852,6 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
           'qwen/qwen3-235b-a22b',
           JSON.stringify(userInput),
           selectedPrompt,
-          key,
           historico[userId] || []
         )).data;
 

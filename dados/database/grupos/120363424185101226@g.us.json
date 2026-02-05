@@ -1,0 +1,29 @@
+{
+  "mark": {},
+  "createdAt": "2026-02-05T15:11:06.792Z",
+  "groupName": "Oi",
+  "modorpg": false,
+  "minMessage": null,
+  "moderators": [],
+  "allowedModCommands": [],
+  "mutedUsers": {},
+  "mutedUsers2": {},
+  "levelingEnabled": false,
+  "adminWhitelist": {},
+  "roles": {},
+  "roleMessages": {},
+  "contador": [
+    {
+      "id": "60812727160901@lid",
+      "msg": 3,
+      "cmd": 3,
+      "figu": 0,
+      "pushname": "Vinícius",
+      "firstSeen": "2026-02-05T15:11:06.827Z",
+      "lastActivity": "2026-02-05T15:12:57.352Z"
+    }
+  ],
+  "autorepo": true,
+  "assistente": true,
+  "assistentePersonality": "nazuna"
+}
