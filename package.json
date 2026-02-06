@@ -1,5 +1,5 @@
 {
-    "name": "nazuna",
+    "name": "kaneki",
     "version": "8.0.0",
     "description": "Bot de whatsapp criada por hiudy",
     "type": "module",
@@ -13,7 +13,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/hiudyy/nazuna.git"
+        "url": "git+https://github.com/hiudyy/kaneki.git"
     },
     "homepage": "https://cognima.com.br",
     "author": "Hiudy",

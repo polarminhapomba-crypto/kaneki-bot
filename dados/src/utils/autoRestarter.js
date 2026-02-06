@@ -21,7 +21,7 @@ class AutoRestarter {
             'UnhandledPromiseRejectionWarning'
         ];
         this.logFile = path.join(__dirname, '../../../logs/auto-restart.log');
-        this.pidFile = path.join(__dirname, '../../../nazuna.pid');
+        this.pidFile = path.join(__dirname, '../../../kaneki.pid');
         this.isShuttingDown = false;
         this.childProcess = null;
         
@@ -213,7 +213,7 @@ class AutoRestarter {
             }
 
             // Limpa arquivos temporários
-            const tempDirs = ['/tmp/nazuna-*', './temp/*'];
+            const tempDirs = ['/tmp/kaneki-*', './temp/*'];
             
             for (const tempPattern of tempDirs) {
                 try {

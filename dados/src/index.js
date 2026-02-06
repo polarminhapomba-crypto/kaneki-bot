@@ -4205,7 +4205,7 @@ Código: *${roleCode}*`,
         }
         
         // Obter a personalidade atual do grupo
-        const personality = groupData.assistentePersonality || 'nazuna';
+        const personality = groupData.assistentePersonality || 'kaneki';
         
         ia.makeAssistentRequest({
           mensagens: [jSoNzIn]
@@ -15407,7 +15407,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
         try {
           if (!isOwner || isOwner && isSubOwner) return reply("🚫 Apenas o Dono principal pode utilizar esse comando!");
           if (!fs.existsSync(pathz.join(__dirname, '..', 'database', 'updateSave.json'))) return reply('❌ Sua versão não tem suporte a esse sistema ainda.');
-          const AtualCom = await axios.get('https://api.github.com/repos/hiudyy/nazuna/commits?per_page=1', {
+          const AtualCom = await axios.get('https://api.github.com/repos/hiudyy/kaneki/commits?per_page=1', {
             headers: {
               Accept: 'application/vnd.github+json'
             }
@@ -15416,7 +15416,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
             total
           } = JSON.parse(fs.readFileSync(pathz.join(__dirname, '..', 'database', 'updateSave.json'), 'utf-8'));
           if (AtualCom > total) {
-            const TextZin = await VerifyUpdate('hiudyy/nazuna', AtualCom - total);
+            const TextZin = await VerifyUpdate('hiudyy/kaneki', AtualCom - total);
             await reply(TextZin);
           } else {
             await reply('Você ja esta utilizando a versão mais recente da bot.');
@@ -18161,7 +18161,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
           if (!q) return reply(`❌️ *Forma incorreta, use está como exemplo:* ${prefix + command} https://instagram.com/hiudyyy_`);
           const shortResponse = await axios.post("https://spoo.me/api/v1/shorten", { 
             long_url: q, 
-            alias: `nazuna_${Math.floor(10000 + Math.random() * 90000)}` 
+            alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
           });
           reply(`✅ *Link encurtado com sucesso!*\n\n🔗 *Link curto:* ${shortResponse.data.short_url}\n📎 *Link original:* ${shortResponse.data.long_url}`);
         } catch (e) {
@@ -18173,7 +18173,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
       case 'gerarnick':
       case 'nickgenerator':
         try {
-          if (!q) return reply(`🎮 *GERADOR DE NICK*\n\n📝 *Como usar:*\n• Digite o nick após o comando\n• Ex: ${prefix}nick nazuna`);
+          if (!q) return reply(`🎮 *GERADOR DE NICK*\n\n📝 *Como usar:*\n• Digite o nick após o comando\n• Ex: ${prefix}nick kaneki`);
           var datzn;
           datzn = await styleText(q);
           await reply(datzn.join('\n'));
@@ -18478,7 +18478,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
           if (!datz.ok) return reply(datz.msg);
           return axios.post("https://spoo.me/api/v1/shorten", { 
             long_url: datz.url, 
-            alias: `nazuna_${Math.floor(10000 + Math.random() * 90000)}` 
+            alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
           }).then((shortLinkPlugin) => {
             return nazu.sendMessage(from, {
               image: { url: datz.image },
@@ -19084,7 +19084,7 @@ case 'facebookdl':
           if (fileSizeBytes > maxSize) {
             const shortLinkGdrive = await axios.post("https://spoo.me/api/v1/shorten", { 
               long_url: downloadUrl, 
-              alias: `nazuna_${Math.floor(10000 + Math.random() * 90000)}` 
+              alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
             });
             return reply(`📁 *Arquivo encontrado!*\n\n📄 *Nome:* ${fileName}\n📊 *Tamanho:* ${fileSize}\n📋 *Tipo:* ${mimetype}\n\n⚠️ *Arquivo muito grande para enviar!*\nO limite do WhatsApp é 100MB.\n\n🔗 *Link direto:*\n${shortLinkGdrive.data.short_url}`);
           }
@@ -19181,7 +19181,7 @@ case 'facebookdl':
           if (fileSizeBytes > maxSize) {
             const shortLinkMf = await axios.post("https://spoo.me/api/v1/shorten", { 
               long_url: downloadUrl, 
-              alias: `nazuna_${Math.floor(10000 + Math.random() * 90000)}` 
+              alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
             });
             return reply(`📁 *Arquivo encontrado!*\n\n📄 *Nome:* ${fileName}\n📊 *Tamanho:* ${fileSize}\n📅 *Upload:* ${uploadDate || 'N/A'}\n📋 *Tipo:* ${extension || mimetype}\n\n⚠️ *Arquivo muito grande para enviar!*\nO limite do WhatsApp é 100MB.\n\n🔗 *Link direto:*\n${shortLinkMf.data.short_url}`);
           }
@@ -19439,7 +19439,7 @@ case 'facebookdl':
         try {
           await reply('📦 Baixando o código-fonte do bot... Aguarde!');
           
-          const zipResponse = await axios.get('https://github.com/hiudyy/nazuna/archive/refs/heads/main.zip', {
+          const zipResponse = await axios.get('https://github.com/hiudyy/kaneki/archive/refs/heads/main.zip', {
             responseType: 'arraybuffer',
             timeout: 60000 // 60 segundos de timeout
           });
@@ -19450,9 +19450,9 @@ case 'facebookdl':
           
           await nazu.sendMessage(from, {
             document: Buffer.from(zipResponse.data),
-            fileName: 'nazuna-bot.zip',
+            fileName: 'kaneki-bot.zip',
             mimetype: 'application/zip',
-            caption: `📦 *Código-fonte do ${nomebot}*\n\n📖 Leia a documentação no repositório para entender melhor como instalar:\n🔗 https://github.com/hiudyy/nazuna\n\n⚠️ *Importante:* Certifique-se de ter Node.js instalado e siga os passos do README.md!`
+            caption: `📦 *Código-fonte do ${nomebot}*\n\n📖 Leia a documentação no repositório para entender melhor como instalar:\n🔗 https://github.com/hiudyy/kaneki\n\n⚠️ *Importante:* Certifique-se de ter Node.js instalado e siga os passos do README.md!`
           }, { quoted: info });
           
         } catch (e) {
@@ -19463,7 +19463,7 @@ case 'facebookdl':
             ? '❌ Tempo de conexão esgotado. Tente novamente.'
             : '❌ Erro ao baixar o arquivo.';
           
-          await reply(`${errorMsg}\n\nTente acessar diretamente:\n🔗 https://github.com/hiudyy/nazuna`);
+          await reply(`${errorMsg}\n\nTente acessar diretamente:\n🔗 https://github.com/hiudyy/kaneki`);
         }
         break;
       case 'gitbot':
@@ -19480,8 +19480,8 @@ case 'facebookdl':
             const githubHeaders = { 'Accept': 'application/vnd.github+json' };
             
             Promise.all([
-              axios.get('https://api.github.com/repos/hiudyy/nazuna', { headers: githubHeaders }),
-              axios.get('https://api.github.com/repos/hiudyy/nazuna/commits?per_page=1', { headers: githubHeaders })
+              axios.get('https://api.github.com/repos/hiudyy/kaneki', { headers: githubHeaders }),
+              axios.get('https://api.github.com/repos/hiudyy/kaneki/commits?per_page=1', { headers: githubHeaders })
             ]).then(([repoResponse, commitsResponse]) => {
               const repo = repoResponse.data;
               
@@ -19532,7 +19532,7 @@ case 'facebookdl':
 │ 🔄 *Atualizado:* ${updatedAt}
 │ 📤 *Último push:* ${pushedAt}
 │
-│ ⏱️ *Nazuna vem sendo ativamente*
+│ ⏱️ *Kaneki vem sendo ativamente*
 │ *mantida há:* ${tempoAtivo}
 │
 │ 🔗 *Links:*
@@ -19548,7 +19548,7 @@ case 'facebookdl':
               reply(gitInfo);
             }).catch((e) => {
               console.error('Erro ao buscar info do GitHub:', e);
-              reply(`❌ Erro ao buscar informações. Acesse diretamente:\n🔗 https://github.com/hiudyy/nazuna\n📞 Suporte: wa.me/553391967445`);
+              reply(`❌ Erro ao buscar informações. Acesse diretamente:\n🔗 https://github.com/hiudyy/kaneki\n📞 Suporte: wa.me/553391967445`);
             });
           });
         } catch (e) {
@@ -19893,7 +19893,7 @@ Exemplo: ${prefix}msgprefix Use #prefixo# antes do comando!
 
 🔹 *Nome do Bot*
 Use: ${prefix}nomebot <nome>
-Exemplo: ${prefix}nomebot Nazuna
+Exemplo: ${prefix}nomebot Kaneki
 • Altera o nome exibido nos menus
 • Use nomes curtos e memoráveis
 
@@ -21203,7 +21203,7 @@ Precisa de ajuda? Entre em contato:
       case 'nome-bot':
         try {
           if (!isOwner) return reply("Este comando é exclusivo para o meu dono!");
-          if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Nazuna`);
+          if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Kaneki`);
           let config = JSON.parse(fs.readFileSync(CONFIG_FILE));
           config.nomebot = q;
           writeJsonFile(CONFIG_FILE, config);
@@ -23702,7 +23702,7 @@ ${prefix}togglecmdvip premium_ia off`);
             return sendSticker(nazu, from, {
               sticker: { url: resultUrl },
               author: `${pushname}\n${nomebot}\n${nomedono}`,
-              packname: 'Nazuna Bot - Stickers',
+              packname: 'Kaneki Bot - Stickers',
               type: 'image'
             }, {
               quoted: info
@@ -27238,15 +27238,15 @@ Exemplos:
               delete groupData.assistentePersonality;
             } else {
               // Se ativar sem especificar, usa padrão
-              groupData.assistentePersonality = groupData.assistentePersonality || 'nazuna';
+              groupData.assistentePersonality = groupData.assistentePersonality || 'kaneki';
             }
             fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
             
             const statusMsg = groupData.assistente 
               ? `✅ *Assistente ativada com sucesso!*\n\n` +
-                `🤖 *Personalidade atual:* ${groupData.assistentePersonality === 'nazuna' ? 'Nazuna (Padrão)' : groupData.assistentePersonality === 'humana' ? 'Humana' : groupData.assistentePersonality === 'pro' ? 'Pro (Comandos)' : 'IA Normal'}\n\n` +
+                `🤖 *Personalidade atual:* ${groupData.assistentePersonality === 'kaneki' ? 'Kaneki (Padrão)' : groupData.assistentePersonality === 'humana' ? 'Humana' : groupData.assistentePersonality === 'pro' ? 'Pro (Comandos)' : 'IA Normal'}\n\n` +
                 `💡 *Trocar personalidade:*\n` +
-                `• ${prefix}assistente nazuna - Personalidade padrão Nazuna\n` +
+                `• ${prefix}assistente kaneki - Personalidade padrão Kaneki\n` +
                 `• ${prefix}assistente humana - Age 100% como humana\n` +
                 `• ${prefix}assistente ia - IA normal sem personalidade\n` +
                 `• ${prefix}assistente pro - Interpreta comandos em linguagem natural\n\n` +
@@ -27259,10 +27259,10 @@ Exemplos:
           // Se tem argumento, define a personalidade
           const personality = q.toLowerCase().trim();
           
-          if (!['nazuna', 'humana', 'ia', 'pro'].includes(personality)) {
+          if (!['kaneki', 'humana', 'ia', 'pro'].includes(personality)) {
             return reply(`❌ *Personalidade inválida!*\n\n` +
               `Escolha uma das opções:\n` +
-              `• ${prefix}assistente nazuna - Personalidade padrão Nazuna (vampira tsundere)\n` +
+              `• ${prefix}assistente kaneki - Personalidade padrão Kaneki (vampira tsundere)\n` +
               `• ${prefix}assistente humana - Age 100% como uma pessoa real\n` +
               `• ${prefix}assistente ia - IA normal e objetiva\n` +
               `• ${prefix}assistente pro - Interpreta comandos em linguagem natural`);
@@ -27273,7 +27273,7 @@ Exemplos:
           fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
           
           const personalityNames = {
-            'nazuna': '🌙 *Nazuna* - Vampira moderna com personalidade tsundere',
+            'kaneki': '🌙 *Kaneki* - Vampira moderna com personalidade tsundere',
             'humana': '👤 *Humana* - Age como uma pessoa real, nunca admite ser IA',
             'ia': '🤖 *IA Normal* - Assistente objetiva e direta',
             'pro': '⚡ *Pro* - Interpreta comandos em linguagem natural (não responde, só executa)'

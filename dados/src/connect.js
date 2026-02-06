@@ -468,7 +468,7 @@ function formatMessageText(template, replacements) {
     return text;
 }
 
-async function createGroupMessage(NazunaSock, groupMetadata, participants, settings, isWelcome = true) {
+async function createGroupMessage(KanekiSock, groupMetadata, participants, settings, isWelcome = true) {
     const jsonGp = await loadGroupSettings(groupMetadata.id);
     const mentions = participants.map(p => p);
     const bannerName = participants.length === 1 ? participants[0].split('@')[0] : `${participants.length} Membros`;
@@ -489,7 +489,7 @@ async function createGroupMessage(NazunaSock, groupMetadata, participants, setti
     if (settings.image) {
         let profilePicUrl = 'https://raw.githubusercontent.com/nazuninha/uploads/main/outros/1747053564257_bzswae.bin';
         if (participants.length === 1 && isWelcome) {
-            profilePicUrl = await NazunaSock.profilePictureUrl(participants[0], 'image').catch(() => profilePicUrl);
+            profilePicUrl = await KanekiSock.profilePictureUrl(participants[0], 'image').catch(() => profilePicUrl);
         }
        
         const image = settings.image !== 'banner' ? {
@@ -505,7 +505,7 @@ async function createGroupMessage(NazunaSock, groupMetadata, participants, setti
     return message;
 }
 
-async function handleGroupParticipantsUpdate(NazunaSock, inf) {
+async function handleGroupParticipantsUpdate(KanekiSock, inf) {
     try {
         const from = inf.id || inf.jid || (inf.participants && inf.participants.length > 0 ? inf.participants[0].split('@')[0] + '@s.whatsapp.net' : null);
         
@@ -529,7 +529,7 @@ async function handleGroupParticipantsUpdate(NazunaSock, inf) {
         }
         
         // Ignora eventos do próprio bot
-        const botId = NazunaSock.user.id.split(':')[0];
+        const botId = KanekiSock.user.id.split(':')[0];
 
         inf.participants = inf.participants.map(isValidParticipant).filter(Boolean);
 
@@ -537,7 +537,7 @@ async function handleGroupParticipantsUpdate(NazunaSock, inf) {
             return;
         }
             
-        let groupMetadata = await NazunaSock.groupMetadata(from).catch(err => {
+        let groupMetadata = await KanekiSock.groupMetadata(from).catch(err => {
             console.error(`❌ Erro ao buscar metadados do grupo ${from}: ${err.message}`);
             return null;
         });
@@ -570,11 +570,11 @@ async function handleGroupParticipantsUpdate(NazunaSock, inf) {
                     }
                 }
                 if (membersToRemove.length > 0) {
-                    await NazunaSock.groupParticipantsUpdate(from, membersToRemove, 'remove').catch(err => {
+                    await KanekiSock.groupParticipantsUpdate(from, membersToRemove, 'remove').catch(err => {
                         console.error(`❌ Erro ao remover membros do grupo ${from}: ${err.message}`);
                     });
                     
-                    await NazunaSock.sendMessage(from, {
+                    await KanekiSock.sendMessage(from, {
                         text: `🚫 Foram removidos ${membersToRemove.length} membros por regras de moderação:\n- ${removalReasons.join('\n- ')}`,
                         mentions: membersToRemove,
                     }).catch(err => {
@@ -583,11 +583,11 @@ async function handleGroupParticipantsUpdate(NazunaSock, inf) {
                 }
                 
                 if (membersToWelcome.length > 0) {
-                    const message = await createGroupMessage(NazunaSock, groupMetadata, membersToWelcome, groupSettings.welcome || {
+                    const message = await createGroupMessage(KanekiSock, groupMetadata, membersToWelcome, groupSettings.welcome || {
                         text: groupSettings.textbv
                     });
                     
-                    await NazunaSock.sendMessage(from, message).catch(err => {
+                    await KanekiSock.sendMessage(from, message).catch(err => {
                         console.error(`❌ Erro ao enviar mensagem de boas-vindas: ${err.message}`);
                     });
                 }
@@ -595,8 +595,8 @@ async function handleGroupParticipantsUpdate(NazunaSock, inf) {
             }
             case 'remove': {
                 if (groupSettings.exit?.enabled) {
-                    const message = await createGroupMessage(NazunaSock, groupMetadata, inf.participants, groupSettings.exit, false);
-                    await NazunaSock.sendMessage(from, message).catch(err => {
+                    const message = await createGroupMessage(KanekiSock, groupMetadata, inf.participants, groupSettings.exit, false);
+                    await KanekiSock.sendMessage(from, message).catch(err => {
                         console.error(`❌ Erro ao enviar mensagem de saída: ${err.message}`);
                     });
                 }
@@ -859,7 +859,7 @@ async function handleJidFiles(jidFiles, jidToLidMap, orphanJidsSet) {
     return { totalReplacements, totalRemovals, updatedFiles, renamedFiles, deletedFiles };
 }
 
-async function fetchLidWithRetry(NazunaSock, jid, maxRetries = 3) {
+async function fetchLidWithRetry(KanekiSock, jid, maxRetries = 3) {
     if (!jid || !isValidJid(jid)) {
         console.warn(`⚠️ JID inválido fornecido: ${jid}`);
         return null;
@@ -867,7 +867,7 @@ async function fetchLidWithRetry(NazunaSock, jid, maxRetries = 3) {
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            const result = await NazunaSock.onWhatsApp(jid);
+            const result = await KanekiSock.onWhatsApp(jid);
             if (result && result[0] && result[0].lid) {
                 return { jid, lid: result[0].lid };
             }
@@ -884,7 +884,7 @@ async function fetchLidWithRetry(NazunaSock, jid, maxRetries = 3) {
     return null;
 }
 
-async function fetchLidsInBatches(NazunaSock, uniqueJids, batchSize = 5) {
+async function fetchLidsInBatches(KanekiSock, uniqueJids, batchSize = 5) {
     const lidResults = [];
     const jidToLidMap = new Map();
     let successfulFetches = 0;
@@ -892,7 +892,7 @@ async function fetchLidsInBatches(NazunaSock, uniqueJids, batchSize = 5) {
     for (let i = 0; i < uniqueJids.length; i += batchSize) {
         const batch = uniqueJids.slice(i, i + batchSize);
         
-        const batchPromises = batch.map(jid => fetchLidWithRetry(NazunaSock, jid));
+        const batchPromises = batch.map(jid => fetchLidWithRetry(KanekiSock, jid));
         const batchResults = await Promise.allSettled(batchPromises);
         
         batchResults.forEach((result, index) => {
@@ -912,10 +912,10 @@ async function fetchLidsInBatches(NazunaSock, uniqueJids, batchSize = 5) {
     return { lidResults, jidToLidMap, successfulFetches };
 }
 
-async function updateOwnerLid(NazunaSock) {
+async function updateOwnerLid(KanekiSock) {
     const ownerJid = `${numerodono}@s.whatsapp.net`;
     try {
-        const result = await fetchLidWithRetry(NazunaSock, ownerJid);
+        const result = await fetchLidWithRetry(KanekiSock, ownerJid);
         if (result) {
             config.lidowner = result.lid;
             await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
@@ -925,7 +925,7 @@ async function updateOwnerLid(NazunaSock) {
     }
 }
 
-async function performMigration(NazunaSock) {
+async function performMigration(KanekiSock) {
     let scanResult;
     try {
         scanResult = await scanForJids(DATABASE_DIR);
@@ -940,7 +940,7 @@ async function performMigration(NazunaSock) {
         return;
     }
     
-    const { jidToLidMap, successfulFetches } = await fetchLidsInBatches(NazunaSock, uniqueJids);
+    const { jidToLidMap, successfulFetches } = await fetchLidsInBatches(KanekiSock, uniqueJids);
     const orphanJidsSet = new Set(uniqueJids.filter(jid => !jidToLidMap.has(jid)));
 
     if (jidToLidMap.size === 0) {
@@ -992,7 +992,7 @@ async function createBotSocket(authDir) {
         const version = [2, 3000, 1031821793];
         console.log(`📱 Usando versão do WhatsApp: ${version.join('.')}`);
         
-        const NazunaSock = makeWASocket({
+        const KanekiSock = makeWASocket({
             version,
             emitOwnEvents: true,
             fireInitQueries: true,
@@ -1012,7 +1012,7 @@ async function createBotSocket(authDir) {
             shouldResendMessageOn475AckError: true
         });
 
-        if (codeMode && !NazunaSock.authState.creds.registered) {
+        if (codeMode && !KanekiSock.authState.creds.registered) {
             console.log('📱 Insira o número de telefone (com código de país, ex: +14155552671 ou +551199999999): ');
             let phoneNumber = await ask('--> ');
             phoneNumber = phoneNumber.replace(/\D/g, '');
@@ -1020,14 +1020,14 @@ async function createBotSocket(authDir) {
                 console.log('⚠️ Número inválido! Use um número válido com código de país (ex: +14155552671 ou +551199999999).');
                 process.exit(1);
             }
-            const code = await NazunaSock.requestPairingCode(phoneNumber.replaceAll('+', '').replaceAll(' ', '').replaceAll('-', ''));
+            const code = await KanekiSock.requestPairingCode(phoneNumber.replaceAll('+', '').replaceAll(' ', '').replaceAll('-', ''));
             console.log(`🔑 Código de pareamento: ${code}`);
             console.log('📲 Envie este código no WhatsApp para autenticar o bot.');
         }
 
-        NazunaSock.ev.on('creds.update', saveCreds);
+        KanekiSock.ev.on('creds.update', saveCreds);
 
-        NazunaSock.ev.on('groups.update', async (updates) => {
+        KanekiSock.ev.on('groups.update', async (updates) => {
             if (!Array.isArray(updates) || updates.length === 0) return;
             
             if (DEBUG_MODE) {
@@ -1046,7 +1046,7 @@ async function createBotSocket(authDir) {
                 if (!ev || !ev.id) return;
                 
                 try {
-                    const meta = await NazunaSock.groupMetadata(ev.id).catch(() => null);
+                    const meta = await KanekiSock.groupMetadata(ev.id).catch(() => null);
                     if (meta) {
                         // Metadados atualizados, pode ser usado para cache futuro
                         if (DEBUG_MODE) {
@@ -1061,7 +1061,7 @@ async function createBotSocket(authDir) {
             await Promise.allSettled(updatePromises);
         });
 
-        NazunaSock.ev.on('group-participants.update', async (inf) => {
+        KanekiSock.ev.on('group-participants.update', async (inf) => {
             if (DEBUG_MODE) {
                 console.log('\n🐛 ========== GROUP PARTICIPANTS UPDATE ==========');
                 console.log('📅 Timestamp:', new Date().toISOString());
@@ -1072,7 +1072,7 @@ async function createBotSocket(authDir) {
                 console.log('�📦 Full event data:', JSON.stringify(inf, null, 2));
                 console.log('🐛 ================================================\n');
             }
-            await handleGroupParticipantsUpdate(NazunaSock, inf);
+            await handleGroupParticipantsUpdate(KanekiSock, inf);
         });
 
         let messagesListenerAttached = false;
@@ -1127,7 +1127,7 @@ async function createBotSocket(authDir) {
             
             // Processa mensagem
             if (typeof indexModule === 'function') {
-                await indexModule(NazunaSock, info, null, messagesCache, rentalExpirationManager);
+                await indexModule(KanekiSock, info, null, messagesCache, rentalExpirationManager);
             } else {
                 throw new Error('Módulo index.js não é uma função válida. Verifique o arquivo index.js.');
             }
@@ -1137,7 +1137,7 @@ async function createBotSocket(authDir) {
             if (messagesListenerAttached) return;
             messagesListenerAttached = true;
 
-            NazunaSock.ev.on('messages.upsert', async (m) => {
+            KanekiSock.ev.on('messages.upsert', async (m) => {
                 if (!m.messages || !Array.isArray(m.messages)) return;
                 
                 // Se for 'append', só processa se for solicitação de entrada (messageStubType 172)
@@ -1174,13 +1174,13 @@ async function createBotSocket(authDir) {
             });
         };
 
-        NazunaSock.ev.on('connection.update', async (update) => {
+        KanekiSock.ev.on('connection.update', async (update) => {
             const {
                 connection,
                 lastDisconnect,
                 qr
             } = update;
-            if (qr && !NazunaSock.authState.creds.registered && !codeMode) {
+            if (qr && !KanekiSock.authState.creds.registered && !codeMode) {
                 console.log('🔗 QR Code gerado para autenticação:');
                 qrcode.generate(qr, {
                     small: true
@@ -1194,10 +1194,10 @@ async function createBotSocket(authDir) {
                 
                 await initializeOptimizedCaches();
                 
-                await updateOwnerLid(NazunaSock);
-                await performMigration(NazunaSock);
+                await updateOwnerLid(KanekiSock);
+                await performMigration(KanekiSock);
                 
-                rentalExpirationManager.nazu = NazunaSock;
+                rentalExpirationManager.nazu = KanekiSock;
                 await rentalExpirationManager.initialize();
                 
                 attachMessagesListener();
@@ -1301,7 +1301,7 @@ async function createBotSocket(authDir) {
                 }, reconnectDelay);
             }
         });
-        return NazunaSock;
+        return KanekiSock;
     } catch (err) {
         console.error(`❌ Erro ao criar socket do bot: ${err.message}`);
         throw err;
@@ -1320,7 +1320,7 @@ async function startNazu() {
     try {
         reconnectAttempts = 0; // Reset contador ao conectar com sucesso
         forbidden403Attempts = 0; // Reset contador de erro 403
-        console.log('🚀 Iniciando Nazuna...');
+        console.log('🚀 Iniciando Kaneki...');
 
         await createBotSocket(AUTH_DIR);
         isReconnecting = false; // Conexão estabelecida com sucesso

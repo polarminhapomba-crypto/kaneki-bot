@@ -1,6 +1,6 @@
 {
-  "60812727160901@lid_nazuna": {
-    "userId": "60812727160901@lid_nazuna",
+  "60812727160901@lid_kaneki": {
+    "userId": "60812727160901@lid_kaneki",
     "nome": "Vinícius",
     "apelidos": [],
     "preferencias": {
@@ -41,9 +41,9 @@
         "comandos": 0
       }
     },
-    "relacionamento_nazuna": {
+    "relacionamento_kaneki": {
       "nivel_intimidade": 1,
-      "apelido_nazuna": null,
+      "apelido_kaneki": null,
       "memorias_especiais": [],
       "conversas_marcantes": [],
       "sentimento": "neutro"

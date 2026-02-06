@@ -1,4 +1,4 @@
-// Adaptado do DownloaderX para nazuna - Versão sem yt-dlp
+// Adaptado do DownloaderX para kaneki - Versão sem yt-dlp
 import axios from 'axios';
 
 const CONFIG = {

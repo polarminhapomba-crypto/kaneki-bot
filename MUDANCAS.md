@@ -1,7 +1,7 @@
 # Mudanças Realizadas - Integração DownloaderX
 
 ## Resumo
-Foram transferidos os comandos de download do TikTok, Instagram e YouTube do projeto DownloaderX para o projeto nazuna, substituindo as cases correspondentes.
+Foram transferidos os comandos de download do TikTok, Instagram e YouTube do projeto DownloaderX para o projeto kaneki, substituindo as cases correspondentes.
 
 ## Arquivos Novos Criados
 
@@ -82,7 +82,7 @@ Após integrar essas mudanças, os comandos funcionarão da seguinte forma:
 1. Os novos handlers usam `yt-dlp` que é mais robusto e suporta mais plataformas
 2. Os arquivos temporários são criados e deletados automaticamente após o download
 3. As mensagens de erro foram mantidas em português para melhor UX
-4. O código mantém a estrutura assíncrona original do nazuna
+4. O código mantém a estrutura assíncrona original do kaneki
 
 ## Próximos Passos
 

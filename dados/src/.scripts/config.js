@@ -31,7 +31,7 @@ const print = {
     separator: () => console.log(`${colors.blue}=================================================${colors.reset}`),
     header: () => {
         print.separator();
-        console.log(`${colors.bold}🚀 Configurador Gênesis Nazuna - Versão ${version}${colors.reset}`);
+        console.log(`${colors.bold}🚀 Configurador Gênesis Kaneki - Versão ${version}${colors.reset}`);
         console.log(`${colors.bold}👨‍💻 Criado por Hiudy${colors.reset}`);
         print.separator(); console.log();
     }
@@ -183,7 +183,7 @@ async function installNodeDependencies() {
         const cleanupPaths = [
             './temp',
             './logs/*.log', 
-            '/tmp/nazuna-*',
+            '/tmp/kaneki-*',
             '/tmp/baileys_media_cache'
         ];
         
@@ -278,7 +278,7 @@ async function main() {
         print.info('📝 Lembre-se de instalar com: npm run config:install');
     }
 
-    print.message(`🎉 Nazuna configurado e pronto para uso! Versão: ${version}`);
+    print.message(`🎉 Kaneki configurado e pronto para uso! Versão: ${version}`);
 }
 
 main().catch((error) => {
