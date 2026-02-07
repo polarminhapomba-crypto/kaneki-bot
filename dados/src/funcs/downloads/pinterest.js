@@ -33,10 +33,10 @@ function setCache(key, val) {
 
 async function search(query) {
   try {
-    const cached = getCached(\`search:\${query.toLowerCase()}\`);
+    const cached = getCached(`search:${query.toLowerCase()}`);
     if (cached) return { ok: true, ...cached, cached: true };
 
-    const response = await axios.get(\`https://br.pinterest.com/search/pins/?q=\${encodeURIComponent(query)}\`, {
+    const response = await axios.get(`https://br.pinterest.com/search/pins/?q=${encodeURIComponent(query)}`, {
       headers: HEADERS,
       timeout: 30000
     });
@@ -60,7 +60,7 @@ async function search(query) {
       urls: imgList.slice(0, 50)
     };
 
-    setCache(\`search:\${query.toLowerCase()}\`, result);
+    setCache(`search:${query.toLowerCase()}`, result);
     return { ok: true, ...result };
   } catch (error) {
     return { ok: false, msg: 'Erro ao buscar no Pinterest' };
@@ -69,7 +69,7 @@ async function search(query) {
 
 async function dl(url) {
   try {
-    const cached = getCached(\`download:\${url}\`);
+    const cached = getCached(`download:${url}`);
     if (cached) return { ok: true, ...cached, cached: true };
 
     const response = await axios.get(url, { headers: HEADERS, timeout: 30000 });
@@ -106,7 +106,7 @@ async function dl(url) {
       urls: [mediaUrl]
     };
 
-    setCache(\`download:\${url}\`, result);
+    setCache(`download:${url}`, result);
     return { ok: true, ...result };
   } catch (error) {
     return { ok: false, msg: 'Erro ao baixar do Pinterest' };
