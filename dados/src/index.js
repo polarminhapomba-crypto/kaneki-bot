@@ -20991,7 +20991,7 @@ Precisa de ajuda? Entre em contato:
         try {
           if (!q) return reply('❌ Digite o nome do comando. Exemplo: ' + prefix + 'getcase menu');
           var caseCode;
-          caseCode = (fs.readFileSync(__dirname + "/index.js", "utf-8").match(new RegExp(`case\\s*["'\`]${q}["'\`]\\s*:[\\s\\S]*?break\\s*;?`, "i")) || [])[0];
+          caseCode = (fs.readFileSync(__dirname + "/index.js", "utf-8").match(new RegExp("case\\\\s*[\"'`]" + q + "[\"'`]\\\\s*:[\\\\s\\\\S]*?break\\\\s*;?", "i")) || [])[0];
           await nazu.sendMessage(from, {
             document: Buffer.from(caseCode, 'utf-8'),
             mimetype: 'text/plain',
