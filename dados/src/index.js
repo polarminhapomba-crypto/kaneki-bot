@@ -12825,44 +12825,18 @@ Entre em contato com o dono do bot:
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          // Usando o endpoint mais estável da Pollinations
+          // Endpoint direto da Pollinations que gera a imagem na hora
           const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
           
-          try {
-            const response = await axios.get(imageUrl, { 
-              responseType: 'arraybuffer',
-              timeout: 40000,
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-              }
-            });
-
-            if (response.data.byteLength > 5000) {
-              const tempPath = pathz.join(os.tmpdir(), `gemma2_${Date.now()}.jpg`);
-              fs.writeFileSync(tempPath, Buffer.from(response.data));
-              
-              await nazu.sendMessage(from, {
-                image: { url: tempPath },
-                caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
-              }, { quoted: info });
-              
-              setTimeout(() => {
-                if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-              }, 15000);
-              return;
-            }
-          } catch (downloadErr) {
-            console.error('Erro ao baixar imagem, tentando envio direto por URL:', downloadErr.message);
-          }
-
-          // Fallback: Enviar por URL direta se o download falhar (alguns servidores aceitam melhor assim)
+          // Enviar diretamente pela URL. O Baileys cuidará do download.
+          // Isso evita erros de download no servidor do bot (ENOTFOUND, 530, etc)
           await nazu.sendMessage(from, {
             image: { url: imageUrl },
-            caption: `🎨 *Imagem gerada por Gemma2 (Link Direto)*\n\n📝 *Prompt:* ${q}`
+            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
           
         } catch (e) {
-          console.error('Erro fatal no comando gemma2:', e.message);
+          console.error('Erro no comando gemma2:', e.message);
           reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
         }
         break;
