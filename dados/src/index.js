@@ -12825,8 +12825,9 @@ Entre em contato com o dono do bot:
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          // Usando Airforce Flux que é estável e não apresenta o Error 1033
-          const finalImageUrl = `https://api.airforce/v1/imagine?prompt=${encodeURIComponent(q)}&model=flux&width=1024&height=1024&seed=${seed}`;
+          // Usando um proxy de imagem (wsrv.nl) para contornar o Error 1033 e garantir que o link abra em qualquer lugar
+          const rawImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux`;
+          const finalImageUrl = `https://wsrv.nl/?url=${encodeURIComponent(rawImageUrl)}&default=ssl`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
