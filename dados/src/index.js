@@ -19388,6 +19388,7 @@ case 'facebookdl':
       case 'apps':
       case 'playstore':
       case 'appstore':
+      case 'app':
         try {
           if (!q) return reply(`📱 *Busca de Aplicativos*\n\n❌ Digite o nome do app.\n\n📝 *Uso:* ${prefix}${command} <nome>\n\n📌 *Exemplo:*\n${prefix}${command} Minecraft`);
           
