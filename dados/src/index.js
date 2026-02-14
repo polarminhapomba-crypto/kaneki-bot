@@ -12824,9 +12824,8 @@ Entre em contato com o dono do bot:
         try {
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
-          const seed = Math.floor(Math.random() * 1000000);
-          // Usando Pollinations com parâmetros de renderização direta que costumam ignorar bloqueios de login em navegadores mobile
-          const finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux`;
+          // Usando MagicStudio que é extremamente estável para links diretos públicos
+          const finalImageUrl = `https://ai-api.magicstudio.com/api/ai-art-generator?prompt=${encodeURIComponent(q)}`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
