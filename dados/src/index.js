@@ -12828,16 +12828,27 @@ Entre em contato com o dono do bot:
           // Endpoint direto da Pollinations que gera a imagem na hora
           const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
           
-          // Enviar diretamente pela URL. O Baileys cuidará do download.
-          // Isso evita erros de download no servidor do bot (ENOTFOUND, 530, etc)
+          // Baixar a imagem manualmente para garantir que o buffer seja enviado corretamente
+          const response = await axios.get(imageUrl, { 
+            responseType: 'arraybuffer',
+            timeout: 60000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+          });
+
+          if (response.data.byteLength < 1000) {
+             throw new Error("O servidor de imagens retornou um arquivo inválido.");
+          }
+
           await nazu.sendMessage(from, {
-            image: { url: imageUrl },
+            image: Buffer.from(response.data),
             caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
           
         } catch (e) {
           console.error('Erro no comando gemma2:', e.message);
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Motivo:* ${e.message}`);
         }
         break;
       case 'swallow':
