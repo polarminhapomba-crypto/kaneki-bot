@@ -211,3 +211,27 @@ Implementada conversão obrigatória para o codec H.264 usando FFmpeg para todos
 ## Commit
 - Hash: `3a2259c9`
 - Mensagem: "fix: conversão de vídeo via FFmpeg para codec H.264 (correção definitiva para reprodução no WhatsApp)"
+
+
+---
+
+# Ajuste Fino Comando /play - Encoding de Compatibilidade Máxima
+
+## Data: 14 de Fevereiro de 2026
+
+## Resumo
+Refinamento da conversão de vídeo para resolver persistência de erro em alguns dispositivos WhatsApp.
+
+## Mudanças Técnicas
+
+### Arquivo: `dados/src/funcs/downloads/youtube_downloader_x.js`
+
+1. **Ajuste de Perfil H.264**: Alterado de `baseline` para `main` com nível `3.1`. Este é o "sweet spot" de compatibilidade para o player do WhatsApp.
+2. **Escalonamento de Vídeo**: Adicionado filtro de escala `scale='min(1280,iw)':-2`. Isso garante que:
+   - O vídeo não ultrapasse 720p (evitando rejeição por resolução excessiva).
+   - As dimensões sejam sempre pares (requisito técnico para evitar erros de renderização no Android).
+3. **Fallback para Documento**: Caso o processamento de vídeo ainda encontre problemas no dispositivo do usuário, o código agora inclui uma lógica de fallback que envia o arquivo original como **documento**, garantindo que o usuário sempre receba o conteúdo.
+
+## Commit
+- Hash: `73a407c0`
+- Mensagem: "fix: ajuste de encoding FFmpeg (Profile Main 3.1) e escala para compatibilidade total com WhatsApp"
