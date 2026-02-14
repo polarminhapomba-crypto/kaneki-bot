@@ -163,3 +163,25 @@ Exemplo: /add 5511999999999
 - Hash: `fae7d2b0`
 - Mensagem: "feat: adicionar comando /add para adicionar participantes ao grupo por número de telefone"
 - Arquivos alterados: `dados/src/index.js` (+42 linhas)
+
+
+---
+
+# Correção Comando /play - Erro de Reprodução de Vídeo
+
+## Data: 14 de Fevereiro de 2026
+
+## Resumo
+Corrigido erro onde os vídeos baixados do YouTube (especialmente Shorts) não eram reproduzíveis no WhatsApp, exibindo a mensagem "Este vídeo não está disponível porque há algo errado com o arquivo de vídeo".
+
+## Mudanças Realizadas
+
+### Arquivo: `dados/src/funcs/downloads/youtube_downloader_x.js`
+
+1. **Adição de Metadados de Arquivo**: Adicionado o parâmetro `fileName` ao enviar a mensagem de vídeo. Isso ajuda o WhatsApp a identificar corretamente o container e o codec do arquivo MP4, resolvendo problemas de reprodução.
+2. **Priorização de Qualidade**: Reforçada a prioridade para `video_hd` (720p) quando disponível, que possui melhor compatibilidade de encoding.
+3. **Melhoria nas Mensagens**: Atualizadas as legendas e mensagens de erro para serem mais informativas para o usuário.
+
+## Commit
+- Hash: `3da137a6`
+- Mensagem: "fix: corrigir erro de reprodução de vídeo do YouTube no WhatsApp adicionando metadados de arquivo"
