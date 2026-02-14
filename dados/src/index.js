@@ -12824,8 +12824,8 @@ Entre em contato com o dono do bot:
         try {
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
-          // Usando um provedor alternativo mais estável para bots (Luluv-API)
-          const imageUrl = `https://api.luluv.my.id/api/v1/ai/flux-ai?prompt=${encodeURIComponent(q)}`;
+          const seed = Math.floor(Math.random() * 1000000);
+          const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(q)}?width=1024&height=1024&seed=${seed}&model=flux`;
           
           const response = await axios.get(imageUrl, { 
             responseType: 'arraybuffer',
@@ -12835,39 +12835,26 @@ Entre em contato com o dono do bot:
             }
           });
 
-          if (response.data.byteLength < 10000) {
-             throw new Error("A imagem gerada é inválida ou muito pequena.");
+          if (response.data.byteLength < 5000) {
+             throw new Error("Imagem inválida.");
           }
           
-          const buffer = Buffer.from(response.data, 'binary');
+          const tempPath = pathz.join(os.tmpdir(), `gemma2_${Date.now()}.jpg`);
+          fs.writeFileSync(tempPath, Buffer.from(response.data));
           
           await nazu.sendMessage(from, {
-            image: buffer,
-            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`,
-            mimetype: 'image/jpeg'
+            image: { url: tempPath },
+            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
+          
+          // Deletar arquivo temporário após envio
+          setTimeout(() => {
+            if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+          }, 10000);
           
         } catch (e) {
           console.error('Erro no comando gemma2:', e.message);
-          // Fallback para Pollinations se a primeira falhar, mas com tratamento de erro
-          try {
-            const seed = Math.floor(Math.random() * 1000000);
-            const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
-            const fbRes = await axios.get(fallbackUrl, { responseType: 'arraybuffer', timeout: 30000 });
-            
-            if (fbRes.data.byteLength > 10000) {
-              await nazu.sendMessage(from, {
-                image: Buffer.from(fbRes.data, 'binary'),
-                caption: `🎨 *Imagem gerada por Gemma2 (Fallback)*\n\n📝 *Prompt:* ${q}`,
-                mimetype: 'image/jpeg'
-              }, { quoted: info });
-              return;
-            }
-          } catch (err) {
-            console.error('Erro no fallback do gemma2:', err.message);
-          }
-          
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n💡 *Dica:* Tente usar termos em inglês ou uma descrição mais simples.`);
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
         }
         break;
       case 'swallow':
