@@ -12825,9 +12825,8 @@ Entre em contato com o dono do bot:
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          // Usando um proxy de imagem (wsrv.nl) para contornar o Error 1033 e garantir que o link abra em qualquer lugar
-          const rawImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux`;
-          const finalImageUrl = `https://wsrv.nl/?url=${encodeURIComponent(rawImageUrl)}&default=ssl`;
+          // Usando um link direto que não redireciona e é otimizado para visualização pública
+          const finalImageUrl = `https://pollinations.ai/p/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&model=flux`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
