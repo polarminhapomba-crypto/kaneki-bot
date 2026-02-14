@@ -24942,6 +24942,48 @@ ${prefix}togglecmdvip premium_ia off`);
           reply("ocorreu um erro 💔");
         }
         break;
+      case 'add':
+      case 'adicionar':
+        try {
+          if (!isGroup) return reply("isso so pode ser usado em grupo 💔");
+          if (!isGroupAdmin) return reply("Comando restrito a Administradores ou Moderadores com permissão. 💔");
+          if (!isBotAdmin) return reply("Eu preciso ser adm 💔");
+          
+          // Verifica se foi fornecido um número
+          if (!q) return reply("❌ Digite o número da pessoa que deseja adicionar!\n\nExemplo: /add 5511999999999");
+          
+          // Remove caracteres especiais e espaços do número
+          let numero = q.replace(/[^0-9]/g, '');
+          
+          // Verifica se o número tem pelo menos 10 dígitos
+          if (numero.length < 10) {
+            return reply("❌ Número inválido! Digite um número completo com DDD.\n\nExemplo: /add 5511999999999");
+          }
+          
+          // Formata o número no padrão do WhatsApp
+          const numeroFormatado = numero + '@s.whatsapp.net';
+          
+          // Tenta adicionar o participante
+          await nazu.groupParticipantsUpdate(from, [numeroFormatado], 'add');
+          
+          // Notificação X9 para adição
+          if (groupData.x9) {
+            await nazu.sendMessage(from, {
+              text: `➕ *X9 Report:* @${numeroFormatado.split('@')[0]} foi adicionado(a) ao grupo por @${sender.split('@')[0]}.`,
+              mentions: [numeroFormatado, sender],
+            }).catch(err => console.error(`❌ Erro ao enviar X9: ${err.message}`));
+          }
+          
+          reply(`✅ Usuário @${numeroFormatado.split('@')[0]} adicionado com sucesso!`);
+        } catch (e) {
+          console.error(e);
+          if (e.message && e.message.includes('403')) {
+            reply("❌ Não foi possível adicionar o usuário. Possíveis motivos:\n\n• O número está incorreto\n• O usuário saiu recentemente do grupo\n• O usuário bloqueou convites de grupos\n• O usuário tem configurações de privacidade restritas");
+          } else {
+            reply("❌ Ocorreu um erro ao adicionar o usuário. Verifique se o número está correto e tente novamente.");
+          }
+        }
+        break;
       case 'setname':
       case 'nomegp':
       case 'mudarnome':
