@@ -12824,8 +12824,9 @@ Entre em contato com o dono do bot:
         try {
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
-          // Usando MagicStudio que é extremamente estável para links diretos públicos
-          const finalImageUrl = `https://ai-api.magicstudio.com/api/ai-art-generator?prompt=${encodeURIComponent(q)}`;
+          const seed = Math.floor(Math.random() * 1000000);
+          // Usando Airforce Flux que é estável e não apresenta o Error 1033
+          const finalImageUrl = `https://api.airforce/v1/imagine?prompt=${encodeURIComponent(q)}&model=flux&width=1024&height=1024&seed=${seed}`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
