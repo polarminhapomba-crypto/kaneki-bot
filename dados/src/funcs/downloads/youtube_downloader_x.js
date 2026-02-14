@@ -1,17 +1,32 @@
-// Adaptado do DownloaderX para kaneki - Versão otimizada para compatibilidade com WhatsApp
+// Adaptado do DownloaderX para kaneki - Versão com conversão FFmpeg para compatibilidade total
 import axios from 'axios';
+import fs from 'fs';
+import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execPromise = promisify(exec);
 
 const CONFIG = {
   TIMEOUT: 60000,
   DOWNLOAD_TIMEOUT: 180000,
-  USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  USER_AGENT: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  TEMP_DIR: './dados/temp'
 };
+
+// Garantir que o diretório temporário exista
+if (!fs.existsSync(CONFIG.TEMP_DIR)) {
+  fs.mkdirSync(CONFIG.TEMP_DIR, { recursive: true });
+}
 
 async function handleYouTubeDownloader(sock, from, url, info) {
   if (!url.startsWith('http')) {
     await sock.sendMessage(from, { text: '❌ URL inválida' }, { quoted: info });
     return;
   }
+
+  const tempInput = path.join(CONFIG.TEMP_DIR, `input_${Date.now()}.mp4`);
+  const tempOutput = path.join(CONFIG.TEMP_DIR, `output_${Date.now()}.mp4`);
 
   try {
     // Usar API nayan-video-downloader para YouTube
@@ -31,7 +46,7 @@ async function handleYouTubeDownloader(sock, from, url, info) {
 
     const media = (body.data && (body.data.title || body.data.video || body.data.audio)) ? body.data : body;
 
-    // Tentar baixar vídeo - Priorizar HD para melhor compatibilidade com WhatsApp
+    // Tentar baixar vídeo
     let downloadUrl = media.video_hd || media.video;
     let isVideo = true;
 
@@ -60,13 +75,36 @@ async function handleYouTubeDownloader(sock, from, url, info) {
     const title = media.title || 'YouTube Video';
 
     if (isVideo) {
-      // Enviar como vídeo com fileName para ajudar o WhatsApp a identificar o codec
-      await sock.sendMessage(from, {
-        video: buffer,
-        mimetype: 'video/mp4',
-        fileName: `video_${Date.now()}.mp4`,
-        caption: `📹 *${title}*\n\n✅ Vídeo baixado com sucesso!`
-      }, { quoted: info });
+      // Salvar arquivo temporário para conversão
+      fs.writeFileSync(tempInput, buffer);
+
+      // Converter para H.264/AAC usando FFmpeg para garantir compatibilidade com WhatsApp
+      // -c:v libx264 (video codec)
+      // -profile:v baseline -level 3.0 (máxima compatibilidade)
+      // -pix_fmt yuv420p (formato de pixel padrão)
+      // -c:a aac (audio codec)
+      // -movflags +faststart (permite reprodução antes do download completo)
+      try {
+        await execPromise(`ffmpeg -i ${tempInput} -c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart -y ${tempOutput}`);
+        
+        const finalBuffer = fs.readFileSync(tempOutput);
+        
+        await sock.sendMessage(from, {
+          video: finalBuffer,
+          mimetype: 'video/mp4',
+          fileName: `${title}.mp4`,
+          caption: `📹 *${title}*\n\n✅ Vídeo processado para compatibilidade total!`
+        }, { quoted: info });
+      } catch (ffmpegErr) {
+        console.error('Erro FFmpeg:', ffmpegErr);
+        // Fallback: enviar o buffer original se a conversão falhar
+        await sock.sendMessage(from, {
+          video: buffer,
+          mimetype: 'video/mp4',
+          fileName: `${title}.mp4`,
+          caption: `📹 *${title}*\n\n⚠️ Enviado sem conversão (compatibilidade reduzida).`
+        }, { quoted: info });
+      }
     } else {
       await sock.sendMessage(from, {
         audio: buffer,
@@ -77,11 +115,13 @@ async function handleYouTubeDownloader(sock, from, url, info) {
 
   } catch (err) {
     console.error('❌ Erro ao baixar YouTube:', err.message);
-    
-    // Fallback: Se falhar, avisar o usuário
     await sock.sendMessage(from, { 
-      text: '❌ Falha ao processar o vídeo do YouTube. Isso pode acontecer devido a restrições de idade ou região do vídeo.' 
+      text: '❌ Falha ao processar o vídeo do YouTube. Tente novamente.' 
     }, { quoted: info });
+  } finally {
+    // Limpar arquivos temporários
+    if (fs.existsSync(tempInput)) fs.unlinkSync(tempInput);
+    if (fs.existsSync(tempOutput)) fs.unlinkSync(tempOutput);
   }
 }
 
