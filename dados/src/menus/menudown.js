@@ -47,8 +47,9 @@ ${middleBorder}${menuItemIcon}${prefix}instagram
 ${middleBorder}${menuItemIcon}${prefix}igstory
 ${middleBorder}${menuItemIcon}${prefix}facebook
 ${middleBorder}${menuItemIcon}${prefix}gdrive
-${middleBorder}${menuItemIcon}${prefix}mediafire
-${middleBorder}${menuItemIcon}${prefix}twitter
+	${middleBorder}${menuItemIcon}${prefix}mediafire
+	${middleBorder}${menuItemIcon}${prefix}mediafiresearch
+	${middleBorder}${menuItemIcon}${prefix}twitter
 ${bottomBorder}
 
 ${menuTopBorder}${separatorIcon} *${mediaMenuTitle}*
