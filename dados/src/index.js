@@ -12825,12 +12825,16 @@ Entre em contato com o dono do bot:
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          // Usando uma URL mais simples e direta
           const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(q)}?width=1024&height=1024&seed=${seed}&model=flux`;
           
+          // Baixar a imagem para garantir que seja enviada como imagem real (buffer)
+          const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+          const buffer = Buffer.from(response.data, 'binary');
+          
           await nazu.sendMessage(from, {
-            image: { url: imageUrl },
-            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
+            image: buffer,
+            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`,
+            mimetype: 'image/jpeg'
           }, { quoted: info });
           
         } catch (e) {
