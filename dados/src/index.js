@@ -12825,18 +12825,20 @@ Entre em contato com o dono do bot:
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(q)}?width=1024&height=1024&seed=${seed}&model=flux`;
+          // Usando o endpoint de imagem direto que é mais confiável para download de buffer
+          const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
           
           const response = await axios.get(imageUrl, { 
             responseType: 'arraybuffer',
             timeout: 60000,
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
             }
           });
 
-          if (response.data.byteLength < 5000) {
-             throw new Error("Imagem inválida.");
+          if (response.data.byteLength < 10000) {
+             throw new Error("Imagem muito pequena ou inválida.");
           }
           
           const tempPath = pathz.join(os.tmpdir(), `gemma2_${Date.now()}.jpg`);
@@ -12850,11 +12852,11 @@ Entre em contato com o dono do bot:
           // Deletar arquivo temporário após envio
           setTimeout(() => {
             if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-          }, 10000);
+          }, 15000);
           
         } catch (e) {
           console.error('Erro no comando gemma2:', e.message);
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Motivo:* ${e.message}`);
         }
         break;
       case 'swallow':
