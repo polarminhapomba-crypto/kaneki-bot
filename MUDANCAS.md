@@ -185,3 +185,29 @@ Corrigido erro onde os vídeos baixados do YouTube (especialmente Shorts) não e
 ## Commit
 - Hash: `3da137a6`
 - Mensagem: "fix: corrigir erro de reprodução de vídeo do YouTube no WhatsApp adicionando metadados de arquivo"
+
+
+---
+
+# Solução Definitiva Comando /play - Conversão FFmpeg (H.264)
+
+## Data: 14 de Fevereiro de 2026
+
+## Resumo
+Implementada conversão obrigatória para o codec H.264 usando FFmpeg para todos os vídeos baixados do YouTube. Esta é a solução definitiva para o erro de "vídeo indisponível" no WhatsApp, causado por codecs incompatíveis (como AV1 ou VP9) fornecidos pelo YouTube.
+
+## Mudanças Técnicas
+
+### Arquivo: `dados/src/funcs/downloads/youtube_downloader_x.js`
+
+1. **Processamento via FFmpeg**: O vídeo agora passa por um processo de transcodificação antes de ser enviado:
+   - **Codec de Vídeo**: `libx264` (Perfil Baseline 3.0 para compatibilidade máxima com celulares antigos e novos).
+   - **Formato de Pixel**: `yuv420p` (Padrão exigido pelo WhatsApp).
+   - **Codec de Áudio**: `aac` (128k).
+   - **Faststart**: Ativada a flag `+faststart` para permitir que o vídeo comece a ser reproduzido enquanto ainda está sendo baixado no WhatsApp.
+2. **Gerenciamento de Arquivos Temporários**: Implementada lógica de criação e limpeza automática de arquivos temporários no diretório `./dados/temp`.
+3. **Fallback de Segurança**: Caso a conversão falhe por qualquer motivo técnico, o sistema tenta enviar o arquivo original para não deixar o usuário sem resposta.
+
+## Commit
+- Hash: `3a2259c9`
+- Mensagem: "fix: conversão de vídeo via FFmpeg para codec H.264 (correção definitiva para reprodução no WhatsApp)"
