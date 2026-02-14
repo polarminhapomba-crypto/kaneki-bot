@@ -90,3 +90,76 @@ Após integrar essas mudanças, os comandos funcionarão da seguinte forma:
 2. Teste os comandos com URLs válidas
 3. Verifique os logs para possíveis erros
 4. Ajuste as mensagens conforme necessário
+
+
+---
+
+# Comando /add - Adicionar Participantes ao Grupo
+
+## Data: 14 de Fevereiro de 2026
+
+## Resumo
+Implementado novo comando `/add` que permite adicionar participantes ao grupo usando apenas o número de telefone.
+
+## Funcionalidade
+
+### Comando: `/add` ou `/adicionar`
+
+**Localização no código**: `dados/src/index.js` (linhas 24945-24986)
+
+**Descrição**: Adiciona um participante ao grupo usando o número de telefone fornecido.
+
+**Sintaxe**:
+```
+/add 5511999999999
+/adicionar 5511999999999
+```
+
+**Requisitos**:
+- Comando só funciona em grupos
+- Usuário que executa o comando deve ser administrador
+- Bot deve ser administrador do grupo
+
+**Validações implementadas**:
+- Verifica se é um grupo
+- Verifica permissões de administrador do usuário
+- Verifica se o bot é administrador
+- Valida se o número foi fornecido
+- Remove caracteres especiais automaticamente
+- Valida se o número tem pelo menos 10 dígitos
+- Formata automaticamente para o padrão WhatsApp
+
+**Integração com sistema X9**:
+- Envia notificação automática quando X9 está ativo
+- Menciona o usuário adicionado e quem adicionou
+
+**Tratamento de erros**:
+- Erro 403: Fornece mensagens detalhadas sobre possíveis motivos
+  - Número incorreto
+  - Usuário saiu recentemente do grupo
+  - Usuário bloqueou convites de grupos
+  - Configurações de privacidade restritas
+- Erros genéricos: Mensagem de erro amigável
+
+## Exemplo de Uso
+
+```
+/add 5511999999999
+```
+
+**Resposta de sucesso**:
+```
+✅ Usuário @5511999999999 adicionado com sucesso!
+```
+
+**Resposta de erro (número inválido)**:
+```
+❌ Número inválido! Digite um número completo com DDD.
+
+Exemplo: /add 5511999999999
+```
+
+## Commit
+- Hash: `fae7d2b0`
+- Mensagem: "feat: adicionar comando /add para adicionar participantes ao grupo por número de telefone"
+- Arquivos alterados: `dados/src/index.js` (+42 linhas)
