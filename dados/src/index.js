@@ -12825,37 +12825,17 @@ Entre em contato com o dono do bot:
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
-          
-          console.log(`[GEMMA2] Gerando imagem: ${imageUrl}`);
-          
-          // Baixar a imagem com timeout e headers
-          const response = await axios.get(imageUrl, { 
-            responseType: 'arraybuffer',
-            timeout: 45000,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-          });
-          
-          console.log(`[GEMMA2] Download concluído. Status: ${response.status}, Tamanho: ${response.data.byteLength} bytes`);
-          
-          const buffer = Buffer.from(response.data, 'binary');
+          // Usando uma URL mais simples e direta
+          const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(q)}?width=1024&height=1024&seed=${seed}&model=flux`;
           
           await nazu.sendMessage(from, {
-            image: buffer,
+            image: { url: imageUrl },
             caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
           
-          console.log(`[GEMMA2] Mensagem enviada com sucesso.`);
-          
         } catch (e) {
-          console.error('[GEMMA2] Erro detalhado:', e.message);
-          if (e.response) {
-            console.error('[GEMMA2] Status da resposta:', e.response.status);
-            console.error('[GEMMA2] Dados da resposta:', e.response.data?.toString().substring(0, 200));
-          }
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Erro:* ${e.message}\n\nTente novamente em alguns instantes.`);
+          console.error('Erro no comando gemma2:', e);
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
         }
         break;
       case 'swallow':
