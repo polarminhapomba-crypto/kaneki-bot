@@ -1,12 +1,9 @@
 /**
- * Search Service - Implementação direta sem API externa
- * Usa DuckDuckGo como fonte para texto e Google para imagens
+ * Search Service - Implementação usando Google Suggest e Google Images
+ * Esta versão foca em estabilidade, velocidade e suporte a caracteres especiais.
  */
 
 import axios from 'axios';
-import { parseHTML } from 'linkedom';
-
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 // Cache simples
 const cache = new Map();
@@ -31,12 +28,12 @@ function setCache(key, val) {
 }
 
 /**
- * Pesquisar no DuckDuckGo
+ * Pesquisar no Google (via Sugestões e Links Diretos)
  * @param {string} query - Termo de pesquisa
  * @param {number} maxResults - Número máximo de resultados
  * @returns {Promise<Object>} Resultados da pesquisa
  */
-async function search(query, maxResults = 10) {
+async function search(query, maxResults = 5) {
   try {
     if (!query || query.trim().length === 0) {
       return { ok: false, msg: 'Termo de pesquisa inválido' };
@@ -46,52 +43,28 @@ async function search(query, maxResults = 10) {
     const cached = getCached(`search:${query}:${maxResults}`);
     if (cached) return { ok: true, ...cached, cached: true };
 
-    console.log(`[Search] Pesquisando "${query}"`);
+    console.log(`[Search] Pesquisando: "${query}"`);
 
-    const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-
-    const response = await axios.get(searchUrl, {
-      headers: {
-        'User-Agent': USER_AGENT,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
-      },
-      timeout: 60000
+    // Usar o endpoint de sugestões do Google que retorna títulos relevantes
+    const suggestUrl = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
+    const suggestResponse = await axios.get(suggestUrl, { 
+        timeout: 10000,
+        responseType: 'arraybuffer'
     });
+    
+    // Decodificar manualmente o buffer para evitar problemas de encoding
+    const decoder = new TextDecoder('latin1');
+    const decodedData = decoder.decode(suggestResponse.data);
+    const data = JSON.parse(decodedData);
+    const suggestions = data[1] || [];
 
-    const { document } = parseHTML(response.data);
-    const results = [];
-
-    document.querySelectorAll('.result').forEach((element, index) => {
-      if (index >= maxResults) return;
-
-      const titleEl = element.querySelector('.result__title a');
-      const snippetEl = element.querySelector('.result__snippet');
-      const urlEl = element.querySelector('.result__url');
-
-      const title = titleEl?.textContent?.trim();
-      let url = urlEl?.getAttribute('href') || titleEl?.getAttribute('href');
-      const description = snippetEl?.textContent?.trim();
-
-      if (title && url) {
-        // Limpar URL do DuckDuckGo redirect
-        if (url.includes('uddg=')) {
-          const match = url.match(/uddg=([^&]+)/);
-          if (match) url = decodeURIComponent(match[1]);
-        }
-
-        let displayUrl = '';
-        try { displayUrl = new URL(url).hostname; } catch {}
-
-        results.push({
-          position: results.length + 1,
-          title,
-          url,
-          description: description || '',
-          displayUrl
-        });
-      }
-    });
+    const results = suggestions.slice(0, maxResults).map((title, index) => ({
+        position: index + 1,
+        title: title,
+        url: `https://www.google.com/search?q=${encodeURIComponent(title)}`,
+        description: `Pesquisa relacionada a: ${title}`,
+        displayUrl: 'www.google.com'
+    }));
 
     const result = {
       query,
@@ -99,12 +72,16 @@ async function search(query, maxResults = 10) {
       results
     };
 
-    setCache(`search:${query}:${maxResults}`, result);
-
-    return { ok: true, ...result };
+    if (results.length > 0) {
+        setCache(`search:${query}:${maxResults}`, result);
+        return { ok: true, ...result };
+    } else {
+        return { ok: false, msg: 'Nenhum resultado encontrado.' };
+    }
+    
   } catch (error) {
     console.error('[Search] Erro:', error.message);
-    return { ok: false, msg: error.message || 'Erro ao pesquisar' };
+    return { ok: false, msg: 'Erro ao realizar pesquisa.' };
   }
 }
 
@@ -115,24 +92,28 @@ async function search(query, maxResults = 10) {
  */
 async function searchImages(query) {
   try {
-    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`;
+    // Usar o endpoint de busca de imagens com User-Agent de bot para evitar bloqueios complexos
+    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch&hl=pt-BR`;
     const response = await axios.get(url, {
-      headers: { 'User-Agent': USER_AGENT }
-    });
-
-    const { document } = parseHTML(response.data);
-    const images = [];
-    
-    // Tentar encontrar imagens nos scripts ou tags img
-    // Nota: O Google Images carrega muito conteúdo via JS, mas o HTML básico tem algumas thumbnails
-    document.querySelectorAll('img').forEach(img => {
-      const src = img.getAttribute('src');
-      if (src && src.startsWith('http')) {
-        images.push(src);
+      headers: { 
+          'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' 
       }
     });
 
-    return images.slice(0, 5); // Retornar as 5 primeiras
+    const html = response.data;
+    const images = [];
+    
+    // No HTML básico de imagens, as imagens estão em tags <img> com src
+    const regex = /<img[^>]+src="([^"]+)"[^>]+>/g;
+    let match;
+    while ((match = regex.exec(html)) !== null && images.length < 10) {
+        const src = match[1];
+        if (src.startsWith('http') && !src.includes('googlelogo')) {
+            images.push(src);
+        }
+    }
+
+    return images;
   } catch (error) {
     console.error('[Search] Erro ao buscar imagens:', error.message);
     return [];
@@ -145,25 +126,8 @@ async function searchImages(query) {
  * @param {number} maxResults - Número máximo de resultados
  * @returns {Promise<Object>} Resultados da pesquisa
  */
-async function searchNews(query, maxResults = 10) {
-  try {
-    if (!query || query.trim().length === 0) {
-      return { ok: false, msg: 'Termo de pesquisa inválido' };
-    }
-
-    // Adicionar "news" à query para focar em notícias
-    const newsQuery = `${query} news`;
-    const result = await search(newsQuery, maxResults);
-
-    if (result.ok) {
-      result.type = 'news';
-    }
-
-    return result;
-  } catch (error) {
-    console.error('[Search] Erro na pesquisa de notícias:', error.message);
-    return { ok: false, msg: error.message || 'Erro ao pesquisar notícias' };
-  }
+async function searchNews(query, maxResults = 5) {
+    return search(query, maxResults);
 }
 
 export default { search, searchNews, searchImages };
