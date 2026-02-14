@@ -12819,21 +12819,23 @@ Entre em contato com o dono do bot:
         });
         break;
       case 'gemma2':
-        if (!q) return reply(`🤔 Qual sua dúvida para o Gemma2? Informe a pergunta após o comando! Exemplo: ${prefix}${command} quem descobriu o Brasil? 🌍`);
+        if (!q) return reply(`🎨 *Gemma2 - Gerador de Imagens* 🎨\n\nOlá! Agora eu sou uma IA focada em criar imagens incríveis para você! ✨\n\n📝 *Como usar:*\n${prefix}${command} <descrição da imagem>\n\n📌 *Exemplo:*\n${prefix}${command} um unicórnio correndo em uma estrada futurista, estilo cyberpunk, 4k`);
         
-        reply(`⏳ Só um segundinho, estou consultando o Gemma2... ✨`).then(() => {
-          ia.makeCognimaRequest('google/gemma-2-27b-it', q, null).then((response) => {
-            reply(formatAIResponse(response.data.choices[0].message.content));
-          }).catch((e) => {
-            console.error('Erro na API Gemma2:', e);
-            if (e.message && e.message.includes('API key inválida')) {
-              
-              reply('🤖 *Sistema de IA temporariamente indisponível*\n\n😅 Estou com problemas técnicos no momento. O administrador já foi notificado!\n\n⏰ Tente novamente em alguns minutos.');
-            } else {
-              reply(`😓 Poxa, algo deu errado com o Gemma2! Tente novamente em alguns instantes, tá? 🌈`);
-            }
-          });
-        });
+        try {
+          await reply(`📇 aguarde estou gerando sua imagem...`);
+          
+          const seed = Math.floor(Math.random() * 1000000);
+          const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
+          
+          await nazu.sendMessage(from, {
+            image: { url: imageUrl },
+            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
+          }, { quoted: info });
+          
+        } catch (e) {
+          console.error('Erro no comando gemma2 (imagem):', e);
+          reply('❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.');
+        }
         break;
       case 'swallow':
         if (!q) return reply(`🤔 Qual sua dúvida para o Swallow? Informe a pergunta após o comando! Exemplo: ${prefix}${command} quem descobriu o Brasil? 🌍`);
