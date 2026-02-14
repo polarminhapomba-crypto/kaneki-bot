@@ -19384,6 +19384,52 @@ case 'facebookdl':
           reply('❌ Ocorreu um erro na pesquisa. Tente novamente.');
         }
         break;
+
+      case 'apps':
+      case 'playstore':
+      case 'appstore':
+        try {
+          if (!q) return reply(`📱 *Busca de Aplicativos*\n\n❌ Digite o nome do app.\n\n📝 *Uso:* ${prefix}${command} <nome>\n\n📌 *Exemplo:*\n${prefix}${command} Minecraft`);
+          
+          await reply('📱 Buscando aplicativo nas lojas...');
+          
+          const { searchApps } = await import('./funcs/utils/apps.js');
+          const result = await searchApps(q);
+          
+          if (!result.ok) {
+            return reply('❌ Nenhum aplicativo encontrado nas lojas.');
+          }
+          
+          let responseText = `📱 *Resultados para:* "${result.query}"\n\n`;
+          let imageUrl = '';
+
+          if (result.playStore) {
+            responseText += `🤖 *Google Play Store:*\n`;
+            responseText += `📦 *Nome:* ${result.playStore.title}\n`;
+            responseText += `🔗 *Link:* ${result.playStore.url}\n\n`;
+            imageUrl = result.playStore.img;
+          }
+
+          if (result.appStore) {
+            responseText += `🍎 *Apple App Store:*\n`;
+            responseText += `📦 *Nome:* ${result.appStore.title}\n`;
+            responseText += `🔗 *Link:* ${result.appStore.url}\n\n`;
+            if (!imageUrl) imageUrl = result.appStore.img;
+          }
+
+          if (imageUrl) {
+            await nazu.sendMessage(from, {
+              image: { url: imageUrl },
+              caption: responseText.trim()
+            }, { quoted: info });
+          } else {
+            reply(responseText.trim());
+          }
+        } catch (e) {
+          console.error('Erro no comando apps:', e);
+          reply('❌ Ocorreu um erro ao buscar o aplicativo.');
+        }
+        break;
       case 'noticias':
       case 'news':
       case 'noticia':
