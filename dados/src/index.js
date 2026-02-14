@@ -12827,8 +12827,12 @@ Entre em contato com o dono do bot:
           const seed = Math.floor(Math.random() * 1000000);
           const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
           
+          // Baixar a imagem primeiro para garantir que o Baileys consiga enviar
+          const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+          const buffer = Buffer.from(response.data, 'binary');
+          
           await nazu.sendMessage(from, {
-            image: { url: imageUrl },
+            image: buffer,
             caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
           
