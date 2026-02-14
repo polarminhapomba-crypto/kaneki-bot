@@ -4,6 +4,7 @@
  */
 
 import axios from 'axios';
+import { mediaClient } from '../../utils/httpClient.js';
 
 const BASE_URL = 'https://nayan-video-downloader.vercel.app/ndown';
 
@@ -104,13 +105,9 @@ async function dlStory(url) {
         const headResponse = await axios.head(item.url, { timeout: 30000 });
         const contentType = headResponse.headers['content-type'] || '';
         
-        // Baixar o conteúdo
-        const mediaResponse = await axios.get(item.url, {
-          responseType: 'arraybuffer',
-          timeout: 120000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-          }
+        // Baixar o conteúdo usando o mediaClient otimizado
+        const mediaResponse = await mediaClient.get(item.url, {
+          timeout: 120000
         });
         
         results.push({

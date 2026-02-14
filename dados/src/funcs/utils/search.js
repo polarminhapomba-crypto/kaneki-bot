@@ -3,7 +3,7 @@
  * Esta versão foca em estabilidade, velocidade e suporte a caracteres especiais.
  */
 
-import axios from 'axios';
+import { apiClient, scrapingClient } from '../../utils/httpClient.js';
 
 // Cache simples
 const cache = new Map();
@@ -47,7 +47,7 @@ async function search(query, maxResults = 5) {
 
     // Usar o endpoint de sugestões do Google que retorna títulos relevantes
     const suggestUrl = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`;
-    const suggestResponse = await axios.get(suggestUrl, { 
+    const suggestResponse = await apiClient.get(suggestUrl, { 
         timeout: 10000,
         responseType: 'arraybuffer'
     });
@@ -94,7 +94,7 @@ async function searchImages(query) {
   try {
     // Usar o endpoint de busca de imagens com User-Agent de bot para evitar bloqueios complexos
     const url = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch&hl=pt-BR`;
-    const response = await axios.get(url, {
+    const response = await scrapingClient.get(url, {
       headers: { 
           'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' 
       }

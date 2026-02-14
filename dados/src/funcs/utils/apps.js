@@ -2,10 +2,8 @@
  * Apps Search Service - Busca aplicativos na Play Store e App Store
  */
 
-import axios from 'axios';
+import { scrapingClient, apiClient } from '../../utils/httpClient.js';
 import { parseHTML } from 'linkedom';
-
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
 
 /**
  * Busca na Google Play Store
@@ -15,7 +13,7 @@ const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36
 async function searchPlayStore(query) {
     const url = `https://play.google.com/store/search?q=${encodeURIComponent(query)}&c=apps&hl=pt-BR`;
     try {
-        const response = await axios.get(url, { headers: { 'User-Agent': USER_AGENT }, timeout: 10000 });
+        const response = await scrapingClient.get(url, { timeout: 10000 });
         const { document } = parseHTML(response.data);
         
         const appLink = document.querySelector('a[href*="/store/apps/details"]');
@@ -46,7 +44,7 @@ async function searchPlayStore(query) {
 async function searchAppStore(query) {
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&country=br&entity=software&limit=1`;
     try {
-        const response = await axios.get(url, { timeout: 10000 });
+        const response = await apiClient.get(url, { timeout: 10000 });
         const data = response.data;
         if (data.results && data.results.length > 0) {
             const app = data.results[0];
