@@ -15407,7 +15407,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
         try {
           if (!isOwner || isOwner && isSubOwner) return reply("🚫 Apenas o Dono principal pode utilizar esse comando!");
           if (!fs.existsSync(pathz.join(__dirname, '..', 'database', 'updateSave.json'))) return reply('❌ Sua versão não tem suporte a esse sistema ainda.');
-          const AtualCom = await axios.get('https://api.github.com/repos/hiudyy/kaneki/commits?per_page=1', {
+          const AtualCom = await axios.get('https://api.github.com/repos/polarminhapomba-crypto/kaneki-bot/commits?per_page=1', {
             headers: {
               Accept: 'application/vnd.github+json'
             }
@@ -19548,7 +19548,7 @@ case 'facebookdl':
         try {
           await reply('📦 Baixando o código-fonte do bot... Aguarde!');
           
-          const zipResponse = await axios.get('https://github.com/hiudyy/kaneki/archive/refs/heads/main.zip', {
+          const zipResponse = await axios.get('https://github.com/polarminhapomba-crypto/kaneki-bot/archive/refs/heads/main.zip', {
             responseType: 'arraybuffer',
             timeout: 60000 // 60 segundos de timeout
           });
@@ -19561,7 +19561,7 @@ case 'facebookdl':
             document: Buffer.from(zipResponse.data),
             fileName: 'kaneki-bot.zip',
             mimetype: 'application/zip',
-            caption: `📦 *Código-fonte do ${nomebot}*\n\n📖 Leia a documentação no repositório para entender melhor como instalar:\n🔗 https://github.com/hiudyy/kaneki\n\n⚠️ *Importante:* Certifique-se de ter Node.js instalado e siga os passos do README.md!`
+            caption: `📦 *Código-fonte do ${nomebot}*\n\n📖 Leia a documentação no repositório para entender melhor como instalar:\n🔗 https://github.com/polarminhapomba-crypto/kaneki-bot\n\n⚠️ *Importante:* Certifique-se de ter Node.js instalado e siga os passos do README.md!`
           }, { quoted: info });
           
         } catch (e) {
@@ -19572,7 +19572,7 @@ case 'facebookdl':
             ? '❌ Tempo de conexão esgotado. Tente novamente.'
             : '❌ Erro ao baixar o arquivo.';
           
-          await reply(`${errorMsg}\n\nTente acessar diretamente:\n🔗 https://github.com/hiudyy/kaneki`);
+          await reply(`${errorMsg}\n\nTente acessar diretamente:\n🔗 https://github.com/polarminhapomba-crypto/kaneki-bot`);
         }
         break;
       case 'gitbot':
@@ -19589,8 +19589,8 @@ case 'facebookdl':
             const githubHeaders = { 'Accept': 'application/vnd.github+json' };
             
             Promise.all([
-              axios.get('https://api.github.com/repos/hiudyy/kaneki', { headers: githubHeaders }),
-              axios.get('https://api.github.com/repos/hiudyy/kaneki/commits?per_page=1', { headers: githubHeaders })
+              axios.get('https://api.github.com/repos/polarminhapomba-crypto/kaneki-bot', { headers: githubHeaders }),
+              axios.get('https://api.github.com/repos/polarminhapomba-crypto/kaneki-bot/commits?per_page=1', { headers: githubHeaders })
             ]).then(([repoResponse, commitsResponse]) => {
               const repo = repoResponse.data;
               
@@ -19657,7 +19657,7 @@ case 'facebookdl':
               reply(gitInfo);
             }).catch((e) => {
               console.error('Erro ao buscar info do GitHub:', e);
-              reply(`❌ Erro ao buscar informações. Acesse diretamente:\n🔗 https://github.com/hiudyy/kaneki\n📞 Suporte: wa.me/553391967445`);
+              reply(`❌ Erro ao buscar informações. Acesse diretamente:\n🔗 https://github.com/polarminhapomba-crypto/kaneki-bot\n📞 Suporte: wa.me/553391967445`);
             });
           });
         } catch (e) {
