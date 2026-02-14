@@ -12824,9 +12824,8 @@ Entre em contato com o dono do bot:
         try {
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
-          const seed = Math.floor(Math.random() * 1000000);
-          // Usando Airforce Flux como provedor principal por ser mais estável para links diretos
-          const finalImageUrl = `https://api.airforce/v1/imagine?prompt=${encodeURIComponent(q)}&model=flux&width=1024&height=1024&seed=${seed}`;
+          // Usando Hercai que fornece links diretos públicos sem necessidade de login
+          const finalImageUrl = `https://hercai.onrender.com/v3/text2image?prompt=${encodeURIComponent(q)}`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
