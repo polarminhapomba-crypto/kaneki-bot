@@ -12824,37 +12824,46 @@ Entre em contato com o dono do bot:
         try {
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
-          // Usando a Luluv-API que é mais estável para evitar o erro 530 (Cloudflare/Pollinations)
-          const imageUrl = `https://api.luluv.my.id/api/v1/ai/flux-ai?prompt=${encodeURIComponent(q)}`;
+          const seed = Math.floor(Math.random() * 1000000);
+          // Usando o endpoint mais estável da Pollinations
+          const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
           
-          const response = await axios.get(imageUrl, { 
-            responseType: 'arraybuffer',
-            timeout: 60000,
-            headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            }
-          });
+          try {
+            const response = await axios.get(imageUrl, { 
+              responseType: 'arraybuffer',
+              timeout: 40000,
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+              }
+            });
 
-          if (response.data.byteLength < 5000) {
-             throw new Error("O servidor de imagens retornou um arquivo inválido.");
+            if (response.data.byteLength > 5000) {
+              const tempPath = pathz.join(os.tmpdir(), `gemma2_${Date.now()}.jpg`);
+              fs.writeFileSync(tempPath, Buffer.from(response.data));
+              
+              await nazu.sendMessage(from, {
+                image: { url: tempPath },
+                caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
+              }, { quoted: info });
+              
+              setTimeout(() => {
+                if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
+              }, 15000);
+              return;
+            }
+          } catch (downloadErr) {
+            console.error('Erro ao baixar imagem, tentando envio direto por URL:', downloadErr.message);
           }
-          
-          const tempPath = pathz.join(os.tmpdir(), `gemma2_${Date.now()}.jpg`);
-          fs.writeFileSync(tempPath, Buffer.from(response.data));
-          
+
+          // Fallback: Enviar por URL direta se o download falhar (alguns servidores aceitam melhor assim)
           await nazu.sendMessage(from, {
-            image: { url: tempPath },
-            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
+            image: { url: imageUrl },
+            caption: `🎨 *Imagem gerada por Gemma2 (Link Direto)*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
           
-          // Deletar arquivo temporário após envio
-          setTimeout(() => {
-            if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
-          }, 15000);
-          
         } catch (e) {
-          console.error('Erro no comando gemma2:', e.message);
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Motivo:* ${e.message === 'Request failed with status code 530' ? 'O servidor de IA está instável no momento. Tente novamente em instantes.' : e.message}`);
+          console.error('Erro fatal no comando gemma2:', e.message);
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
         }
         break;
       case 'swallow':
