@@ -21099,8 +21099,22 @@ Precisa de ajuda? Entre em contato:
         if (!isOwner) return reply("Este comando é apenas para o meu dono");
         try {
           if (!q) return reply('❌ Digite o nome do comando. Exemplo: ' + prefix + 'getcase menu');
-          var caseCode;
-          caseCode = (fs.readFileSync(__dirname + "/index.js", "utf-8").match(new RegExp("case\\\\s*[\"'`]" + q + "[\"'`]\\\\s*:[\\\\s\\\\S]*?break\\\\s*;?", "i")) || [])[0];
+          
+          const indexPath = pathz.join(__dirname, 'index.js');
+          if (!fs.existsSync(indexPath)) {
+            return reply('❌ Arquivo index.js não encontrado.');
+          }
+
+          const fileContent = fs.readFileSync(indexPath, "utf-8");
+          // Regex melhorada para capturar a case corretamente
+          const regex = new RegExp("case\\s*['\"`]" + q + "['\"`]\\s*:[\\s\\S]*?break\\s*;?", "i");
+          const match = fileContent.match(regex);
+
+          if (!match || !match[0]) {
+            return reply(`❌ Comando "${q}" não encontrado no código.`);
+          }
+
+          const caseCode = match[0];
           await nazu.sendMessage(from, {
             document: Buffer.from(caseCode, 'utf-8'),
             mimetype: 'text/plain',
@@ -21109,8 +21123,8 @@ Precisa de ajuda? Entre em contato:
             quoted: info
           });
         } catch (e) {
-          console.error(e);
-          await reply("❌ Ocorreu um erro interno. Tente novamente em alguns minutos.");
+          console.error('Erro no comando getcase:', e);
+          await reply("❌ Ocorreu um erro ao buscar a case. Verifique o console.");
         }
         break;
       case 'boton':
