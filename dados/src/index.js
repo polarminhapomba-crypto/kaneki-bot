@@ -12824,8 +12824,9 @@ Entre em contato com o dono do bot:
         try {
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
-          // Usando Hercai que fornece links diretos públicos sem necessidade de login
-          const finalImageUrl = `https://hercai.onrender.com/v3/text2image?prompt=${encodeURIComponent(q)}`;
+          const seed = Math.floor(Math.random() * 1000000);
+          // Usando Pollinations com parâmetros de renderização direta que costumam ignorar bloqueios de login em navegadores mobile
+          const finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true&model=flux`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
