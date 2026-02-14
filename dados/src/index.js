@@ -12860,6 +12860,7 @@ Entre em contato com o dono do bot:
 
           await nazu.sendMessage(from, {
             image: buffer,
+            mimetype: 'image/jpeg',
             caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
           }, { quoted: info });
           
