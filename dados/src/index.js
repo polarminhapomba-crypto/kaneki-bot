@@ -19035,7 +19035,6 @@ case 'facebookdl':
       case 'igdl':
       case 'ig':
       case 'instavideo':
-      case 'igstory':
         try {
           if (!q) return reply(`Digite um link do Instagram.\n> Ex: ${prefix}${command} https://www.instagram.com/reel/DFaq_X7uoiT/?igsh=M3Q3N2ZyMWU1M3Bo`);
           
@@ -19052,6 +19051,30 @@ case 'facebookdl':
           return;
         } catch (e) {
           console.error('Erro no comando Instagram:', e);
+          reply("❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
+        }
+        break;
+      
+      case 'igstory':
+      case 'instastory':
+      case 'storydl':
+      case 'storyig':
+        try {
+          if (!q) return reply(`Digite um link do story do Instagram.\n> Ex: ${prefix}${command} https://www.instagram.com/stories/username/`);
+          
+          if (!q.startsWith('http')) {
+            return reply('❌ URL inválida. Por favor, envie um link do Instagram válido.');
+          }
+
+          reply('📥 Baixando story do Instagram... Aguarde!');
+          
+          // Importar e usar o handler de stories
+          const { handleInstagramStoryDownloader } = await import('./funcs/downloads/igstory.js');
+          await handleInstagramStoryDownloader(nazu, from, q, info);
+          
+          return;
+        } catch (e) {
+          console.error('Erro no comando Instagram Story:', e);
           reply("❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
         }
         break;
