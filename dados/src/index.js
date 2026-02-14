@@ -19431,6 +19431,31 @@ case 'facebookdl':
           reply('❌ Ocorreu um erro ao buscar o aplicativo.');
         }
         break;
+      case 'mediafiresearch':
+      case 'mediafires':
+      case 'mfsearch':
+      case 'mf':
+        try {
+          if (!q) return reply(`📁 *Busca no Mediafire*\n\n❌ Digite o que deseja pesquisar.\n\n📝 *Uso:* ${prefix}${command} <termo>\n\n📌 *Exemplo:*\n${prefix}${command} minecraft apk`);
+          
+          // Construir URL de busca do Google para Mediafire
+          const searchQuery = encodeURIComponent(q);
+          const mediafireSearchUrl = `https://www.google.com/search?q=site:mediafire.com+${searchQuery}`;
+          
+          let responseText = `📁 *Busca no Mediafire*\n\n`;
+          responseText += `🔍 *Termo:* "${q}"\n\n`;
+          responseText += `💡 *Como funciona:*\n`;
+          responseText += `O Mediafire não possui busca nativa, mas você pode encontrar arquivos usando o Google!\n\n`;
+          responseText += `🔗 *Link da busca:*\n${mediafireSearchUrl}\n\n`;
+          responseText += `📝 *Dica:* Clique no link acima para ver todos os arquivos do Mediafire relacionados à sua busca.`;
+          
+          reply(responseText.trim());
+        } catch (e) {
+          console.error('Erro no comando mediafiresearch:', e);
+          reply('❌ Ocorreu um erro ao gerar o link de busca.');
+        }
+        break;
+
       case 'noticias':
       case 'news':
       case 'noticia':
