@@ -12824,21 +12824,19 @@ Entre em contato com o dono do bot:
         try {
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
-          const seed = Math.floor(Math.random() * 1000000);
-          // Usando o endpoint de imagem direto que é mais confiável para download de buffer
-          const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
+          // Usando a Luluv-API que é mais estável para evitar o erro 530 (Cloudflare/Pollinations)
+          const imageUrl = `https://api.luluv.my.id/api/v1/ai/flux-ai?prompt=${encodeURIComponent(q)}`;
           
           const response = await axios.get(imageUrl, { 
             responseType: 'arraybuffer',
             timeout: 60000,
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-              'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8'
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
             }
           });
 
-          if (response.data.byteLength < 10000) {
-             throw new Error("Imagem muito pequena ou inválida.");
+          if (response.data.byteLength < 5000) {
+             throw new Error("O servidor de imagens retornou um arquivo inválido.");
           }
           
           const tempPath = pathz.join(os.tmpdir(), `gemma2_${Date.now()}.jpg`);
@@ -12856,7 +12854,7 @@ Entre em contato com o dono do bot:
           
         } catch (e) {
           console.error('Erro no comando gemma2:', e.message);
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Motivo:* ${e.message}`);
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Motivo:* ${e.message === 'Request failed with status code 530' ? 'O servidor de IA está instável no momento. Tente novamente em instantes.' : e.message}`);
         }
         break;
       case 'swallow':
