@@ -12822,51 +12822,22 @@ Entre em contato com o dono do bot:
         if (!q) return reply(`🎨 *Gemma2 - Gerador de Imagens* 🎨\n\nOlá! Agora eu sou uma IA focada em criar imagens incríveis para você! ✨\n\n📝 *Como usar:*\n${prefix}${command} <descrição da imagem>\n\n📌 *Exemplo:*\n${prefix}${command} um unicórnio correndo em uma estrada futurista, estilo cyberpunk, 4k`);
         
         try {
-          await reply(`📇 aguarde estou gerando sua imagem...`);
+          await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          const providers = [
-            `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`,
-            `https://api.airforce/v1/imagine?prompt=${encodeURIComponent(q)}&model=flux&width=1024&height=1024`,
-            `https://hercai.onrender.com/v3/text2image?prompt=${encodeURIComponent(q)}`
-          ];
+          // Usando o provedor mais estável para link direto
+          const finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
 
-          let buffer = null;
-          let lastError = null;
+          const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
+                              `📝 *Prompt:* ${q}\n\n` +
+                              `🔗 *Link para Download:* ${finalImageUrl}\n\n` +
+                              `💡 _Clique no link acima para abrir no Chrome e salvar a imagem em alta qualidade._`;
 
-          for (const url of providers) {
-            try {
-              const response = await axios.get(url, { 
-                responseType: 'arraybuffer',
-                timeout: 30000,
-                headers: {
-                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                }
-              });
-
-              if (response.data && response.data.byteLength > 5000) {
-                buffer = Buffer.from(response.data);
-                break;
-              }
-            } catch (err) {
-              lastError = err.message;
-              continue;
-            }
-          }
-
-          if (!buffer) {
-            throw new Error(lastError || "Todos os provedores de imagem falharam.");
-          }
-
-          await nazu.sendMessage(from, {
-            image: buffer,
-            mimetype: 'image/jpeg',
-            caption: `🎨 *Imagem gerada por Gemma2*\n\n📝 *Prompt:* ${q}`
-          }, { quoted: info });
+          await reply(responseMsg);
           
         } catch (e) {
           console.error('Erro no comando gemma2:', e.message);
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n⚠️ *Motivo:* ${e.message}`);
+          reply(`❌ Desculpe, ocorreu um erro ao processar sua imagem.\n\n⚠️ *Motivo:* ${e.message}`);
         }
         break;
       case 'swallow':
