@@ -1,4 +1,4 @@
-// Adaptado do DownloaderX para kaneki - Versão sem yt-dlp
+// Adaptado do DownloaderX para kaneki - Versão otimizada para compatibilidade com WhatsApp
 import axios from 'axios';
 
 const CONFIG = {
@@ -25,13 +25,13 @@ async function handleYouTubeDownloader(sock, from, url, info) {
     const body = (raw && typeof raw.status === 'number' && raw.data) ? raw.data : raw;
 
     if (!body || body.status === false) {
-      await sock.sendMessage(from, { text: '❌ Não foi possível processar o vídeo' }, { quoted: info });
+      await sock.sendMessage(from, { text: '❌ Não foi possível processar o vídeo. Tente novamente mais tarde.' }, { quoted: info });
       return;
     }
 
     const media = (body.data && (body.data.title || body.data.video || body.data.audio)) ? body.data : body;
 
-    // Tentar baixar vídeo
+    // Tentar baixar vídeo - Priorizar HD para melhor compatibilidade com WhatsApp
     let downloadUrl = media.video_hd || media.video;
     let isVideo = true;
 
@@ -42,7 +42,7 @@ async function handleYouTubeDownloader(sock, from, url, info) {
     }
 
     if (!downloadUrl) {
-      await sock.sendMessage(from, { text: '❌ URL de download não disponível' }, { quoted: info });
+      await sock.sendMessage(from, { text: '❌ URL de download não disponível para este vídeo.' }, { quoted: info });
       return;
     }
 
@@ -60,21 +60,28 @@ async function handleYouTubeDownloader(sock, from, url, info) {
     const title = media.title || 'YouTube Video';
 
     if (isVideo) {
+      // Enviar como vídeo com fileName para ajudar o WhatsApp a identificar o codec
       await sock.sendMessage(from, {
         video: buffer,
         mimetype: 'video/mp4',
-        caption: `📹 ${title}`
+        fileName: `video_${Date.now()}.mp4`,
+        caption: `📹 *${title}*\n\n✅ Vídeo baixado com sucesso!`
       }, { quoted: info });
     } else {
       await sock.sendMessage(from, {
         audio: buffer,
-        mimetype: 'audio/mpeg'
+        mimetype: 'audio/mpeg',
+        fileName: `${title}.mp3`
       }, { quoted: info });
     }
 
   } catch (err) {
     console.error('❌ Erro ao baixar YouTube:', err.message);
-    await sock.sendMessage(from, { text: '❌ Falha ao baixar do YouTube. Tente novamente.' }, { quoted: info });
+    
+    // Fallback: Se falhar, avisar o usuário
+    await sock.sendMessage(from, { 
+      text: '❌ Falha ao processar o vídeo do YouTube. Isso pode acontecer devido a restrições de idade ou região do vídeo.' 
+    }, { quoted: info });
   }
 }
 
