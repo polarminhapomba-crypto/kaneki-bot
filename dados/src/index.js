@@ -12824,11 +12824,21 @@ Entre em contato com o dono do bot:
         try {
           await reply(`📇 aguarde estou gerando sua imagem...`);
           
-          const seed = Math.floor(Math.random() * 1000000);
-          const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(q)}?width=1024&height=1024&seed=${seed}&model=flux`;
+          // Usando um provedor alternativo mais estável para bots (Luluv-API)
+          const imageUrl = `https://api.luluv.my.id/api/v1/ai/flux-ai?prompt=${encodeURIComponent(q)}`;
           
-          // Baixar a imagem para garantir que seja enviada como imagem real (buffer)
-          const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+          const response = await axios.get(imageUrl, { 
+            responseType: 'arraybuffer',
+            timeout: 60000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+          });
+
+          if (response.data.byteLength < 10000) {
+             throw new Error("A imagem gerada é inválida ou muito pequena.");
+          }
+          
           const buffer = Buffer.from(response.data, 'binary');
           
           await nazu.sendMessage(from, {
@@ -12838,8 +12848,26 @@ Entre em contato com o dono do bot:
           }, { quoted: info });
           
         } catch (e) {
-          console.error('Erro no comando gemma2:', e);
-          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem. Tente novamente em alguns instantes.`);
+          console.error('Erro no comando gemma2:', e.message);
+          // Fallback para Pollinations se a primeira falhar, mas com tratamento de erro
+          try {
+            const seed = Math.floor(Math.random() * 1000000);
+            const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
+            const fbRes = await axios.get(fallbackUrl, { responseType: 'arraybuffer', timeout: 30000 });
+            
+            if (fbRes.data.byteLength > 10000) {
+              await nazu.sendMessage(from, {
+                image: Buffer.from(fbRes.data, 'binary'),
+                caption: `🎨 *Imagem gerada por Gemma2 (Fallback)*\n\n📝 *Prompt:* ${q}`,
+                mimetype: 'image/jpeg'
+              }, { quoted: info });
+              return;
+            }
+          } catch (err) {
+            console.error('Erro no fallback do gemma2:', err.message);
+          }
+          
+          reply(`❌ Desculpe, ocorreu um erro ao gerar sua imagem.\n\n💡 *Dica:* Tente usar termos em inglês ou uma descrição mais simples.`);
         }
         break;
       case 'swallow':
