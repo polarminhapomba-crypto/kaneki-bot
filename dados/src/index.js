@@ -12825,8 +12825,8 @@ Entre em contato com o dono do bot:
           await reply(`🎨 *Gemma2* | Gerando link da sua imagem, aguarde...`);
           
           const seed = Math.floor(Math.random() * 1000000);
-          // Usando o provedor mais estável para link direto
-          const finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(q)}?seed=${seed}&width=1024&height=1024&nologo=true`;
+          // Usando Airforce Flux como provedor principal por ser mais estável para links diretos
+          const finalImageUrl = `https://api.airforce/v1/imagine?prompt=${encodeURIComponent(q)}&model=flux&width=1024&height=1024&seed=${seed}`;
 
           const responseMsg = `🎨 *Imagem Gerada com Sucesso!*\n\n` +
                               `📝 *Prompt:* ${q}\n\n` +
