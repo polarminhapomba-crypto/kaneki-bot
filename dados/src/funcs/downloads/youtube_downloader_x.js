@@ -1,4 +1,4 @@
-// Adaptado do DownloaderX para kaneki - Versão com conversão FFmpeg para compatibilidade total
+// Adaptado do DownloaderX para kaneki - Versão com encoding de compatibilidade máxima para WhatsApp
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
@@ -25,8 +25,9 @@ async function handleYouTubeDownloader(sock, from, url, info) {
     return;
   }
 
-  const tempInput = path.join(CONFIG.TEMP_DIR, `input_${Date.now()}.mp4`);
-  const tempOutput = path.join(CONFIG.TEMP_DIR, `output_${Date.now()}.mp4`);
+  const timestamp = Date.now();
+  const tempInput = path.join(CONFIG.TEMP_DIR, `in_${timestamp}.mp4`);
+  const tempOutput = path.join(CONFIG.TEMP_DIR, `out_${timestamp}.mp4`);
 
   try {
     // Usar API nayan-video-downloader para YouTube
@@ -78,31 +79,35 @@ async function handleYouTubeDownloader(sock, from, url, info) {
       // Salvar arquivo temporário para conversão
       fs.writeFileSync(tempInput, buffer);
 
-      // Converter para H.264/AAC usando FFmpeg para garantir compatibilidade com WhatsApp
-      // -c:v libx264 (video codec)
-      // -profile:v baseline -level 3.0 (máxima compatibilidade)
-      // -pix_fmt yuv420p (formato de pixel padrão)
-      // -c:a aac (audio codec)
-      // -movflags +faststart (permite reprodução antes do download completo)
+      // Parâmetros de conversão para COMPATIBILIDADE MÁXIMA com WhatsApp:
+      // -c:v libx264: Codec H.264
+      // -profile:v main: Perfil Main (mais compatível que High, melhor que Baseline para qualidade/tamanho)
+      // -level 3.1: Nível de compatibilidade padrão para dispositivos móveis
+      // -pix_fmt yuv420p: Formato de pixel exigido pelo WhatsApp
+      // -c:a aac: Codec de áudio padrão
+      // -b:a 128k: Bitrate de áudio estável
+      // -movflags +faststart: Move o índice para o início (permite reprodução instantânea)
+      // -vf "scale='min(1280,iw)':-2": Garante que a largura não passe de 1280 e a altura seja par (requisito de muitos codecs)
       try {
-        await execPromise(`ffmpeg -i ${tempInput} -c:v libx264 -profile:v baseline -level 3.0 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart -y ${tempOutput}`);
+        await execPromise(`ffmpeg -i ${tempInput} -c:v libx264 -profile:v main -level 3.1 -pix_fmt yuv420p -vf "scale='min(1280,iw)':-2" -c:a aac -b:a 128k -movflags +faststart -y ${tempOutput}`);
         
         const finalBuffer = fs.readFileSync(tempOutput);
         
         await sock.sendMessage(from, {
           video: finalBuffer,
           mimetype: 'video/mp4',
-          fileName: `${title}.mp4`,
-          caption: `📹 *${title}*\n\n✅ Vídeo processado para compatibilidade total!`
+          fileName: `video_${timestamp}.mp4`,
+          caption: `📹 *${title}*`,
+          gifPlayback: false // Garante que seja enviado como vídeo normal
         }, { quoted: info });
       } catch (ffmpegErr) {
         console.error('Erro FFmpeg:', ffmpegErr);
-        // Fallback: enviar o buffer original se a conversão falhar
+        // Fallback 1: Enviar como documento (sempre funciona para download, mesmo que não dê play direto)
         await sock.sendMessage(from, {
-          video: buffer,
+          document: buffer,
           mimetype: 'video/mp4',
           fileName: `${title}.mp4`,
-          caption: `📹 *${title}*\n\n⚠️ Enviado sem conversão (compatibilidade reduzida).`
+          caption: `📹 *${title}*\n\n⚠️ O vídeo foi enviado como arquivo devido a uma incompatibilidade no player do seu WhatsApp.`
         }, { quoted: info });
       }
     } else {
@@ -119,9 +124,11 @@ async function handleYouTubeDownloader(sock, from, url, info) {
       text: '❌ Falha ao processar o vídeo do YouTube. Tente novamente.' 
     }, { quoted: info });
   } finally {
-    // Limpar arquivos temporários
-    if (fs.existsSync(tempInput)) fs.unlinkSync(tempInput);
-    if (fs.existsSync(tempOutput)) fs.unlinkSync(tempOutput);
+    // Limpar arquivos temporários com segurança
+    try {
+      if (fs.existsSync(tempInput)) fs.unlinkSync(tempInput);
+      if (fs.existsSync(tempOutput)) fs.unlinkSync(tempOutput);
+    } catch (e) {}
   }
 }
 
