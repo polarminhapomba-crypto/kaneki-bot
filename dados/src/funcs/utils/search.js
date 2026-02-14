@@ -1,6 +1,6 @@
 /**
  * Search Service - Implementação direta sem API externa
- * Usa DuckDuckGo como fonte
+ * Usa DuckDuckGo como fonte para texto e Google para imagens
  */
 
 import axios from 'axios';
@@ -109,6 +109,37 @@ async function search(query, maxResults = 10) {
 }
 
 /**
+ * Pesquisar imagens no Google
+ * @param {string} query - Termo de pesquisa
+ * @returns {Promise<string[]>} URLs das imagens
+ */
+async function searchImages(query) {
+  try {
+    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=isch`;
+    const response = await axios.get(url, {
+      headers: { 'User-Agent': USER_AGENT }
+    });
+
+    const { document } = parseHTML(response.data);
+    const images = [];
+    
+    // Tentar encontrar imagens nos scripts ou tags img
+    // Nota: O Google Images carrega muito conteúdo via JS, mas o HTML básico tem algumas thumbnails
+    document.querySelectorAll('img').forEach(img => {
+      const src = img.getAttribute('src');
+      if (src && src.startsWith('http')) {
+        images.push(src);
+      }
+    });
+
+    return images.slice(0, 5); // Retornar as 5 primeiras
+  } catch (error) {
+    console.error('[Search] Erro ao buscar imagens:', error.message);
+    return [];
+  }
+}
+
+/**
  * Pesquisar notícias
  * @param {string} query - Termo de pesquisa
  * @param {number} maxResults - Número máximo de resultados
@@ -135,5 +166,5 @@ async function searchNews(query, maxResults = 10) {
   }
 }
 
-export default { search, searchNews };
-export { search, searchNews };
+export default { search, searchNews, searchImages };
+export { search, searchNews, searchImages };

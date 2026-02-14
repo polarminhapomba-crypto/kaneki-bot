@@ -19347,24 +19347,38 @@ case 'facebookdl':
           
           await reply('🔍 Pesquisando...');
           
-          // Usar implementação local de search
-          const searchResult = await search(q, 10);
+          // Importar funções de busca
+          const { search, searchImages } = await import('./funcs/utils/search.js');
           
-          if (!searchResult.ok) {
+          // Executar busca de texto e imagens em paralelo
+          const [searchResult, images] = await Promise.all([
+            search(q, 5),
+            searchImages(q)
+          ]);
+          
+          if (!searchResult.ok || !searchResult.results.length) {
             return reply('❌ Nenhum resultado encontrado.');
           }
           
           const { query, results } = searchResult;
           
-          let response = `🔍 *Resultados para:* "${query}"\n\n`;
+          let responseText = `🔍 *Resultados para:* "${query}"\n\n`;
           
-          results.slice(0, 8).forEach((result, index) => {
-            response += `*${index + 1}. ${result.title}*\n`;
-            response += `📝 ${result.description?.substring(0, 150) || 'Sem descrição'}${result.description?.length > 150 ? '...' : ''}\n`;
-            response += `🔗 ${result.url}\n\n`;
+          results.forEach((result, index) => {
+            responseText += `*${index + 1}. ${result.title}*\n`;
+            responseText += `📝 ${result.description?.substring(0, 150) || 'Sem descrição'}${result.description?.length > 150 ? '...' : ''}\n`;
+            responseText += `🔗 ${result.url}\n\n`;
           });
-          
-          reply(response.trim());
+
+          // Se encontrou imagens, envia a primeira com o texto
+          if (images && images.length > 0) {
+            await nazu.sendMessage(from, {
+              image: { url: images[0] },
+              caption: responseText.trim()
+            }, { quoted: info });
+          } else {
+            reply(responseText.trim());
+          }
         } catch (e) {
           console.error('Erro no comando google:', e);
           reply('❌ Ocorreu um erro na pesquisa. Tente novamente.');
