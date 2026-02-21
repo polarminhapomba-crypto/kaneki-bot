@@ -1,4 +1,32 @@
+# Dependências
 node_modules/
-cache/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Dados de Sessão e Banco de Dados (EXTREMAMENTE IMPORTANTE)
+dados/database/qr-code/
+dados/database/session/
+dados/database/auth/
+*.json.tmp
+*.db
+*.sqlite
+
+# Logs e Cache
 logs/
 *.log
+cache/
+temp/
+midias/
+dados/midias/
+.npm
+.eslintcache
+
+# Configurações Pessoais
+dados/src/config.json
+.env
+.env.local
+
+# Sistema
+.DS_Store
+Thumbs.db
