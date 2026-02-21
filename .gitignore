@@ -8,6 +8,9 @@ yarn.lock
 dados/database/qr-code/
 dados/database/session/
 dados/database/auth/
+dados/database/auth_info*/
+*.session
+*.session.json
 *.json.tmp
 *.db
 *.sqlite
@@ -16,7 +19,9 @@ dados/database/auth/
 logs/
 *.log
 cache/
+tmp/
 temp/
+*.tmp
 midias/
 dados/midias/
 .npm
@@ -26,6 +31,14 @@ dados/midias/
 dados/src/config.json
 .env
 .env.local
+.env.*
+*.key
+*.pem
+*.cert
+
+# Mídias temporárias
+dados/tmp/
+dados/media/
 
 # Sistema
 .DS_Store
