@@ -6,8 +6,11 @@ import { fileURLToPath } from 'url';
 
 import userContextDB from '../../utils/userContextDB.js';
 
-// Chave de IA hardcoded
-const IA_API_KEY = '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';
+// API gratuita Pollinations.ai - sem necessidade de chave de API
+const IA_API_KEY = process.env.OPENAI_API_KEY || '';
+const IA_API_BASE_URL = process.env.OPENAI_BASE_URL || 'https://text.pollinations.ai';
+// Modelo padrão para todos os comandos de IA
+const IA_DEFAULT_MODEL = 'openai';
 
 // Função para obter data/hora no fuso horário do Brasil (GMT-3)
 function getBrazilDateTime() {
@@ -1392,20 +1395,24 @@ async function makeCognimaRequest(modelo, texto, systemPrompt = null, historico 
 
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      // Usar API da NVIDIA diretamente
+      // Usar API Pollinations.ai (gratuita, sem chave)
+      const requestHeaders = {
+        'Content-Type': 'application/json'
+      };
+      // Adicionar Authorization apenas se houver chave configurada
+      if (IA_API_KEY) {
+        requestHeaders['Authorization'] = `Bearer ${IA_API_KEY}`;
+      }
       const response = await axios.post(
-        'https://integrate.api.nvidia.com/v1/chat/completions',
+        `${IA_API_BASE_URL}/openai`,
         {
           messages,
-          model: modelo,
+          model: IA_DEFAULT_MODEL,
           temperature: 0.7,
           max_tokens: 2000
         },
         {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${IA_API_KEY}`
-          },
+          headers: requestHeaders,
           timeout: 120000
         }
       );
