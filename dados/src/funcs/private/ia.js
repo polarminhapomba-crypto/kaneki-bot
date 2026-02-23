@@ -1440,7 +1440,9 @@ async function makeCognimaRequest(modelo, texto, systemPrompt = null, historico 
         throw new Error(`Falha na requisição após ${retries} tentativas: ${error.response?.data?.message || error.message}`);
       }
 
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      // Aumentar o tempo de espera entre tentativas (backoff) para evitar rate limit
+      const delay = Math.pow(3, attempt) * 2000;
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 }
