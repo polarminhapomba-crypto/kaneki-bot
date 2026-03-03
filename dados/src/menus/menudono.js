@@ -197,6 +197,8 @@ ${middleBorder}
 ${middleBorder}${menuTitleIcon} *Transmissão Privada:*
 ${middleBorder}${menuItemIcon}${prefix}tm2
 ${middleBorder}${menuItemIcon}${prefix}statustm
+${middleBorder}${menuItemIcon}${prefix}svctt (salvar contato)
+${middleBorder}${menuItemIcon}${prefix}tmctt (transmissão contatos)
 ${middleBorder}
 ${middleBorder}📝 Usuários inscrevem com:
 ${middleBorder}   ${prefix}inscrevertm (no PV)
