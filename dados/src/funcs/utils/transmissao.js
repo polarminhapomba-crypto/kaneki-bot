@@ -94,45 +94,67 @@ export async function handleSaveContact(sock, message, text) {
 }
 
 /**
- * Função para o comando /tmctt (Transmissão em Massa - Lógica tm2)
+ * Função para o comando /tmctt (Transmissão em Massa - Foco no Privado)
  */
 export async function handleBroadcast(sock, message) {
     const { remoteJid } = message.key;
+    
+    // Pega a mensagem citada (quoted) para transmitir
     const quotedMsg = message.message.extendedTextMessage?.contextInfo?.quotedMessage;
 
     if (!quotedMsg) {
-        await sock.sendMessage(remoteJid, { text: '⚠️ Responda a uma mensagem com /tmctt para transmitir.' }, { quoted: message });
+        await sock.sendMessage(remoteJid, { text: '⚠️ Responda a uma mensagem com /tmctt para transmitir para todos os contatos.' }, { quoted: message });
         return;
     }
 
     const data = loadSubscribers();
     if (data.subscribers.length === 0) {
-        await sock.sendMessage(remoteJid, { text: '⚠️ Nenhum contato salvo. Use /svctt primeiro.' }, { quoted: message });
+        await sock.sendMessage(remoteJid, { text: '⚠️ Nenhum contato salvo na lista. Use /svctt primeiro.' }, { quoted: message });
         return;
     }
 
-    await sock.sendMessage(remoteJid, { text: `🚀 Transmitindo para ${data.subscribers.length} contatos (Lógica tm2)...` }, { quoted: message });
+    await sock.sendMessage(remoteJid, { text: `🚀 Iniciando transmissão privada para ${data.subscribers.length} contatos...` }, { quoted: message });
 
     let success = 0;
-    
-    // Lógica tm2: Envia a mensagem original para cada contato
+    let failed = 0;
+
+    // Prepara o conteúdo da mensagem para encaminhamento
+    const messageContent = {
+        forward: {
+            key: {
+                remoteJid: message.message.extendedTextMessage.contextInfo.participant,
+                id: message.message.extendedTextMessage.contextInfo.stanzaId
+            },
+            message: quotedMsg
+        }
+    };
+
+    // Loop de envio para cada contato salvo
     for (const sub of data.subscribers) {
         try {
-            // Envia a mensagem citada diretamente para o privado do contato
-            await sock.sendMessage(sub.id, { forward: message.message.extendedTextMessage.contextInfo.quotedMessage }, { quoted: message.message.extendedTextMessage.contextInfo.quotedMessage });
+            // Envia para o privado do contato
+            await sock.sendMessage(sub.id, messageContent);
             success++;
-            // Delay anti-ban (mesmo padrão do tm2)
-            await new Promise(r => setTimeout(r, 2000)); 
+            
+            // Delay anti-ban (entre 1.5 e 3 segundos)
+            await new Promise(r => setTimeout(r, 1500 + Math.random() * 1500)); 
         } catch (e) {
-            console.error(`Erro ao enviar para ${sub.id}:`, e.message);
+            console.error(`[tmctt] Erro ao enviar para ${sub.id}:`, e.message);
+            failed++;
         }
     }
 
+    // Atualiza estatísticas
     data.stats.totalMessages += success;
     data.stats.lastBroadcast = new Date().toISOString();
     saveSubscribers(data);
 
-    await sock.sendMessage(remoteJid, { text: `✅ Transmissão concluída! Enviadas: ${success}` }, { quoted: message });
+    const report = `✅ *Transmissão Concluída!*\n\n` +
+                   `📤 Enviadas: ${success}\n` +
+                   `❌ Falhas: ${failed}\n` +
+                   `👥 Total na lista: ${data.subscribers.length}`;
+
+    await sock.sendMessage(remoteJid, { text: report }, { quoted: message });
 }
 
 // --- Funções Originais Mantidas para Compatibilidade ---

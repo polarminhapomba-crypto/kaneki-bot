@@ -2,11 +2,11 @@
   "commands": [
     {
       "name": "svctt",
-      "code": "async (sock, message, text) => {\n    const { handleSaveContact } = await import(\"../funcs/utils/svctt.js\");\n    await handleSaveContact(sock, message, text);\n}"
+      "code": "async (sock, message, text) => {\n    const { handleSaveContact } = await import(\"../funcs/utils/transmissao.js\");\n    await handleSaveContact(sock, message, text);\n}"
     },
     {
       "name": "tmctt",
-      "code": "async (sock, message, text) => {\n    const { handleBroadcast } = await import(\"../funcs/utils/tmctt.js\");\n    await handleBroadcast(sock, message);\n}"
+      "code": "async (sock, message, text) => {\n    const { handleBroadcast } = await import(\"../funcs/utils/transmissao.js\");\n    await handleBroadcast(sock, message);\n}"
     }
   ]
 }
