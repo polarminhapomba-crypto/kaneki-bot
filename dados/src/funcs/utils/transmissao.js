@@ -1,5 +1,4 @@
-// --- SISTEMA DE TRANSMISSÃO (BROADCAST LIST) ---
-// Permite que usuários se inscrevam para receber transmissões do dono
+// --- SISTEMA DE TRANSMISSÃO INTEGRADO (BROADCAST & CONTACTS) ---
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -10,7 +9,7 @@ const __dirname = path.dirname(__filename);
 const TRANSMISSAO_FILE = path.join(__dirname, '../../../database/transmissao.json');
 
 /**
- * Carrega a lista de inscritos
+ * Carrega a lista de inscritos/contatos
  */
 const loadSubscribers = () => {
     try {
@@ -40,7 +39,7 @@ const loadSubscribers = () => {
 };
 
 /**
- * Salva a lista de inscritos
+ * Salva a lista de inscritos/contatos
  */
 const saveSubscribers = (data) => {
     try {
@@ -57,185 +56,119 @@ const saveSubscribers = (data) => {
 };
 
 /**
- * Inscreve um usuário na lista de transmissão
+ * Função para o comando /svctt (Salvar Contato)
  */
-const subscribe = (userId, userName) => {
-    const data = loadSubscribers();
-    
-    // Verifica se já está inscrito
-    const alreadySubscribed = data.subscribers.some(sub => sub.id === userId);
-    
-    if (alreadySubscribed) {
-        return {
-            success: false,
-            message: '⚠️ Você já está inscrito na lista de transmissão!'
-        };
+export async function handleSaveContact(sock, message, text) {
+    const { remoteJid } = message.key;
+    const [number, ...nameParts] = text.split(' ');
+    const name = nameParts.join(' ').trim();
+
+    if (!number) {
+        await sock.sendMessage(remoteJid, { text: '⚠️ Uso: /svctt <número> [nome]' }, { quoted: message });
+        return;
     }
+
+    const cleanNumber = number.replace(/\D/g, '');
+    const userId = `${cleanNumber}@s.whatsapp.net`;
     
-    // Adiciona à lista
+    const data = loadSubscribers();
+    const alreadyExists = data.subscribers.some(sub => sub.id === userId);
+
+    if (alreadyExists) {
+        await sock.sendMessage(remoteJid, { text: '⚠️ Este contato já está salvo!' }, { quoted: message });
+        return;
+    }
+
     data.subscribers.push({
         id: userId,
-        name: userName || 'Usuário',
+        name: name || cleanNumber,
         subscribedAt: new Date().toISOString(),
         messagesReceived: 0
     });
-    
+
     data.stats.totalSubscribers = data.subscribers.length;
-    
+
     if (saveSubscribers(data)) {
-        return {
-            success: true,
-            message: `✅ *Inscrição realizada com sucesso!*\n\n` +
-                     `📱 Você agora receberá as transmissões do dono.\n` +
-                     `👥 Total de inscritos: ${data.stats.totalSubscribers}\n\n` +
-                     `💡 Para cancelar, use o mesmo comando novamente.`
-        };
+        await sock.sendMessage(remoteJid, { text: `✅ Contato ${name || cleanNumber} salvo com sucesso!` }, { quoted: message });
     }
-    
-    return {
-        success: false,
-        message: '❌ Erro ao inscrever na lista de transmissão.'
-    };
-};
+}
 
 /**
- * Remove a inscrição de um usuário
+ * Função para o comando /tmctt (Transmissão em Massa - Lógica tm2)
  */
-const unsubscribe = (userId) => {
-    const data = loadSubscribers();
-    
-    const initialLength = data.subscribers.length;
-    data.subscribers = data.subscribers.filter(sub => sub.id !== userId);
-    
-    if (data.subscribers.length === initialLength) {
-        return {
-            success: false,
-            message: '⚠️ Você não está inscrito na lista de transmissão!'
-        };
+export async function handleBroadcast(sock, message) {
+    const { remoteJid } = message.key;
+    const quotedMsg = message.message.extendedTextMessage?.contextInfo?.quotedMessage;
+
+    if (!quotedMsg) {
+        await sock.sendMessage(remoteJid, { text: '⚠️ Responda a uma mensagem com /tmctt para transmitir.' }, { quoted: message });
+        return;
     }
-    
-    data.stats.totalSubscribers = data.subscribers.length;
-    
-    if (saveSubscribers(data)) {
-        return {
-            success: true,
-            message: `✅ *Inscrição cancelada!*\n\n` +
-                     `📱 Você não receberá mais transmissões.\n` +
-                     `👥 Total de inscritos: ${data.stats.totalSubscribers}`
-        };
+
+    const data = loadSubscribers();
+    if (data.subscribers.length === 0) {
+        await sock.sendMessage(remoteJid, { text: '⚠️ Nenhum contato salvo. Use /svctt primeiro.' }, { quoted: message });
+        return;
     }
+
+    await sock.sendMessage(remoteJid, { text: `🚀 Transmitindo para ${data.subscribers.length} contatos (Lógica tm2)...` }, { quoted: message });
+
+    let success = 0;
     
-    return {
-        success: false,
-        message: '❌ Erro ao cancelar inscrição.'
-    };
-};
+    // Lógica tm2: Envia a mensagem original para cada contato
+    for (const sub of data.subscribers) {
+        try {
+            // Envia a mensagem citada diretamente para o privado do contato
+            await sock.sendMessage(sub.id, { forward: message.message.extendedTextMessage.contextInfo.quotedMessage }, { quoted: message.message.extendedTextMessage.contextInfo.quotedMessage });
+            success++;
+            // Delay anti-ban (mesmo padrão do tm2)
+            await new Promise(r => setTimeout(r, 2000)); 
+        } catch (e) {
+            console.error(`Erro ao enviar para ${sub.id}:`, e.message);
+        }
+    }
 
-/**
- * Verifica se um usuário está inscrito
- */
-const isSubscribed = (userId) => {
-    const data = loadSubscribers();
-    return data.subscribers.some(sub => sub.id === userId);
-};
-
-/**
- * Obtém lista de todos os inscritos
- */
-const getSubscribers = () => {
-    const data = loadSubscribers();
-    return data.subscribers;
-};
-
-/**
- * Obtém estatísticas da transmissão
- */
-const getStats = () => {
-    const data = loadSubscribers();
-    return {
-        totalSubscribers: data.stats.totalSubscribers,
-        totalMessages: data.stats.totalMessages,
-        lastBroadcast: data.stats.lastBroadcast,
-        subscribers: data.subscribers
-    };
-};
-
-/**
- * Incrementa contador de mensagens enviadas
- */
-const incrementMessageCount = (successCount) => {
-    const data = loadSubscribers();
-    data.stats.totalMessages += successCount;
+    data.stats.totalMessages += success;
     data.stats.lastBroadcast = new Date().toISOString();
-    
-    // Atualiza contador de cada inscrito
-    data.subscribers.forEach(sub => {
-        sub.messagesReceived = (sub.messagesReceived || 0) + 1;
-    });
-    
+    saveSubscribers(data);
+
+    await sock.sendMessage(remoteJid, { text: `✅ Transmissão concluída! Enviadas: ${success}` }, { quoted: message });
+}
+
+// --- Funções Originais Mantidas para Compatibilidade ---
+export const subscribe = (userId, userName) => {
+    const data = loadSubscribers();
+    if (data.subscribers.some(sub => sub.id === userId)) return { success: false, message: 'Já inscrito!' };
+    data.subscribers.push({ id: userId, name: userName || 'Usuário', subscribedAt: new Date().toISOString(), messagesReceived: 0 });
+    data.stats.totalSubscribers = data.subscribers.length;
+    saveSubscribers(data);
+    return { success: true, message: 'Inscrito com sucesso!' };
+};
+
+export const unsubscribe = (userId) => {
+    const data = loadSubscribers();
+    data.subscribers = data.subscribers.filter(sub => sub.id !== userId);
+    data.stats.totalSubscribers = data.subscribers.length;
+    saveSubscribers(data);
+    return { success: true, message: 'Cancelado com sucesso!' };
+};
+
+export const isSubscribed = (userId) => loadSubscribers().subscribers.some(sub => sub.id === userId);
+export const getSubscribers = () => loadSubscribers().subscribers;
+export const getStats = () => {
+    const data = loadSubscribers();
+    return { totalSubscribers: data.stats.totalSubscribers, totalMessages: data.stats.totalMessages, lastBroadcast: data.stats.lastBroadcast, subscribers: data.subscribers };
+};
+export const incrementMessageCount = (count) => {
+    const data = loadSubscribers();
+    data.stats.totalMessages += count;
     saveSubscribers(data);
 };
-
-/**
- * Remove inscrito (para limpeza ou admin)
- */
-const removeSubscriber = (userId) => {
+export const removeSubscriber = (userId) => unsubscribe(userId);
+export const clearAll = () => {
     const data = loadSubscribers();
-    
-    const subscriber = data.subscribers.find(sub => sub.id === userId);
-    if (!subscriber) {
-        return {
-            success: false,
-            message: '⚠️ Usuário não encontrado na lista!'
-        };
-    }
-    
-    data.subscribers = data.subscribers.filter(sub => sub.id !== userId);
-    data.stats.totalSubscribers = data.subscribers.length;
-    
-    if (saveSubscribers(data)) {
-        return {
-            success: true,
-            message: `✅ Usuário ${subscriber.name} removido da lista!\n👥 Total: ${data.stats.totalSubscribers}`
-        };
-    }
-    
-    return {
-        success: false,
-        message: '❌ Erro ao remover usuário.'
-    };
-};
-
-/**
- * Limpa toda a lista (apenas dono)
- */
-const clearAll = () => {
-    const data = loadSubscribers();
-    const count = data.subscribers.length;
-    
     data.subscribers = [];
     data.stats.totalSubscribers = 0;
-    
-    if (saveSubscribers(data)) {
-        return {
-            success: true,
-            message: `✅ Lista limpa! ${count} inscrito(s) removido(s).`
-        };
-    }
-    
-    return {
-        success: false,
-        message: '❌ Erro ao limpar lista.'
-    };
-};
-
-export {
-    subscribe,
-    unsubscribe,
-    isSubscribed,
-    getSubscribers,
-    getStats,
-    incrementMessageCount,
-    removeSubscriber,
-    clearAll
+    saveSubscribers(data);
+    return { success: true };
 };
