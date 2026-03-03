@@ -2,15 +2,10 @@
 // Comando: /tmctt (Transmitir para Contatos)
 // Envia uma mensagem para todos os contatos salvos na lista do bot.
 
-import { loadContacts } from './svctt.js'; // Importa o loader de contatos
+import { loadContacts } from './svctt.js';
 
 /**
  * Envia uma mensagem para uma lista de contatos.
- * @param {object} sock - A instância do socket Baileys.
- * @param {string[]} contactJids - Array com os JIDs dos contatos.
- * @param {object} messageContent - O conteúdo da mensagem a ser enviada.
- * @param {object} originalMessage - A mensagem original para citação.
- * @returns {{successCount: number, failCount: number, failedJids: string[]}} - Resultado do envio.
  */
 async function broadcastMessage(sock, contactJids, messageContent, originalMessage) {
     let successCount = 0;
@@ -19,7 +14,6 @@ async function broadcastMessage(sock, contactJids, messageContent, originalMessa
 
     for (const jid of contactJids) {
         try {
-            // Encaminha a mensagem citada para cada contato
             await sock.sendMessage(jid, messageContent, { quoted: originalMessage });
             successCount++;
             // Pausa para evitar bloqueio por spam
@@ -36,11 +30,9 @@ async function broadcastMessage(sock, contactJids, messageContent, originalMessa
 
 /**
  * Função principal para ser chamada pelo bot.
- * @param {object} sock - A instância do socket Baileys.
- * @param {object} message - O objeto da mensagem recebida.
  */
-async function handleBroadcast(sock, message) {
-    const { remoteJid, id: messageId } = message.key;
+export async function handleBroadcast(sock, message) {
+    const { remoteJid } = message.key;
     const quotedMsg = message.message.extendedTextMessage?.contextInfo?.quotedMessage;
 
     if (!quotedMsg) {
@@ -82,8 +74,3 @@ async function handleBroadcast(sock, message) {
 
     await sock.sendMessage(remoteJid, { text: report }, { quoted: message });
 }
-
-// Exporta a função principal
-export {
-    handleBroadcast
-};

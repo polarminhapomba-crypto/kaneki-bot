@@ -4,13 +4,16 @@
 
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Define o caminho para o arquivo de contatos
-const CONTACTS_FILE = path.join(process.env.DATABASE_PATH || './dados/database', 'saved_contacts.json');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Define o caminho para o arquivo de contatos de forma robusta
+const CONTACTS_FILE = path.join(__dirname, '../../../database/saved_contacts.json');
 
 /**
  * Carrega a lista de contatos salvos do arquivo JSON.
- * @returns {object} Objeto com a lista de contatos e estatísticas.
  */
 const loadContacts = () => {
     try {
@@ -21,14 +24,11 @@ const loadContacts = () => {
     } catch (error) {
         console.error('[svctt] Erro ao carregar contatos:', error.message);
     }
-    // Retorna uma estrutura padrão se o arquivo não existir ou der erro
     return { contacts: [], stats: { totalContacts: 0 } };
 };
 
 /**
  * Salva a lista de contatos no arquivo JSON.
- * @param {object} data - O objeto de contatos para salvar.
- * @returns {boolean} True se salvou com sucesso, false caso contrário.
  */
 const saveContacts = (data) => {
     try {
@@ -46,26 +46,21 @@ const saveContacts = (data) => {
 
 /**
  * Adiciona ou atualiza um contato na lista.
- * @param {string} userId - O JID do usuário (ex: '5511999999999@s.whatsapp.net').
- * @param {string} [userName] - O nome para salvar o contato (opcional).
- * @returns {{success: boolean, message: string}} Objeto com status e mensagem.
  */
 const addContact = (userId, userName) => {
     const contactsData = loadContacts();
     const existingContact = contactsData.contacts.find(c => c.id === userId);
 
     if (existingContact) {
-        // Se o contato já existe, apenas informa
         return {
             success: false,
             message: `⚠️ Este contato já está salvo na lista com o nome "${existingContact.name}".`
         };
     }
 
-    // Adiciona o novo contato
     contactsData.contacts.push({
         id: userId,
-        name: userName || userId.split('@')[0], // Usa o número se o nome não for fornecido
+        name: userName || userId.split('@')[0],
         savedAt: new Date().toISOString()
     });
 
@@ -86,11 +81,8 @@ const addContact = (userId, userName) => {
 
 /**
  * Função principal para ser chamada pelo bot.
- * @param {object} sock - A instância do socket Baileys.
- * @param {object} message - O objeto da mensagem recebida.
- * @param {string} text - O texto do comando (número e nome).
  */
-async function handleSaveContact(sock, message, text) {
+export async function handleSaveContact(sock, message, text) {
     const { remoteJid } = message.key;
     const [number, ...nameParts] = text.split(' ');
     const name = nameParts.join(' ').trim();
@@ -109,9 +101,4 @@ async function handleSaveContact(sock, message, text) {
     await sock.sendMessage(remoteJid, { text: result.message }, { quoted: message });
 }
 
-// Exporta as funções para serem usadas em outros lugares
-export {
-    handleSaveContact,
-    loadContacts,
-    saveContacts
-};
+export { loadContacts };
