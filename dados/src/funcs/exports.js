@@ -210,12 +210,13 @@ async function loadModules() {
         }
 
         // --- private (ESM via dynamic import) ---
-        const [iaMod, temuScammerMod, antitoxicMod, iaExpandedMod, antipalavra] = await Promise.all([
+        const [iaMod, temuScammerMod, antitoxicMod, iaExpandedMod, antipalavra, manusBridgeMod] = await Promise.all([
             import('./private/ia.js'),
             import('./private/temuScammer.js'),
             import('./private/antitoxic.js'),
             import('./private/iaExpanded.js'),
             import('./private/antipalavra.js'),
+            import('./private/manusBridge.js'),
         ]);
 
         // Private modules with null checking
@@ -246,6 +247,7 @@ async function loadModules() {
         modules.antitoxic = antitoxicMod.default ?? antitoxicMod;
         modules.iaExpanded = iaExpandedMod.default ?? iaExpandedMod;
         modules.antipalavra = antipalavra.default ?? antipalavra;
+        modules.manusBridge = manusBridgeMod.default ?? manusBridgeMod;
 
         // --- JSONs (sync read as before, exposed as functions) ---
         const toolsJsonData = loadJsonSync('json/tools.json');
