@@ -18540,23 +18540,22 @@ case 'spotify':
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━╯`);
     }
 
-    if (!q.includes('open.spotify.com/track/')) {
-      return reply('❌ Por favor, envie um link válido do Spotify.\n\n💡 Dica: Use o comando play2 para buscar por nome!');
+    if (!q.includes('open.spotify.com/track/') && !q.includes('deezer.com/track/')) {
+      return reply('❌ Por favor, envie um link válido ou use o comando de busca por nome!');
     }
 
-    await reply('🔎 Buscando informações no Spotify... Aguarde!');
+    await reply('🔎 Buscando informações da música... Aguarde!');
 
     const infoResult = await spotifyModule.getInfo(q);
 
     if (!infoResult.ok) {
-      return reply(`❌ ${infoResult.msg}`);
+      return reply(`❌ ${infoResult.msg}\n\n💡 Dica: Tente buscar apenas pelo *nome da música* em vez de usar o link!`);
     }
 
     const caption = `🎵 *Informações da Música* 🎵\n\n` +
       `📌 *Título:* ${infoResult.title}\n` +
       `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : infoResult.artists}\n` +
       `${infoResult.album ? `💿 *Álbum:* ${infoResult.album}\n` : ''}` +
-      `${infoResult.release_date ? `📅 *Lançamento:* ${infoResult.release_date}\n` : ''}` +
       `🔗 *Link Oficial:* ${infoResult.link}\n\n` +
       `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
 
@@ -18570,7 +18569,7 @@ case 'spotify':
         await reply(caption);
       }
     } catch (err) {
-      console.error('Erro ao enviar informações do Spotify:', err);
+      console.error('Erro ao enviar informações:', err);
       await reply(caption);
     }
 
@@ -18595,9 +18594,9 @@ case 'playspotify':
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━╯`);
     }
 
-    await reply('🔎 Buscando no Spotify... Aguarde!');
+    await reply('🔎 Buscando música... Aguarde!');
 
-    // 1. Buscar a música
+    // 1. Buscar a música (Usando a nova API estável)
     const searchResult = await spotifyModule.search(q, 1);
 
     if (!searchResult.ok || !searchResult.results?.length) {
@@ -18605,27 +18604,26 @@ case 'playspotify':
     }
 
     const track = searchResult.results[0];
-    const infoResult = await spotifyModule.getInfo(track.link);
 
     const caption = `🎵 *Música Encontrada!* 🎵\n\n` +
       `🔍 *Busca:* ${q}\n\n` +
-      `📌 *Título:* ${infoResult.title || track.name}\n` +
-      `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : (infoResult.artists || track.artists)}\n` +
-      `🔗 *Link Oficial:* ${infoResult.link || track.link}\n\n` +
+      `📌 *Título:* ${track.name}\n` +
+      `👤 *Artista(s):* ${track.artists}\n` +
+      `💿 *Álbum:* ${track.album}\n` +
+      `🔗 *Link Oficial:* ${track.link}\n\n` +
       `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
 
     try {
-      const image = infoResult.image || track.image;
-      if (image) {
+      if (track.image) {
         await nazu.sendMessage(from, {
-          image: { url: image },
+          image: { url: track.image },
           caption: caption
         }, { quoted: info });
       } else {
         await reply(caption);
       }
     } catch (err) {
-      console.error('Erro ao enviar informações do Spotify:', err);
+      console.error('Erro ao enviar informações:', err);
       await reply(caption);
     }
 
