@@ -24,9 +24,20 @@ function generateTempFileName(ext) {
 
 // Download para buffer
 async function getBuffer(url) {
-  const { data } = await axios.get(url, { responseType: "arraybuffer" });
-  if (!data || data.length === 0) throw new Error("Download vazio");
-  return Buffer.from(data);
+  try {
+    const { data } = await axios.get(url, { 
+      responseType: "arraybuffer",
+      timeout: 30000,
+      validateStatus: (status) => status >= 200 && status < 300
+    });
+    if (!data || data.length === 0) throw new Error("Download vazio");
+    return Buffer.from(data);
+  } catch (error) {
+    const status = error.response?.status;
+    const message = error.message;
+    console.error(`❌ Erro no download (${url}): ${status || ''} ${message}`);
+    throw new Error(`Falha no download: ${status === 404 ? 'Arquivo não encontrado (404)' : message}`);
+  }
 }
 
 // Detecção mínima só para imagens
