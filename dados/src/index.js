@@ -30076,18 +30076,34 @@ ${nivelSorte >= 70 ? '🎉 Hoje é seu dia de sorte!' : nivelSorte >= 40 ? '🤔
           let responseText = (GamezinData[command] || `Voce acabou de dar um(a) ${command} no(a) #nome#`).replaceAll('#nome#', `@${getUserName(menc_os2)}`);
           let media = gamesData.games2[command];
           if (media?.image) {
-            await nazu.sendMessage(from, {
-              image: media.image,
-              caption: responseText,
-              mentions: [menc_os2]
-            });
+            try {
+              await nazu.sendMessage(from, {
+                image: media.image,
+                caption: responseText,
+                mentions: [menc_os2]
+              });
+            } catch (mediaError) {
+              console.error(`Erro ao enviar imagem do comando ${command}:`, mediaError.message);
+              await nazu.sendMessage(from, {
+                text: responseText,
+                mentions: [menc_os2]
+              });
+            }
           } else if (media?.video) {
-            await nazu.sendMessage(from, {
-              video: media.video,
-              caption: responseText,
-              mentions: [menc_os2],
-              gifPlayback: true
-            });
+            try {
+              await nazu.sendMessage(from, {
+                video: media.video,
+                caption: responseText,
+                mentions: [menc_os2],
+                gifPlayback: true
+              });
+            } catch (mediaError) {
+              console.error(`Erro ao enviar vídeo do comando ${command}:`, mediaError.message);
+              await nazu.sendMessage(from, {
+                text: responseText,
+                mentions: [menc_os2]
+              });
+            }
           } else {
             await nazu.sendMessage(from, {
               text: responseText,
