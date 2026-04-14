@@ -18540,22 +18540,22 @@ case 'spotify':
 ╰━━━━━━━━━━━━━━━━━━━━━━━━━╯`);
     }
 
-    if (!q.includes('open.spotify.com/track/') && !q.includes('deezer.com/track/')) {
+    if (!q.includes('spotify.com') && !q.includes('deezer.com')) {
       return reply('❌ Por favor, envie um link válido ou use o comando de busca por nome!');
     }
 
-    await reply('🔎 Buscando informações da música... Aguarde!');
+    await reply('🔎 Lendo o link da música... Aguarde!');
 
     const infoResult = await spotifyModule.getInfo(q);
 
     if (!infoResult.ok) {
-      return reply(`❌ ${infoResult.msg}\n\n💡 Dica: Tente buscar apenas pelo *nome da música* em vez de usar o link!`);
+      return reply(`❌ ${infoResult.msg}`);
     }
 
     const caption = `🎵 *Informações da Música* 🎵\n\n` +
       `📌 *Título:* ${infoResult.title}\n` +
       `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : infoResult.artists}\n` +
-      `${infoResult.album ? `💿 *Álbum:* ${infoResult.album}\n` : ''}` +
+      `${infoResult.album && infoResult.album !== 'Spotify' ? `💿 *Álbum:* ${infoResult.album}\n` : ''}` +
       `🔗 *Link Oficial:* ${infoResult.link}\n\n` +
       `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
 
