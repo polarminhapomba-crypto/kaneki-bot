@@ -18544,44 +18544,34 @@ case 'spotify':
       return reply('❌ Por favor, envie um link válido do Spotify.\n\n💡 Dica: Use o comando play2 para buscar por nome!');
     }
 
-    await reply('🎵 Baixando do Spotify... Aguarde um momento!');
+    await reply('🔎 Buscando informações no Spotify... Aguarde!');
 
-    const downloadResult = await spotifyModule.download(q);
+    const infoResult = await spotifyModule.getInfo(q);
 
-    if (!downloadResult.ok) {
-      return reply(`❌ ${downloadResult.msg}`);
+    if (!infoResult.ok) {
+      return reply(`❌ ${infoResult.msg}`);
     }
 
-    const caption = `🎵 *Música Baixada do Spotify!* 🎵\n\n` +
-      `📌 *Título:* ${downloadResult.title}\n` +
-      `👤 *Artista(s):* ${Array.isArray(downloadResult.artists) ? downloadResult.artists.join(', ') : downloadResult.artists}\n` +
-      `${downloadResult.year ? `📅 *Ano:* ${downloadResult.year}\n` : ''}` +
-      `🎧 *Enviando áudio...*`;
+    const caption = `🎵 *Informações da Música* 🎵\n\n` +
+      `📌 *Título:* ${infoResult.title}\n` +
+      `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : infoResult.artists}\n` +
+      `${infoResult.album ? `💿 *Álbum:* ${infoResult.album}\n` : ''}` +
+      `${infoResult.release_date ? `📅 *Lançamento:* ${infoResult.release_date}\n` : ''}` +
+      `🔗 *Link Oficial:* ${infoResult.link}\n\n` +
+      `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
 
     try {
-      await reply(caption);
-    } catch (err) {
-      console.error('Erro ao enviar caption:', err);
-    }
-
-    try {
-      await nazu.sendMessage(from, {
-        audio: downloadResult.buffer,
-        mimetype: 'audio/mpeg',
-        fileName: downloadResult.filename
-      }, { quoted: info });
-    } catch (audioError) {
-      if (String(audioError).includes("ENOSPC") || String(audioError).includes("size")) {
-        await reply('📦 Arquivo muito grande, enviando como documento...');
+      if (infoResult.image) {
         await nazu.sendMessage(from, {
-          document: downloadResult.buffer,
-          fileName: downloadResult.filename,
-          mimetype: 'audio/mpeg'
+          image: { url: infoResult.image },
+          caption: caption
         }, { quoted: info });
       } else {
-        console.error('Erro ao enviar áudio do Spotify:', audioError);
-        reply('❌ Ocorreu um erro ao enviar o áudio.');
+        await reply(caption);
       }
+    } catch (err) {
+      console.error('Erro ao enviar informações do Spotify:', err);
+      await reply(caption);
     }
 
   } catch (error) {
@@ -18615,40 +18605,28 @@ case 'playspotify':
     }
 
     const track = searchResult.results[0];
+    const infoResult = await spotifyModule.getInfo(track.link);
 
-    const searchCaption = `🎵 *Música Encontrada!* 🎵\n\n` +
+    const caption = `🎵 *Música Encontrada!* 🎵\n\n` +
       `🔍 *Busca:* ${q}\n\n` +
-      `📌 *Título:* ${track.name}\n` +
-      `🔗 *Link:* ${track.link}\n\n` +
-      `📥 *Baixando...*`;
-
-    await reply(searchCaption);
-
-    // 2. Baixar a música
-    const downloadResult = await spotifyModule.download(track.link);
-
-    if (!downloadResult.ok) {
-      return reply(`❌ ${downloadResult.msg}`);
-    }
+      `📌 *Título:* ${infoResult.title || track.name}\n` +
+      `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : (infoResult.artists || track.artists)}\n` +
+      `🔗 *Link Oficial:* ${infoResult.link || track.link}\n\n` +
+      `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
 
     try {
-      await nazu.sendMessage(from, {
-        audio: downloadResult.buffer,
-        mimetype: 'audio/mpeg',
-        fileName: downloadResult.filename
-      }, { quoted: info });
-    } catch (audioError) {
-      if (String(audioError).includes("ENOSPC") || String(audioError).includes("size")) {
-        await reply('📦 Arquivo muito grande, enviando como documento...');
+      const image = infoResult.image || track.image;
+      if (image) {
         await nazu.sendMessage(from, {
-          document: downloadResult.buffer,
-          fileName: downloadResult.filename,
-          mimetype: 'audio/mpeg'
+          image: { url: image },
+          caption: caption
         }, { quoted: info });
       } else {
-        console.error('Erro ao enviar áudio do Spotify:', audioError);
-        reply('❌ Ocorreu um erro ao enviar o áudio.');
+        await reply(caption);
       }
+    } catch (err) {
+      console.error('Erro ao enviar informações do Spotify:', err);
+      await reply(caption);
     }
 
   } catch (error) {
