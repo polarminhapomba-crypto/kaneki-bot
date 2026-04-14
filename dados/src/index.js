@@ -30073,7 +30073,7 @@ ${nivelSorte >= 70 ? '🎉 Hoje é seu dia de sorte!' : nivelSorte >= 40 ? '🤔
           let GamezinData = fs.existsSync(__dirname + '/funcs/json/markgame.json') ? JSON.parse(fs.readFileSync(__dirname + '/funcs/json/markgame.json')) : {
             ranks: {}
           };
-          let responseText = GamezinData[command].replaceAll('#nome#', `@${getUserName(menc_os2)}`) || `Voce acabou de dar um(a) ${command} no(a) @${getUserName(menc_os2)}`;
+          let responseText = (GamezinData[command] || `Voce acabou de dar um(a) ${command} no(a) #nome#`).replaceAll('#nome#', `@${getUserName(menc_os2)}`);
           let media = gamesData.games2[command];
           if (media?.image) {
             await nazu.sendMessage(from, {
