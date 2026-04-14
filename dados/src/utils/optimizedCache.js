@@ -296,9 +296,9 @@ class OptimizedCacheManager {
             
             const memoryPercentage = memUsage.heapUsed / memUsage.heapTotal;
 
-            if (memoryPercentage > 1024) {
+            if (memoryPercentage > 0.90) { // Se usar mais de 90% do heap atual
                 await this.optimizeMemory('high_memory_usage');
-            } else if (usedMB > 300) {
+            } else if (usedMB > 800) { // Se ultrapassar 800MB (considerando o limite de 1024MB no Railway)
                 await this.optimizeMemory('moderate_memory_usage');
             }
 

@@ -5,4 +5,4 @@ nixPkgs = ["nodejs", "ffmpeg", "python3"]
 cmds = ["npm install"]
 
 [start]
-cmd = "node --max-old-space-size=1024 dados/src/connect.js"
+cmd = "node --max-old-space-size=896 dados/src/connect.js"

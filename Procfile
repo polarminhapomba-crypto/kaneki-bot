@@ -1,1 +1,1 @@
-worker: node --max-old-space-size=1024 dados/src/connect.js
+worker: node --max-old-space-size=896 dados/src/connect.js
