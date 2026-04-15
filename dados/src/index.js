@@ -4166,6 +4166,45 @@ Código: *${roleCode}*`,
             ia.makeAssistentRequest({ mensagens: [jSoNzInPv] }, nazu, nmrdn, personality).then((respAssist) => {
               if (respAssist.erro === 'Sistema de IA temporariamente desativado') return;
               
+              // Tratamento especial para personalidade 'pro' (interpretador de comandos) no PV
+              if (respAssist.isPro) {
+                if (respAssist.isCommand && respAssist.command) {
+                  if (respAssist.falta) {
+                    reply(`⚠️ Para executar *${prefix}${respAssist.command}*, preciso que você informe: ${respAssist.falta}`);
+                    return;
+                  }
+                  
+                  console.log(`🤖 [PRO-PV] Comando identificado: ${respAssist.command} ${respAssist.args || ''}`);
+                  
+                  const simulatedCommand = respAssist.command.toLowerCase();
+                  let simulatedArgs = respAssist.args || '';
+                  const simulatedBody = `${prefix}${simulatedCommand} ${simulatedArgs}`.trim();
+                  
+                  // Clonar o objeto info original
+                  const fakeMessage = JSON.parse(JSON.stringify(info));
+                  fakeMessage.messageTimestamp = Math.floor(Date.now() / 1000);
+                  fakeMessage._fromPro = true;
+                  
+                  if (fakeMessage.message) {
+                    fakeMessage.message.conversation = simulatedBody;
+                    delete fakeMessage.message.extendedTextMessage;
+                  } else {
+                    fakeMessage.message = { conversation: simulatedBody };
+                  }
+                  
+                  nazu.sendMessage(from, { 
+                    text: `🤖 *Executando:* ${prefix}${simulatedCommand}${simulatedArgs ? ' ' + simulatedArgs : ''}`
+                  }, { quoted: info }).then(() => {
+                    nazu.ev.emit('messages.upsert', {
+                      messages: [fakeMessage],
+                      type: 'notify'
+                    });
+                  });
+                }
+                // Se não é comando no modo pro, não responde nada (comportamento esperado)
+                return;
+              }
+              
               if (respAssist.resp && Array.isArray(respAssist.resp) && respAssist.resp.length > 0) {
                 const processResponses = (index) => {
                   if (index >= respAssist.resp.length) return;
