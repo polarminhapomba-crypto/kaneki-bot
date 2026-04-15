@@ -27479,8 +27479,9 @@ Exemplos:
                 `💡 *Trocar personalidade:*\n` +
                 `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki\n` +
                 `• ${prefix}assistentepv humana - Age 100% como humana\n` +
-                `• ${prefix}assistentepv ia - IA normal sem personalidade\n\n` +
-                `📩 A assistente responderá mensagens no privado quando mencionarem o bot.`
+                `• ${prefix}assistentepv ia - IA normal sem personalidade\n` +
+                `• ${prefix}assistentepv pro - Interpreta comandos em linguagem natural\n\n` +
+                `🧠 A IA aprende com base nos padrões de conversa para oferecer respostas mais relevantes.`
               : `❌ *Assistente PV desativada!*`;
             
             return reply(statusMsg);
@@ -27488,12 +27489,13 @@ Exemplos:
           
           const personality = q.toLowerCase().trim();
           
-          if (!['kaneki', 'humana', 'ia'].includes(personality)) {
+          if (!['kaneki', 'humana', 'ia', 'pro'].includes(personality)) {
             return reply(`❌ *Personalidade inválida!*\n\n` +
               `Escolha uma das opções:\n` +
-              `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki\n` +
-              `• ${prefix}assistentepv humana - Age 100% como humana\n` +
-              `• ${prefix}assistentepv ia - IA normal e objetiva`);
+              `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki (vampira tsundere)\n` +
+              `• ${prefix}assistentepv humana - Age 100% como uma pessoa real\n` +
+              `• ${prefix}assistentepv ia - IA normal e objetiva\n` +
+              `• ${prefix}assistentepv pro - Interpreta comandos em linguagem natural`);
           }
           
           assistentePvData.ativo = true;
@@ -27503,7 +27505,8 @@ Exemplos:
           const personalityNames = {
             'kaneki': '🌙 *Kaneki* - Vampira moderna com personalidade tsundere',
             'humana': '👤 *Humana* - Age como uma pessoa real, nunca admite ser IA',
-            'ia': '🤖 *IA Normal* - Assistente objetiva e direta'
+            'ia': '🤖 *IA Normal* - Assistente objetiva e direta',
+            'pro': '⚡ *Pro* - Interpreta comandos em linguagem natural (não responde, só executa)'
           };
           
           reply(`✅ *Personalidade do Assistente PV alterada!*\n\n` +
