@@ -4113,6 +4113,90 @@ Código: *${roleCode}*`,
 
     const _botShort = (nazu && nazu.user && (nazu.user.id || nazu.user.lid)) ? String((nazu.user.id || nazu.user.lid).split(':')[0]) : '';
     // Não processar pela assistente se a mensagem veio do PRO (evita loop infinito)
+    // ASSISTENTE PV - Funciona no privado, somente se o dono ativou
+    if (!isGroup && !info.key.fromMe && !isCmd) {
+      try {
+        const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
+        let assistentePvData = {};
+        try {
+          if (fs.existsSync(assistentePvPath)) {
+            assistentePvData = JSON.parse(fs.readFileSync(assistentePvPath));
+          }
+        } catch (e) {}
+        
+        if (assistentePvData.ativo && budy2 && budy2.length > 2) {
+          const personality = assistentePvData.personality || 'kaneki';
+          
+          const jSoNzInPv = {
+            texto: budy2.trim(),
+            id_enviou: sender,
+            nome_enviou: pushname,
+            id_grupo: false,
+            nome_grupo: false,
+            tem_midia: isMedia,
+            tipo_midia: info.message?.imageMessage ? 'imagem' : info.message?.videoMessage ? 'video' : info.message?.audioMessage ? 'audio' : null,
+            marcou_mensagem: false,
+            marcou_sua_mensagem: false,
+            mensagem_marcada: false,
+            id_enviou_marcada: false,
+            tem_midia_marcada: false,
+            tipo_midia_marcada: null,
+            mencoes: [],
+            primeira_mencao: null,
+            tem_mencao: false,
+            id_mensagem: info.key.id,
+            data_atual: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
+            data_mensagem: new Date(info.messageTimestamp * 1000).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+          };
+          
+          // Checar mensagem marcada
+          let { participant: pvParticipant, quotedMessage: pvQuotedMessage } = info.message?.extendedTextMessage?.contextInfo || {};
+          let pvJsonO = {
+            participant: pvParticipant,
+            quotedMessage: pvQuotedMessage,
+            texto: pvQuotedMessage?.conversation || pvQuotedMessage?.extendedTextMessage?.text || pvQuotedMessage?.imageMessage?.caption || pvQuotedMessage?.videoMessage?.caption || ""
+          };
+          if (pvJsonO && pvJsonO.participant && pvJsonO.texto && pvJsonO.texto.length > 0) {
+            jSoNzInPv.marcou_mensagem = true;
+            jSoNzInPv.mensagem_marcada = pvJsonO.texto;
+            jSoNzInPv.id_enviou_marcada = pvJsonO.participant;
+          }
+          
+          if (ia && typeof ia.makeAssistentRequest === 'function') {
+            ia.makeAssistentRequest({ mensagens: [jSoNzInPv] }, nazu, nmrdn, personality).then((respAssist) => {
+              if (respAssist.erro === 'Sistema de IA temporariamente desativado') return;
+              
+              if (respAssist.resp && Array.isArray(respAssist.resp) && respAssist.resp.length > 0) {
+                const processResponses = (index) => {
+                  if (index >= respAssist.resp.length) return;
+                  const msgza = respAssist.resp[index];
+                  const processNext = () => processResponses(index + 1);
+                  
+                  if (msgza && msgza.react) {
+                    nazu.react(msgza.react.replaceAll(' ', '').replaceAll('\n', ''), { key: info.key }).then(() => {
+                      if (msgza.resp && typeof msgza.resp === 'string' && msgza.resp.length > 0) {
+                        reply(msgza.resp).then(processNext);
+                      } else { processNext(); }
+                    }).catch(err => {
+                      if (msgza.resp && typeof msgza.resp === 'string' && msgza.resp.length > 0) {
+                        reply(msgza.resp).then(processNext);
+                      } else { processNext(); }
+                    });
+                  } else if (msgza && msgza.resp && typeof msgza.resp === 'string' && msgza.resp.length > 0) {
+                    reply(msgza.resp).then(processNext);
+                  } else { processNext(); }
+                };
+                processResponses(0);
+              }
+            }).catch((err) => {
+              console.error('Erro no assistente PV:', err.message);
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Erro ao processar assistente PV:', e);
+      }
+    }
     if (!info.key.fromMe && isAssistente && !isCmd && !info._fromPro && ((_botShort && budy2.includes(_botShort)) || (menc_os2 && menc_os2 == botNumber))) {
       if (budy2.replaceAll('@' + _botShort, '').length > 2) {
         // Detectar tipo de mídia da mensagem atual
@@ -27361,6 +27445,71 @@ Exemplos:
           groupData.autorepo = !groupData.autorepo;
           fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
           reply(`✅ Auto resposta ${groupData.autorepo ? 'ativada' : 'desativada'}!`);
+        } catch (e) {
+          console.error(e);
+          reply("Ocorreu um erro 💔");
+        }
+        break;
+      case 'assistentepv':
+        try {
+          if (!isOwner) return reply('🚫 Este comando é apenas para o dono do bot!');
+          
+          const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
+          let assistentePvData = {};
+          try {
+            if (fs.existsSync(assistentePvPath)) {
+              assistentePvData = JSON.parse(fs.readFileSync(assistentePvPath));
+            }
+          } catch (e) {
+            assistentePvData = {};
+          }
+          
+          if (!q) {
+            assistentePvData.ativo = !assistentePvData.ativo;
+            if (!assistentePvData.ativo) {
+              delete assistentePvData.personality;
+            } else {
+              assistentePvData.personality = assistentePvData.personality || 'kaneki';
+            }
+            fs.writeFileSync(assistentePvPath, JSON.stringify(assistentePvData, null, 2));
+            
+            const statusMsg = assistentePvData.ativo 
+              ? `✅ *Assistente PV ativada com sucesso!*\n\n` +
+                `🤖 *Personalidade atual:* ${assistentePvData.personality === 'kaneki' ? 'Kaneki (Padrão)' : assistentePvData.personality === 'humana' ? 'Humana' : assistentePvData.personality === 'ia' ? 'IA Normal' : 'Pro (Comandos)'}\n\n` +
+                `💡 *Trocar personalidade:*\n` +
+                `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki\n` +
+                `• ${prefix}assistentepv humana - Age 100% como humana\n` +
+                `• ${prefix}assistentepv ia - IA normal sem personalidade\n\n` +
+                `📩 A assistente responderá mensagens no privado quando mencionarem o bot.`
+              : `❌ *Assistente PV desativada!*`;
+            
+            return reply(statusMsg);
+          }
+          
+          const personality = q.toLowerCase().trim();
+          
+          if (!['kaneki', 'humana', 'ia'].includes(personality)) {
+            return reply(`❌ *Personalidade inválida!*\n\n` +
+              `Escolha uma das opções:\n` +
+              `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki\n` +
+              `• ${prefix}assistentepv humana - Age 100% como humana\n` +
+              `• ${prefix}assistentepv ia - IA normal e objetiva`);
+          }
+          
+          assistentePvData.ativo = true;
+          assistentePvData.personality = personality;
+          fs.writeFileSync(assistentePvPath, JSON.stringify(assistentePvData, null, 2));
+          
+          const personalityNames = {
+            'kaneki': '🌙 *Kaneki* - Vampira moderna com personalidade tsundere',
+            'humana': '👤 *Humana* - Age como uma pessoa real, nunca admite ser IA',
+            'ia': '🤖 *IA Normal* - Assistente objetiva e direta'
+          };
+          
+          reply(`✅ *Personalidade do Assistente PV alterada!*\n\n` +
+            `${personalityNames[personality]}\n\n` +
+            `💬 A assistente agora responderá no privado com essa personalidade.`);
+            
         } catch (e) {
           console.error(e);
           reply("Ocorreu um erro 💔");

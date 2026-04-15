@@ -181,6 +181,7 @@ ${middleBorder}${menuItemIcon}${prefix}viewmsg
 ${middleBorder}${menuItemIcon}${prefix}cases
 ${middleBorder}${menuItemIcon}${prefix}getcase
 ${middleBorder}${menuItemIcon}${prefix}modoliteglobal
+${middleBorder}${menuItemIcon}${prefix}assistentepv
 ${middleBorder}${menuItemIcon}${prefix}iaclear
 ${middleBorder}${menuItemIcon}${prefix}limpardb
 ${middleBorder}${menuItemIcon}${prefix}limparrankg
