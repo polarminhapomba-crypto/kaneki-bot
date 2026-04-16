@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import userContextDB from '../../utils/userContextDB.js';
+import manusBridge from './manusBridge.js';
 
 // API gratuita Pollinations.ai - sem necessidade de chave de API
 const IA_API_KEY = process.env.OPENAI_API_KEY || '';
@@ -1826,6 +1827,8 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
         selectedPrompt = ASSISTANT_PROMPT_IA;
       } else if (personality === 'pro') {
         selectedPrompt = ASSISTANT_PROMPT_PRO;
+      } else if (personality === 'manus') {
+        selectedPrompt = 'Você é o Manus, um assistente de IA avançado integrado ao Kaneki-Bot. Sua missão é ajudar o usuário com tarefas complexas, responder perguntas e realizar ações solicitadas.';
       } else {
         selectedPrompt = ASSISTANT_PROMPT_NAZUNA;
       }
@@ -1856,22 +1859,40 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
 
       let result;
       try {
-        // Chamada única para processamento com contexto
-        const response = (await makeCognimaRequest(
-          'qwen/qwen3-235b-a22b',
-          JSON.stringify(userInput),
-          selectedPrompt,
-          historico[userId] || []
-        )).data;
+        // Integração com Manus
+        if (personality === 'manus') {
+          console.log(`[MANUS-PV] Processando mensagem via ManusBridge: ${msgValidada.texto}`);
+          const manusResponse = await manusBridge.handleManusCommand(msgValidada.texto, nazu, { sender: msgValidada.id_enviou });
+          
+          result = {
+            resp: [{
+              id: msgValidada.id_mensagem || Date.now().toString(),
+              resp: manusResponse,
+              react: '🤖'
+            }]
+          };
+        } else {
+          // Chamada única para processamento com contexto (outras personalidades)
+          const response = (await makeCognimaRequest(
+            'qwen/qwen3-235b-a22b',
+            JSON.stringify(userInput),
+            selectedPrompt,
+            historico[userId] || []
+          )).data;
 
         if (!response || !response.choices || !response.choices[0]) {
           throw new Error("Resposta da API Cognima foi inválida ou vazia.");
         }
 
-        const content = response.choices[0].message.content;
-        result = extractJSON(content);
-        
-        console.log(`[${personality}] Resultado extraído:`, JSON.stringify(result).substring(0, 300));
+        if (personality !== 'manus') {
+          const content = response.choices[0].message.content;
+          result = extractJSON(content);
+          console.log(`[${personality}] Resultado extraído:`, JSON.stringify(result).substring(0, 300));
+        }
+      } catch (error) {
+        console.error(`Erro ao processar mensagem com personalidade ${personality}:`, error);
+        throw error;
+      }
 
         // Tratamento especial para personalidade 'pro' (interpretador de comandos)
         if (personality === 'pro') {
