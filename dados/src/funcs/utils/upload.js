@@ -62,7 +62,9 @@ class FileTypeDetector {
 // --- CLASSE INTERNA PARA GERENCIAR A LÓGICA ---
 class UploaderService {
     constructor(config) {
-        if (!config.GITHUB.TOKEN) throw new Error('Token do GitHub não configurado.');
+        if (!config.GITHUB.TOKEN || config.GITHUB.TOKEN.includes('undefined')) {
+            throw new Error('❌ Token do GitHub não configurado ou inválido. Verifique suas variáveis de ambiente.');
+        }
         this.uploader = new GitHubUploader(config.GITHUB.TOKEN, config.GITHUB.REPO);
         this.maxSizeBytes = config.MAX_FILE_SIZE_MB * 1024 * 1024;
     }

@@ -26,6 +26,7 @@ import { fileURLToPath } from 'url';
 import { PerformanceOptimizer, getPerformanceOptimizer } from './utils/performanceOptimizer.js';
 import { recalcEquipmentBonuses } from './utils/equipment.js';
 import * as ia from './funcs/private/ia.js';
+import manusBridge from './funcs/private/manusBridge.js';
 import * as vipCommandsManager from './utils/vipCommandsManager.js';
 import { getInfo as gdriveGetInfo } from './funcs/utils/gdrive.js';
 import { getInfo as mediafireGetInfo } from './funcs/utils/mediafire.js';
@@ -12740,6 +12741,18 @@ Entre em contato com o dono do bot:
         }
         break;
       //INTELIGENCIA ARTIFICIAL
+      case 'manus':
+        if (!q) return reply(`🤔 O que você deseja pedir ao Manus? Informe seu pedido após o comando! Exemplo: ${prefix}${command} gere uma imagem de um gato 🐱`);
+        reply(`⏳ Só um segundinho, estou processando seu pedido com o Manus... ✨`).then(async () => {
+          try {
+            const response = await manusBridge.handleManusCommand(body, nazu, info);
+            reply(response);
+          } catch (e) {
+            console.error('Erro no comando /manus:', e);
+            reply(`😓 Poxa, algo deu errado ao processar seu pedido com o Manus! Tente novamente em alguns instantes, tá? 🌈`);
+          }
+        });
+        break;
       case 'gemma':
         if (!q) return reply(`🤔 Qual sua dúvida para o Gemma? Informe a pergunta após o comando! Exemplo: ${prefix}${command} quem descobriu o Brasil? 🌍`);
         reply(`⏳ Só um segundinho, estou consultando o Gemma... ✨`).then(() => {
