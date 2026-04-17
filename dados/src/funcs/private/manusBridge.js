@@ -5,7 +5,7 @@
 
 import axios from 'axios';
 
-const MANUS_API_BASE = 'https://api.manus.im';
+const MANUS_API_BASE = 'https://api.manus.ai';
 const REQUEST_TIMEOUT = 30000;
 
 /**
@@ -24,33 +24,28 @@ export async function handleManusCommand(userMessage, socket, m) {
             return '❌ Use: /manus <seu pedido>\n\nExemplo: /manus gere uma imagem de um gato';
         }
 
-        // Envia requisição para Manus
+        // Envia requisição para Manus (API v1 tasks)
         const response = await axios.post(
-            `${MANUS_API_BASE}/v1/process`,
+            `${MANUS_API_BASE}/v1/tasks`,
             {
                 prompt: commandText,
-                context: {
-                    platform: 'whatsapp',
-                    userId: m.sender,
-                    timestamp: new Date().toISOString()
-                }
+                agentProfile: 'manus-1.6-lite' // Perfil leve para bot de WhatsApp
             },
             {
                 timeout: REQUEST_TIMEOUT,
                 headers: {
                     'Content-Type': 'application/json',
+                    'API_KEY': process.env.MANUS_API_KEY || '', // Requer chave de API
                     'User-Agent': 'Kaneki-Bot/1.0'
                 }
             }
         );
 
         // Processa resposta
-        if (response.data && response.data.result) {
-            return response.data.result;
-        } else if (response.data && response.data.error) {
-            return `❌ Erro do Manus: ${response.data.error}`;
+        if (response.data && response.data.task_id) {
+            return `✅ Tarefa criada no Manus!\n\n🆔 ID: ${response.data.task_id}\n🔗 Acompanhe em: ${response.data.task_url || response.data.share_url || 'Link não disponível'}`;
         } else {
-            return '❌ Resposta inválida do Manus';
+            return '❌ Resposta inválida do Manus (ID da tarefa não encontrado)';
         }
 
     } catch (error) {
