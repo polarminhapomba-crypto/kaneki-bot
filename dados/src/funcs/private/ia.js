@@ -1889,7 +1889,8 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
           result = extractJSON(content);
           console.log(`[${personality}] Resultado extraído:`, JSON.stringify(result).substring(0, 300));
         }
-      } catch (error) {
+      }
+    } catch (error) {
         console.error(`Erro ao processar mensagem com personalidade ${personality}:`, error);
         throw error;
       }
