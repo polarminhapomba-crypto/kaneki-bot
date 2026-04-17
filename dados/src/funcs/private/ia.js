@@ -1880,20 +1880,14 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
             historico[userId] || []
           )).data;
 
-        if (!response || !response.choices || !response.choices[0]) {
-          throw new Error("Resposta da API Cognima foi inválida ou vazia.");
-        }
+          if (!response || !response.choices || !response.choices[0]) {
+            throw new Error("Resposta da API Cognima foi inválida ou vazia.");
+          }
 
-        if (personality !== 'manus') {
           const content = response.choices[0].message.content;
           result = extractJSON(content);
           console.log(`[${personality}] Resultado extraído:`, JSON.stringify(result).substring(0, 300));
         }
-      }
-    } catch (error) {
-        console.error(`Erro ao processar mensagem com personalidade ${personality}:`, error);
-        throw error;
-      }
 
         // Tratamento especial para personalidade 'pro' (interpretador de comandos)
         if (personality === 'pro') {
@@ -2016,6 +2010,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
     };
   }
 }
+
 
 /**
  * Processa o aprendizado da IA sobre o usuário
