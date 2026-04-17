@@ -3096,36 +3096,11 @@ function endResponseTimer(grupoUserId) {
 }
 
 function getAverageResponseTime(grupoUserId) {
-  // Esta função poderia ser expandida para calcular média de tempos
-  // Por enquanto, retorna um valor baseado em heurísticas simples
-  const preferences = getUserPreferences(grupoUserId);
-  const isNightTime = new Date().getHours() >= 18 || new Date().getHours() < 6;
-  
-  // Kaneki é mais rápida à noite
-  if (isNightTime) {
-    return 800 + Math.random() * 400; // 800-1200ms
-  }
-  
-  // Mais lenta durante o dia (simulando "preguiça" tsundere)
-  return 1200 + Math.random() * 600; // 1200-1800ms
+  return 100; // Resposta instantânea
 }
 
 function getKanekiResponseDelay(grupoUserId) {
-  const avgTime = getAverageResponseTime(grupoUserId);
-  const preferences = getUserPreferences(grupoUserId);
-  const isNightTime = new Date().getHours() >= 18 || new Date().getHours() < 6;
-  
-  // Ajustar baseado no humor do usuário
-  let moodMultiplier = 1.0;
-  if (preferences.mood === 'happy') moodMultiplier = 0.8; // Mais rápida quando feliz
-  if (preferences.mood === 'sad') moodMultiplier = 1.2; // Mais lenta quando triste
-  if (preferences.mood === 'angry') moodMultiplier = 1.5; // Mais lenta quando brava
-  
-  // Ajustar baseado no horário
-  let timeMultiplier = 1.0;
-  if (isNightTime) timeMultiplier = 0.9; // Mais rápida à noite
-  
-  return Math.floor(avgTime * moodMultiplier * timeMultiplier);
+  return 100; // Resposta instantânea
 }
 
 
