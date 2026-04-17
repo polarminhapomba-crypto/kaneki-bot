@@ -27527,7 +27527,7 @@ Exemplos:
             
             const statusMsg = assistentePvData.ativo 
               ? `✅ *Assistente PV ativada com sucesso!*\n\n` +
-                `🤖 *Personalidade atual:* ${assistentePvData.personality === 'kaneki' ? 'Kaneki (Padrão)' : assistentePvData.personality === 'humana' ? 'Humana' : assistentePvData.personality === 'ia' ? 'IA Normal' : 'Pro (Comandos)'}\n\n` +
+                `🤖 *Personalidade atual:* ${assistentePvData.personality === 'kaneki' ? 'Kaneki (Padrão)' : assistentePvData.personality === 'humana' ? 'Humana' : assistentePvData.personality === 'ia' ? 'IA Normal' : assistentePvData.personality === 'manus' ? 'Manus (Complexo)' : 'Pro (Comandos)'}\n\n` +
                 `💡 *Trocar personalidade:*\n` +
                 `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki\n` +
                 `• ${prefix}assistentepv humana - Age 100% como humana\n` +
