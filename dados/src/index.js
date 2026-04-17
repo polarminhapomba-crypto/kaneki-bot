@@ -27533,7 +27533,7 @@ Exemplos:
                 `• ${prefix}assistentepv humana - Age 100% como humana\n` +
                 `• ${prefix}assistentepv ia - IA normal sem personalidade\n` +
                 `• ${prefix}assistentepv pro - Interpreta comandos em linguagem natural\n` +
-                `• ${prefix}assistentepv manus - Integração com Manus para tarefas complexas\n\n` +},{all:true,find:
+                `• ${prefix}assistentepv manus - Integração com Manus para tarefas complexas\n\n` +
                 `🧠 A IA aprende com base nos padrões de conversa para oferecer respostas mais relevantes.`
               : `❌ *Assistente PV desativada!*`;
             
