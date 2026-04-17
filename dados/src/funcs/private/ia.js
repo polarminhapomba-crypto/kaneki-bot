@@ -7,6 +7,64 @@ import { fileURLToPath } from 'url';
 import userContextDB from '../../utils/userContextDB.js';
 import manusBridge from './manusBridge.js';
 
+function validateMessage(msg) {
+  if (typeof msg === 'object' && msg !== null) {
+    return {
+      data_atual: msg.data_atual || getBrazilDateTime(),
+      data_mensagem: msg.data_mensagem || getBrazilDateTime(),
+      texto: String(msg.texto || '').trim(),
+      id_enviou: String(msg.id_enviou || ''),
+      nome_enviou: String(msg.nome_enviou || ''),
+      id_grupo: String(msg.id_grupo || ''),
+      nome_grupo: String(msg.nome_grupo || ''),
+      tem_midia: Boolean(msg.tem_midia),
+      marcou_mensagem: Boolean(msg.marcou_mensagem),
+      marcou_sua_mensagem: Boolean(msg.marcou_sua_mensagem),
+      mensagem_marcada: msg.mensagem_marcada || null,
+      id_enviou_marcada: msg.id_enviou_marcada || null,
+      tem_midia_marcada: Boolean(msg.tem_midia_marcada),
+      id_mensagem: msg.id_mensagem || (() => {
+        try {
+          return crypto.randomBytes(8).toString('hex');
+        } catch (error) {
+          return Math.random().toString(16).substring(2, 18);
+        }
+      })()
+    };
+  }
+
+  if (typeof msg === 'string') {
+    const parts = msg.split('|');
+    if (parts.length < 7) {
+      throw new Error('Formato de mensagem inválido - poucos campos');
+    }
+    return {
+      data_atual: parts[0] || getBrazilDateTime(),
+      data_mensagem: parts[1] || getBrazilDateTime(),
+      texto: String(parts[2] || '').trim(),
+      id_enviou: String(parts[3] || ''),
+      nome_enviou: String(parts[4] || ''),
+      id_grupo: String(parts[5] || ''),
+      nome_grupo: String(parts[6] || ''),
+      tem_midia: parts[7] === 'true',
+      marcou_mensagem: parts[8] === 'true',
+      marcou_sua_mensagem: parts[9] === 'true',
+      mensagem_marcada: parts[10] || null,
+      id_enviou_marcada: parts[11] || null,
+      tem_midia_marcada: parts[12] === 'true',
+      id_mensagem: parts[13] || (() => {
+        try {
+          return crypto.randomBytes(8).toString('hex');
+        } catch (error) {
+          return Math.random().toString(16).substring(2, 18);
+        }
+      })()
+    };
+  }
+
+  throw new Error('Formato de mensagem não suportado');
+}
+
 // API gratuita Pollinations.ai - sem necessidade de chave de API
 const IA_API_KEY = process.env.OPENAI_API_KEY || '';
 const IA_API_BASE_URL = process.env.OPENAI_BASE_URL || 'https://text.pollinations.ai';
@@ -1522,63 +1580,6 @@ function extractJSON(content) {
   return { resp: [{ resp: cleanWhatsAppFormatting(cleanContent) || "Não entendi a resposta, pode tentar de novo?" }] };
 }
 
-function validateMessage(msg) {
-  if (typeof msg === 'object' && msg !== null) {
-    return {
-      data_atual: msg.data_atual || getBrazilDateTime(),
-      data_mensagem: msg.data_mensagem || getBrazilDateTime(),
-      texto: String(msg.texto || '').trim(),
-      id_enviou: String(msg.id_enviou || ''),
-      nome_enviou: String(msg.nome_enviou || ''),
-      id_grupo: String(msg.id_grupo || ''),
-      nome_grupo: String(msg.nome_grupo || ''),
-      tem_midia: Boolean(msg.tem_midia),
-      marcou_mensagem: Boolean(msg.marcou_mensagem),
-      marcou_sua_mensagem: Boolean(msg.marcou_sua_mensagem),
-      mensagem_marcada: msg.mensagem_marcada || null,
-      id_enviou_marcada: msg.id_enviou_marcada || null,
-      tem_midia_marcada: Boolean(msg.tem_midia_marcada),
-      id_mensagem: msg.id_mensagem || (() => {
-        try {
-          return crypto.randomBytes(8).toString('hex');
-        } catch (error) {
-          return Math.random().toString(16).substring(2, 18);
-        }
-      })()
-    };
-  }
-
-  if (typeof msg === 'string') {
-    const parts = msg.split('|');
-    if (parts.length < 7) {
-      throw new Error('Formato de mensagem inválido - poucos campos');
-    }
-    return {
-      data_atual: parts[0] || getBrazilDateTime(),
-      data_mensagem: parts[1] || getBrazilDateTime(),
-      texto: String(parts[2] || '').trim(),
-      id_enviou: String(parts[3] || ''),
-      nome_enviou: String(parts[4] || ''),
-      id_grupo: String(parts[5] || ''),
-      nome_grupo: String(parts[6] || ''),
-      tem_midia: parts[7] === 'true',
-      marcou_mensagem: parts[8] === 'true',
-      marcou_sua_mensagem: parts[9] === 'true',
-      mensagem_marcada: parts[10] || null,
-      id_enviou_marcada: parts[11] || null,
-      tem_midia_marcada: parts[12] === 'true',
-      id_mensagem: parts[13] || (() => {
-        try {
-          return crypto.randomBytes(8).toString('hex');
-        } catch (error) {
-          return Math.random().toString(16).substring(2, 18);
-        }
-      })()
-    };
-  }
-
-  throw new Error('Formato de mensagem não suportado');
-}
 
 function updateHistorico(grupoUserId, role, content, nome = null) {
   if (!historico[grupoUserId]) {
