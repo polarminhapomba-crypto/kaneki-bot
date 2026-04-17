@@ -117,16 +117,24 @@ class GitHubUploader {
 }
 
 // --- INSTÂNCIA ÚNICA E FUNÇÃO DE EXPORTAÇÃO ---
-const serviceInstance = new UploaderService(CONFIG);
+let serviceInstance = null;
+
+function getServiceInstance() {
+    if (serviceInstance) return serviceInstance;
+    serviceInstance = new UploaderService(CONFIG);
+    return serviceInstance;
+}
 
 /**
  * Processa e faz o upload de um buffer para o GitHub.
+ * O serviço é inicializado sob demanda para que a falta de GITHUB_TOKEN
+ * não derrube o carregamento global do bot quando nenhum upload foi solicitado.
  * @param {Buffer} buffer O buffer do arquivo a ser enviado.
  * @param {boolean} [deleteAfter10Min=false] Se o arquivo deve ser deletado após 10 minutos.
  * @returns {Promise<string>} A URL de download do arquivo.
  */
 async function upload(buffer, deleteAfter10Min = false) {
-    return serviceInstance.upload(buffer, deleteAfter10Min);
+    return getServiceInstance().upload(buffer, deleteAfter10Min);
 }
 
 export default upload;
