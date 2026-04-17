@@ -3095,12 +3095,21 @@ function endResponseTimer(grupoUserId) {
   return null;
 }
 
+/**
+ * Calcula o tempo médio de resposta para um usuário.
+ * Otimizado para ser rápido, mantendo a compatibilidade com o sistema de aprendizado.
+ */
 function getAverageResponseTime(grupoUserId) {
-  return 100; // Resposta instantânea
+  return 50; 
 }
 
+/**
+ * Retorna o delay de resposta da Kaneki.
+ * Removido o atraso artificial longo para priorizar a velocidade solicitada pelo usuário.
+ * O humor e a personalidade agora são expressos apenas pelo conteúdo do texto.
+ */
 function getKanekiResponseDelay(grupoUserId) {
-  return 100; // Resposta instantânea
+  return 50; 
 }
 
 
