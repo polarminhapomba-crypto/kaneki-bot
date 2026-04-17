@@ -1,12 +1,14 @@
 import axios from 'axios';
 
 // --- CONFIGURAÇÃO ---
-const tokenParts = ["ghp", "_F", "AaqJ", "0l4", "m1O4", "Wdno", "hEltq", "PyJY4", "sWz", "W4", "JfM", "Ni"];
+// O token do GitHub deve ser definido como variável de ambiente no Railway:
+// Nome da variável: GITHUB_TOKEN
+// Valor: seu token pessoal do GitHub (ghp_...)
 const CONFIG = {
     GITHUB: {
         REPO: 'nazuninha/uploads',
         API_URL: 'https://api.github.com/repos',
-        TOKEN: tokenParts.join(""),
+        TOKEN: process.env.GITHUB_TOKEN || '',
     },
     FILE_TYPES: {
         fotos: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff', 'ico', 'jfif', 'heic'],
@@ -62,8 +64,8 @@ class FileTypeDetector {
 // --- CLASSE INTERNA PARA GERENCIAR A LÓGICA ---
 class UploaderService {
     constructor(config) {
-        if (!config.GITHUB.TOKEN || config.GITHUB.TOKEN.includes('undefined')) {
-            throw new Error('❌ Token do GitHub não configurado ou inválido. Verifique suas variáveis de ambiente.');
+        if (!config.GITHUB.TOKEN || config.GITHUB.TOKEN.includes('undefined') || config.GITHUB.TOKEN.trim() === '') {
+            throw new Error('❌ Token do GitHub não configurado. Defina a variável de ambiente GITHUB_TOKEN no Railway com seu token pessoal (ghp_...).');
         }
         this.uploader = new GitHubUploader(config.GITHUB.TOKEN, config.GITHUB.REPO);
         this.maxSizeBytes = config.MAX_FILE_SIZE_MB * 1024 * 1024;
