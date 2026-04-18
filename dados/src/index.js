@@ -18692,9 +18692,8 @@ case 'spotify':
       `📌 *Título:* ${infoResult.title}\n` +
       `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : infoResult.artists}\n` +
       `${infoResult.album && infoResult.album !== 'Spotify' ? `💿 *Álbum:* ${infoResult.album}\n` : ''}` +
-      `🔗 *Link Oficial:* ${infoResult.link}\n` +
-      `${infoResult.preview && infoResult.previewSource ? `🎧 *Prévia disponível:* sim (${infoResult.previewSource})\n` : ''}\n` +
-      `💡 *Nota:* O bot não envia a faixa completa de links do Spotify. Quando a plataforma parceira disponibiliza amostra oficial, o bot envia apenas a prévia; para ouvir a versão integral, use o link oficial.`;
+      `🔗 *Link Oficial:* ${infoResult.link}\n\n` +
+      `💡 *Nota:* O download pelo Spotify não pode por conta de direitos autorais e o áudio foi baixado por um aplicativo de música Premium R$:125:85`;
 
     try {
       if (infoResult.image) {
@@ -18706,15 +18705,16 @@ case 'spotify':
         await reply(caption);
       }
 
-      if (infoResult.preview) {
-        const previewResult = await spotifyModule.download(q);
-        if (previewResult.ok && previewResult.buffer) {
-          await nazu.sendMessage(from, {
-            audio: previewResult.buffer,
-            mimetype: 'audio/mpeg',
-            fileName: previewResult.filename
-          }, { quoted: info });
-        }
+      await reply('⏳ Baixando o áudio completo... Aguarde!');
+      const downloadResult = await spotifyModule.download(q);
+      if (downloadResult.ok && downloadResult.buffer) {
+        await nazu.sendMessage(from, {
+          audio: downloadResult.buffer,
+          mimetype: 'audio/mpeg',
+          fileName: downloadResult.filename
+        }, { quoted: info });
+      } else {
+        await reply('❌ Não foi possível baixar o áudio completo.');
       }
     } catch (err) {
       console.error('Erro ao enviar informações:', err);
@@ -18758,9 +18758,8 @@ case 'playspotify':
       `📌 *Título:* ${track.name}\n` +
       `👤 *Artista(s):* ${track.artists}\n` +
       `💿 *Álbum:* ${track.album}\n` +
-      `🔗 *Link Oficial:* ${track.link}\n` +
-      `${track.preview && track.source ? `🎧 *Prévia disponível:* sim (${track.source})\n` : ''}\n` +
-      `💡 *Nota:* O bot não envia a faixa completa. Quando houver amostra oficial disponibilizada pela plataforma de música, o bot envia apenas a prévia; para ouvir a versão integral, use o link oficial.`;
+      `🔗 *Link Oficial:* ${track.link}\n\n` +
+      `💡 *Nota:* O download pelo Spotify não pode por conta de direitos autorais e o áudio foi baixado por um aplicativo de música Premium R$:125:85`;
 
     try {
       if (track.image) {
@@ -18772,15 +18771,16 @@ case 'playspotify':
         await reply(caption);
       }
 
-      if (track.preview) {
-        const previewResult = await spotifyModule.download(track.link || q);
-        if (previewResult.ok && previewResult.buffer) {
-          await nazu.sendMessage(from, {
-            audio: previewResult.buffer,
-            mimetype: 'audio/mpeg',
-            fileName: previewResult.filename
-          }, { quoted: info });
-        }
+      await reply('⏳ Baixando o áudio completo... Aguarde!');
+      const downloadResult = await spotifyModule.download(track.link || q);
+      if (downloadResult.ok && downloadResult.buffer) {
+        await nazu.sendMessage(from, {
+          audio: downloadResult.buffer,
+          mimetype: 'audio/mpeg',
+          fileName: downloadResult.filename
+        }, { quoted: info });
+      } else {
+        await reply('❌ Não foi possível baixar o áudio completo.');
       }
     } catch (err) {
       console.error('Erro ao enviar informações:', err);
