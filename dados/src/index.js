@@ -18710,7 +18710,8 @@ case 'spotify':
       if (downloadResult.ok && downloadResult.buffer) {
         await nazu.sendMessage(from, {
           audio: downloadResult.buffer,
-          mimetype: 'audio/mpeg'
+          mimetype: 'audio/mpeg',
+          fileName: downloadResult.filename || 'music.mp3'
         }, { quoted: info });
       } else {
         await reply('❌ Não foi possível baixar o áudio completo.');
@@ -18775,7 +18776,8 @@ case 'playspotify':
       if (downloadResult.ok && downloadResult.buffer) {
         await nazu.sendMessage(from, {
           audio: downloadResult.buffer,
-          mimetype: 'audio/mpeg'
+          mimetype: 'audio/mpeg',
+          fileName: downloadResult.filename || 'music.mp3'
         }, { quoted: info });
       } else {
         await reply('❌ Não foi possível baixar o áudio completo.');

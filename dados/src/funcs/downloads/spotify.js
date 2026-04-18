@@ -6,6 +6,7 @@
 
 import axios from 'axios';
 import { mediaClient } from '../../utils/httpClient.js';
+import NodeID3 from 'node-id3';
 
 const BASE_URL = 'https://nayan-video-downloader.vercel.app';
 const SPOTIFY_OEMBED = 'https://open.spotify.com/oembed';
@@ -40,6 +41,8 @@ async function download(urlOrName) {
   try {
     let query;
     let displayTitle = '';
+    let spotifyImage = null;
+    let spotifyArtists = '';
 
     // 1. Identificar a música
     if (urlOrName.includes('spotify.com')) {
@@ -47,6 +50,8 @@ async function download(urlOrName) {
       if (!meta) return { ok: false, msg: 'Link do Spotify inválido ou privado.' };
       query = `${meta.title} ${meta.artists}`;
       displayTitle = meta.title;
+      spotifyImage = meta.image;
+      spotifyArtists = meta.artists;
     } else {
       query = urlOrName;
     }
@@ -77,16 +82,50 @@ async function download(urlOrName) {
 
     // 4. Baixar o buffer de áudio (usando o cliente de mídia do bot)
     const audioResponse = await mediaClient.get(dlData.download_url, {
+      responseType: 'arraybuffer',
       timeout: 60000
     });
 
+    let audioBuffer = Buffer.from(audioResponse.data);
+    const finalTitle = displayTitle || dlData.title;
+    const finalArtists = spotifyArtists || dlData.artist;
+    const finalImage = spotifyImage || dlData.thumbnail;
+
+    // 5. Adicionar metadados ID3 (Capa e Nome)
+    try {
+      const tags = {
+        title: finalTitle,
+        artist: finalArtists,
+      };
+
+      if (finalImage) {
+        const imageResponse = await axios.get(finalImage, { responseType: 'arraybuffer' });
+        tags.image = {
+          mime: "image/jpeg",
+          type: {
+            id: 3,
+            name: "front cover"
+          },
+          description: "Cover",
+          imageBuffer: Buffer.from(imageResponse.data)
+        };
+      }
+
+      const success = NodeID3.write(tags, audioBuffer);
+      if (success) {
+        audioBuffer = success;
+      }
+    } catch (id3Error) {
+      console.error('Erro ao adicionar tags ID3:', id3Error.message);
+    }
+
     return {
       ok: true,
-      buffer: Buffer.from(audioResponse.data),
-      title: displayTitle || dlData.title,
-      artists: dlData.artist,
-      filename: `${displayTitle || dlData.title}.mp3`,
-      thumbnail: dlData.thumbnail
+      buffer: audioBuffer,
+      title: finalTitle,
+      artists: finalArtists,
+      filename: `${finalTitle}.mp3`,
+      thumbnail: finalImage
     };
   } catch (error) {
     console.error('Erro no processo de download estável:', error.message);

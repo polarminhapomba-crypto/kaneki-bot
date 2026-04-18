@@ -26,6 +26,7 @@
         "linkedom": "^0.18.12",
         "node-cache": "^5.1.2",
         "node-cron": "^4.2.1",
+        "node-id3": "^0.2.9",
         "node-webpmux": "^3.2.1",
         "pino": "^10.1.0",
         "qrcode-terminal": "^0.12.0",
