@@ -1,25 +1,14 @@
 /**
  * Music Info & Downloader - Busca informações e faz download de áudios completos.
- * Suporta links do Spotify e busca automática em múltiplas fontes (YouTube, SoundCloud, etc)
- * via yt-dlp para garantir o download do áudio completo.
+ * Refatorado para usar APIs externas estáveis, garantindo compatibilidade com o Railway
+ * sem depender de binários locais como yt-dlp.
  */
 
 import axios from 'axios';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-import fs from 'fs';
-import path from 'path';
-
-const execPromise = promisify(exec);
 
 const DEEZER_API = 'https://api.deezer.com';
 const SPOTIFY_OEMBED = 'https://open.spotify.com/oembed';
-const TEMP_DIR = './dados/temp';
-
-// Garantir que o diretório temporário exista
-if (!fs.existsSync(TEMP_DIR)) {
-  fs.mkdirSync(TEMP_DIR, { recursive: true });
-}
+const DOWNLOAD_API = 'https://nayan-video-downloader.vercel.app/ytdown';
 
 // Cache simples
 const cache = new Map();
@@ -180,53 +169,60 @@ async function getInfo(urlOrName) {
 }
 
 /**
- * Faz o download do áudio completo via múltiplas fontes usando yt-dlp.
- * Tenta buscar em várias plataformas para garantir o sucesso.
+ * Faz o download do áudio completo via API externa estável.
  */
 async function download(urlOrName) {
   const info = await getInfo(urlOrName);
   if (!info.ok) return info;
 
-  // Busca mais abrangente para garantir o download completo
-  const query = `${info.title} ${info.artists} full audio`;
-  const timestamp = Date.now();
-  const outputPath = path.join(TEMP_DIR, `music_${timestamp}.mp3`);
-
   try {
-    /**
-     * yt-dlp configurado para buscar em múltiplas fontes:
-     * - Busca automática (ytsearch)
-     * - Extração de áudio de alta qualidade
-     * - Suporte a diversos sites (YouTube, SoundCloud, Bandcamp, etc)
-     */
-    await execPromise(`yt-dlp --default-search "ytsearch" --max-downloads 1 --extract-audio --audio-format mp3 --audio-quality 0 --output "${outputPath}" "${query}"`);
+    // 1. Primeiro tentamos obter um link do YouTube para a música
+    const query = `${info.title} ${info.artists} audio`;
+    const ytSearchResponse = await axios.get(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, {
+        headers: { 'User-Agent': 'Mozilla/5.0' }
+    });
+    
+    const ytIdMatch = ytSearchResponse.data.match(/"videoId":"([^"]+)"/);
+    if (!ytIdMatch) throw new Error('Vídeo não encontrado no YouTube.');
+    
+    const ytUrl = `https://www.youtube.com/watch?v=${ytIdMatch[1]}`;
 
-    if (fs.existsSync(outputPath)) {
-      const buffer = fs.readFileSync(outputPath);
-      const filename = `${sanitizeFileName(`${info.title} - ${info.artists}`)}.mp3`;
-      
-      // Limpar arquivo temporário
-      setTimeout(() => {
-        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-      }, 5000);
+    // 2. Usamos a API externa para obter o link de download do áudio
+    const dlResponse = await axios.get(DOWNLOAD_API, {
+      params: { url: ytUrl },
+      timeout: 30000
+    });
 
-      return {
-        ok: true,
-        buffer,
-        filename,
-        title: info.title,
-        artists: info.artists,
-        image: info.image,
-        info
-      };
-    } else {
-      throw new Error('Falha ao gerar o arquivo de áudio.');
+    const body = dlResponse.data;
+    const media = (body.data && body.data.audio) ? body.data : (body.audio ? body : null);
+
+    if (!media || !media.audio) {
+      throw new Error('Link de download não disponível.');
     }
+
+    // 3. Baixamos o buffer do áudio
+    const fileResponse = await axios.get(media.audio, {
+      responseType: 'arraybuffer',
+      timeout: 60000
+    });
+
+    const buffer = Buffer.from(fileResponse.data);
+    const filename = `${sanitizeFileName(`${info.title} - ${info.artists}`)}.mp3`;
+
+    return {
+      ok: true,
+      buffer,
+      filename,
+      title: info.title,
+      artists: info.artists,
+      image: info.image,
+      info
+    };
   } catch (error) {
-    console.error('Erro no download multi-fonte:', error.message);
+    console.error('Erro no download via API externa:', error.message);
     return {
       ok: false,
-      msg: 'Não foi possível baixar o áudio completo de nenhuma fonte disponível.',
+      msg: 'Não foi possível baixar o áudio completo. Tente novamente mais tarde.',
       info
     };
   }
