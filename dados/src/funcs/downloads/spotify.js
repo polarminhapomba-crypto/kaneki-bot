@@ -22,7 +22,8 @@ async function getSpotifyMetadata(url) {
     if (response.data && response.data.title) {
       return {
         title: response.data.title,
-        artists: response.data.author_name || ''
+        artists: response.data.author_name || '',
+        image: response.data.thumbnail_url || null
       };
     }
     return null;
@@ -98,8 +99,46 @@ export default {
   getInfo: async (q) => {
     if (q.includes('spotify.com')) {
       const meta = await getSpotifyMetadata(q);
-      return meta ? { ok: true, ...meta, image: null, link: q } : { ok: false };
+      return meta ? { ok: true, ...meta, link: q } : { ok: false };
     }
+    // Para buscas que não são links, tentamos buscar no SoundCloud para pegar a imagem
+    try {
+      const searchResponse = await axios.get(`${BASE_URL}/soundcloud-search`, {
+        params: { name: q, limit: 1 },
+        timeout: 10000
+      });
+      if (searchResponse.data?.results?.length) {
+        const track = searchResponse.data.results[0];
+        return {
+          ok: true,
+          title: track.title,
+          artists: track.user_id,
+          image: track.artwork_url,
+          link: track.permalink_url
+        };
+      }
+    } catch (e) {}
     return { ok: true, title: q, artists: '', image: null, link: q };
+  },
+  search: async (q, limit = 1) => {
+    try {
+      const searchResponse = await axios.get(`${BASE_URL}/soundcloud-search`, {
+        params: { name: q, limit },
+        timeout: 10000
+      });
+      if (searchResponse.data?.results?.length) {
+        return {
+          ok: true,
+          results: searchResponse.data.results.map(t => ({
+            name: t.title,
+            artists: t.user_id,
+            image: t.artwork_url,
+            link: t.permalink_url,
+            album: 'SoundCloud'
+          }))
+        };
+      }
+      return { ok: false };
+    } catch (e) { return { ok: false }; }
   }
 };
