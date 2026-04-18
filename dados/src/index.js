@@ -18692,8 +18692,9 @@ case 'spotify':
       `📌 *Título:* ${infoResult.title}\n` +
       `👤 *Artista(s):* ${Array.isArray(infoResult.artists) ? infoResult.artists.join(', ') : infoResult.artists}\n` +
       `${infoResult.album && infoResult.album !== 'Spotify' ? `💿 *Álbum:* ${infoResult.album}\n` : ''}` +
-      `🔗 *Link Oficial:* ${infoResult.link}\n\n` +
-      `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
+      `🔗 *Link Oficial:* ${infoResult.link}\n` +
+      `${infoResult.preview && infoResult.previewSource ? `🎧 *Prévia disponível:* sim (${infoResult.previewSource})\n` : ''}\n` +
+      `💡 *Nota:* O bot não envia a faixa completa de links do Spotify. Quando a plataforma parceira disponibiliza amostra oficial, o bot envia apenas a prévia; para ouvir a versão integral, use o link oficial.`;
 
     try {
       if (infoResult.image) {
@@ -18703,6 +18704,17 @@ case 'spotify':
         }, { quoted: info });
       } else {
         await reply(caption);
+      }
+
+      if (infoResult.preview) {
+        const previewResult = await spotifyModule.download(q);
+        if (previewResult.ok && previewResult.buffer) {
+          await nazu.sendMessage(from, {
+            audio: previewResult.buffer,
+            mimetype: 'audio/mpeg',
+            fileName: previewResult.filename
+          }, { quoted: info });
+        }
       }
     } catch (err) {
       console.error('Erro ao enviar informações:', err);
@@ -18746,8 +18758,9 @@ case 'playspotify':
       `📌 *Título:* ${track.name}\n` +
       `👤 *Artista(s):* ${track.artists}\n` +
       `💿 *Álbum:* ${track.album}\n` +
-      `🔗 *Link Oficial:* ${track.link}\n\n` +
-      `💡 *Nota:* O download direto foi desativado por questões de segurança e direitos autorais. Ouça pelo link oficial!`;
+      `🔗 *Link Oficial:* ${track.link}\n` +
+      `${track.preview && track.source ? `🎧 *Prévia disponível:* sim (${track.source})\n` : ''}\n` +
+      `💡 *Nota:* O bot não envia a faixa completa. Quando houver amostra oficial disponibilizada pela plataforma de música, o bot envia apenas a prévia; para ouvir a versão integral, use o link oficial.`;
 
     try {
       if (track.image) {
@@ -18757,6 +18770,17 @@ case 'playspotify':
         }, { quoted: info });
       } else {
         await reply(caption);
+      }
+
+      if (track.preview) {
+        const previewResult = await spotifyModule.download(track.link || q);
+        if (previewResult.ok && previewResult.buffer) {
+          await nazu.sendMessage(from, {
+            audio: previewResult.buffer,
+            mimetype: 'audio/mpeg',
+            fileName: previewResult.filename
+          }, { quoted: info });
+        }
       }
     } catch (err) {
       console.error('Erro ao enviar informações:', err);

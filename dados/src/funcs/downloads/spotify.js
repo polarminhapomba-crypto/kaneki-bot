@@ -1,6 +1,7 @@
 /**
  * Music Info - Busca informações de músicas de forma estável
- * Refatorado para suportar links diretos do Spotify (oEmbed) e busca via Deezer
+ * Refatorado para suportar links diretos do Spotify (oEmbed) e busca via Deezer,
+ * incluindo prévia de áudio quando a plataforma disponibilizar esse recurso.
  */
 
 import axios from 'axios';
@@ -30,43 +31,181 @@ function setCache(key, val) {
   cache.set(key, { val, ts: Date.now() });
 }
 
+function sanitizeFileName(name = 'audio') {
+  return String(name)
+    .replace(/[\\/:*?"<>|]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120) || 'audio';
+}
+
+function normalizeText(text = '') {
+  return String(text)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function scoreTrackMatch(baseTitle = '', baseArtists = '', candidate = {}) {
+  const refTitle = normalizeText(baseTitle);
+  const refArtists = normalizeText(baseArtists);
+  const candTitle = normalizeText(candidate.title || candidate.name);
+  const candArtist = normalizeText(candidate.artist || candidate.artists);
+
+  let score = 0;
+
+  if (candTitle === refTitle) score += 80;
+  else if (candTitle.includes(refTitle) || refTitle.includes(candTitle)) score += 45;
+
+  if (refArtists && candArtist === refArtists) score += 20;
+  else if (refArtists && (candArtist.includes(refArtists) || refArtists.includes(candArtist))) score += 10;
+
+  return score;
+}
+
+async function fetchDeezerTrackById(trackId) {
+  const cacheKey = `deezer:track:${trackId}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const response = await axios.get(`${DEEZER_API}/track/${trackId}`, {
+    timeout: 15000
+  });
+
+  if (!response.data || response.data.error) {
+    return null;
+  }
+
+  const track = response.data;
+  const result = {
+    ok: true,
+    title: track.title,
+    name: track.title,
+    artists: track.artist?.name || 'Artista desconhecido',
+    artist: track.artist?.name || 'Artista desconhecido',
+    album: track.album?.title || 'Deezer',
+    image: track.album?.cover_medium || track.album?.cover_big || null,
+    link: track.link,
+    preview: track.preview || null,
+    duration: track.duration || null,
+    source: 'Deezer'
+  };
+
+  setCache(cacheKey, result);
+  return result;
+}
+
+async function searchDeezerTrack(query, limit = 5) {
+  const cacheKey = `deezer:search:${query}:${limit}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const response = await axios.get(`${DEEZER_API}/search`, {
+    params: { q: query },
+    timeout: 15000
+  });
+
+  const results = (response.data?.data || []).slice(0, limit).map(track => ({
+    ok: true,
+    title: track.title,
+    name: track.title,
+    artists: track.artist?.name || 'Artista desconhecido',
+    artist: track.artist?.name || 'Artista desconhecido',
+    album: track.album?.title || 'Deezer',
+    image: track.album?.cover_medium || null,
+    link: track.link,
+    preview: track.preview || null,
+    duration: track.duration || null,
+    source: 'Deezer'
+  }));
+
+  setCache(cacheKey, results);
+  return results;
+}
+
+async function enrichWithPreview(baseInfo) {
+  try {
+    const artistText = Array.isArray(baseInfo.artists) ? baseInfo.artists.join(', ') : (baseInfo.artists || baseInfo.artist || '');
+    const query = [baseInfo.title || baseInfo.name, artistText].filter(Boolean).join(' ');
+
+    if (!query) {
+      return baseInfo;
+    }
+
+    const candidates = await searchDeezerTrack(query, 5);
+    if (!candidates.length) {
+      return baseInfo;
+    }
+
+    const best = [...candidates]
+      .map(candidate => ({
+        ...candidate,
+        _score: scoreTrackMatch(baseInfo.title || baseInfo.name, artistText, candidate)
+      }))
+      .sort((a, b) => b._score - a._score)[0];
+
+    if (!best || best._score < 35) {
+      return baseInfo;
+    }
+
+    return {
+      ...baseInfo,
+      artists: baseInfo.artists || best.artists,
+      artist: baseInfo.artist || best.artist,
+      album: baseInfo.album && baseInfo.album !== 'Spotify' ? baseInfo.album : best.album,
+      preview: best.preview || null,
+      previewSource: best.preview ? 'Deezer' : null,
+      deezerLink: best.link || null,
+      duration: baseInfo.duration || best.duration || null,
+      image: baseInfo.image || best.image || null
+    };
+  } catch (error) {
+    console.error('Erro ao enriquecer música com prévia:', error.message);
+    return baseInfo;
+  }
+}
+
 /**
  * Obtém metadados de um link do Spotify usando oEmbed (oficial e estável)
  */
 async function getSpotifyMetadata(url) {
-    try {
-        const cleanUrl = url.split('?')[0]; // Remove parâmetros de tracking
-        const cached = getCached(`spotify:${cleanUrl}`);
-        if (cached) return cached;
+  try {
+    const cleanUrl = url.split('?')[0];
+    const cached = getCached(`spotify:${cleanUrl}`);
+    if (cached) return cached;
 
-        const response = await axios.get(SPOTIFY_OEMBED, {
-            params: { url: cleanUrl },
-            timeout: 10000
-        });
+    const response = await axios.get(SPOTIFY_OEMBED, {
+      params: { url: cleanUrl },
+      timeout: 10000
+    });
 
-        if (!response.data || !response.data.title) {
-            return null;
-        }
-
-        const data = response.data;
-        // O título do oEmbed costuma ser apenas o nome da música
-        // Para links do Spotify, o oEmbed é excelente para pegar a capa e o título
-        const result = {
-            ok: true,
-            title: data.title,
-            artists: 'Spotify Track', // oEmbed não separa artista nativamente de forma simples no título
-            album: 'Spotify',
-            image: data.thumbnail_url,
-            link: cleanUrl,
-            source: 'Spotify'
-        };
-
-        setCache(`spotify:${cleanUrl}`, result);
-        return result;
-    } catch (error) {
-        console.error('Erro no oEmbed do Spotify:', error.message);
-        return null;
+    if (!response.data || !response.data.title) {
+      return null;
     }
+
+    const data = response.data;
+    const result = {
+      ok: true,
+      title: data.title,
+      name: data.title,
+      artists: data.author_name || 'Spotify Track',
+      artist: data.author_name || 'Spotify Track',
+      album: 'Spotify',
+      image: data.thumbnail_url || null,
+      link: cleanUrl,
+      source: 'Spotify',
+      preview: null,
+      previewSource: null
+    };
+
+    const enriched = await enrichWithPreview(result);
+    setCache(`spotify:${cleanUrl}`, enriched);
+    return enriched;
+  } catch (error) {
+    console.error('Erro no oEmbed do Spotify:', error.message);
+    return null;
+  }
 }
 
 /**
@@ -77,30 +216,17 @@ async function search(query, limit = 10) {
     const cached = getCached(`search:${query}:${limit}`);
     if (cached) return cached;
 
-    const response = await axios.get(`${DEEZER_API}/search`, {
-      params: { q: query },
-      timeout: 15000
-    });
+    const results = await searchDeezerTrack(query, limit);
 
-    if (!response.data || !response.data.data) {
+    if (!results.length) {
       return { ok: false, msg: 'Nenhuma música encontrada.' };
     }
-
-    const results = response.data.data.slice(0, limit).map(track => ({
-        name: track.title,
-        artists: track.artist.name,
-        album: track.album.title,
-        image: track.album.cover_medium,
-        link: track.link,
-        duration: track.duration,
-        source: 'Deezer'
-    }));
 
     const result = {
       ok: true,
       query,
       total: results.length,
-      results: results
+      results
     };
 
     setCache(`search:${query}:${limit}`, result);
@@ -116,37 +242,22 @@ async function search(query, limit = 10) {
  */
 async function getInfo(urlOrName) {
   try {
-    // Se for link do Spotify, usa o oEmbed
     if (urlOrName.includes('spotify.com')) {
-        const spotifyData = await getSpotifyMetadata(urlOrName);
-        if (spotifyData) return spotifyData;
-        
-        // Fallback: se o oEmbed falhar, tenta buscar o título via Deezer (extraindo da URL se possível)
-        return { ok: false, msg: 'Não foi possível ler este link do Spotify. Tente buscar pelo nome!' };
+      const spotifyData = await getSpotifyMetadata(urlOrName);
+      if (spotifyData) return spotifyData;
+
+      return { ok: false, msg: 'Não foi possível ler este link do Spotify. Tente buscar pelo nome!' };
     }
 
-    // Se for link do Deezer
     if (urlOrName.includes('deezer.com')) {
-        const trackId = urlOrName.split('/').pop();
-        const response = await axios.get(`${DEEZER_API}/track/${trackId}`);
-        if (response.data && !response.data.error) {
-            const track = response.data;
-            return {
-                ok: true,
-                title: track.title,
-                artists: track.artist.name,
-                album: track.album.title,
-                image: track.album.cover_medium,
-                link: track.link,
-                source: 'Deezer'
-            };
-        }
+      const trackId = (urlOrName.split('?')[0].split('/').pop() || '').trim();
+      const track = await fetchDeezerTrackById(trackId);
+      if (track) return track;
     }
 
-    // Se for apenas texto, faz uma busca
     const searchResult = await search(urlOrName, 1);
     if (searchResult.ok && searchResult.results.length > 0) {
-        return { ok: true, ...searchResult.results[0] };
+      return { ok: true, ...searchResult.results[0] };
     }
 
     return { ok: false, msg: 'Música não encontrada.' };
@@ -156,11 +267,53 @@ async function getInfo(urlOrName) {
   }
 }
 
-async function download(url) {
-  return {
-    ok: false,
-    msg: 'Download desativado por segurança.'
-  };
+async function download(urlOrName) {
+  try {
+    const info = await getInfo(urlOrName);
+
+    if (!info.ok) {
+      return info;
+    }
+
+    if (!info.preview) {
+      return {
+        ok: false,
+        msg: 'Nenhuma prévia de áudio foi disponibilizada para esta música.',
+        info
+      };
+    }
+
+    const response = await axios.get(info.preview, {
+      responseType: 'arraybuffer',
+      timeout: 20000,
+      maxRedirects: 5,
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    });
+
+    const artistText = Array.isArray(info.artists) ? info.artists.join(', ') : (info.artists || info.artist || 'artista');
+    const filename = `${sanitizeFileName(`${info.title || info.name} - ${artistText}`)} (preview).mp3`;
+
+    return {
+      ok: true,
+      type: 'preview',
+      buffer: Buffer.from(response.data),
+      filename,
+      title: info.title || info.name,
+      artists: artistText,
+      image: info.image || null,
+      link: info.link,
+      previewSource: info.previewSource || info.source || 'Deezer',
+      info
+    };
+  } catch (error) {
+    console.error('Erro ao baixar prévia:', error.message);
+    return {
+      ok: false,
+      msg: 'Não foi possível obter a prévia de áudio desta música.'
+    };
+  }
 }
 
 export default {
