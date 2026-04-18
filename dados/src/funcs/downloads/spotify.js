@@ -1,14 +1,26 @@
 /**
  * Music Info & Downloader - Busca informações e faz download de áudios completos.
- * Refatorado para usar APIs externas estáveis, garantindo compatibilidade com o Railway
- * sem depender de binários locais como yt-dlp.
+ * Refatorado para usar APIs externas e conversão via FFmpeg para garantir
+ * compatibilidade total com o player do WhatsApp.
  */
 
 import axios from 'axios';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs';
+import path from 'path';
+
+const execPromise = promisify(exec);
 
 const DEEZER_API = 'https://api.deezer.com';
 const SPOTIFY_OEMBED = 'https://open.spotify.com/oembed';
 const DOWNLOAD_API = 'https://nayan-video-downloader.vercel.app/ytdown';
+const TEMP_DIR = './dados/temp';
+
+// Garantir que o diretório temporário exista
+if (!fs.existsSync(TEMP_DIR)) {
+  fs.mkdirSync(TEMP_DIR, { recursive: true });
+}
 
 // Cache simples
 const cache = new Map();
@@ -169,25 +181,29 @@ async function getInfo(urlOrName) {
 }
 
 /**
- * Faz o download do áudio completo via API externa estável.
+ * Faz o download e converte para OGG/OPUS para compatibilidade máxima.
  */
 async function download(urlOrName) {
   const info = await getInfo(urlOrName);
   if (!info.ok) return info;
 
+  const timestamp = Date.now();
+  const tempInput = path.join(TEMP_DIR, `in_${timestamp}.mp3`);
+  const tempOutput = path.join(TEMP_DIR, `out_${timestamp}.opus`);
+
   try {
-    // 1. Primeiro tentamos obter um link do YouTube para a música
+    // 1. Obter link do YouTube
     const query = `${info.title} ${info.artists} audio`;
     const ytSearchResponse = await axios.get(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, {
         headers: { 'User-Agent': 'Mozilla/5.0' }
     });
     
     const ytIdMatch = ytSearchResponse.data.match(/"videoId":"([^"]+)"/);
-    if (!ytIdMatch) throw new Error('Vídeo não encontrado no YouTube.');
+    if (!ytIdMatch) throw new Error('Vídeo não encontrado.');
     
     const ytUrl = `https://www.youtube.com/watch?v=${ytIdMatch[1]}`;
 
-    // 2. Usamos a API externa para obter o link de download do áudio
+    // 2. Obter link de download
     const dlResponse = await axios.get(DOWNLOAD_API, {
       params: { url: ytUrl },
       timeout: 30000
@@ -195,19 +211,24 @@ async function download(urlOrName) {
 
     const body = dlResponse.data;
     const media = (body.data && body.data.audio) ? body.data : (body.audio ? body : null);
+    if (!media || !media.audio) throw new Error('Link de download não disponível.');
 
-    if (!media || !media.audio) {
-      throw new Error('Link de download não disponível.');
-    }
-
-    // 3. Baixamos o buffer do áudio
+    // 3. Baixar arquivo temporário
     const fileResponse = await axios.get(media.audio, {
       responseType: 'arraybuffer',
       timeout: 60000
     });
+    fs.writeFileSync(tempInput, Buffer.from(fileResponse.data));
 
-    const buffer = Buffer.from(fileResponse.data);
-    const filename = `${sanitizeFileName(`${info.title} - ${info.artists}`)}.mp3`;
+    // 4. Converter para OGG/OPUS (Formato nativo do WhatsApp para áudio)
+    // -c:a libopus: Codec Opus
+    // -b:a 128k: Bitrate
+    // -vbr on: Variable Bitrate
+    // -compression_level 10: Melhor compressão
+    await execPromise(`ffmpeg -i ${tempInput} -c:a libopus -b:a 128k -vbr on -compression_level 10 ${tempOutput}`);
+
+    const buffer = fs.readFileSync(tempOutput);
+    const filename = `${sanitizeFileName(`${info.title} - ${info.artists}`)}.opus`;
 
     return {
       ok: true,
@@ -219,12 +240,18 @@ async function download(urlOrName) {
       info
     };
   } catch (error) {
-    console.error('Erro no download via API externa:', error.message);
+    console.error('Erro no download/conversão:', error.message);
     return {
       ok: false,
-      msg: 'Não foi possível baixar o áudio completo. Tente novamente mais tarde.',
+      msg: 'Não foi possível processar o áudio completo.',
       info
     };
+  } finally {
+    // Limpar arquivos temporários
+    try {
+      if (fs.existsSync(tempInput)) fs.unlinkSync(tempInput);
+      if (fs.existsSync(tempOutput)) fs.unlinkSync(tempOutput);
+    } catch (e) {}
   }
 }
 

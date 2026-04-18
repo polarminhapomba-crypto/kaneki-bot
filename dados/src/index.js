@@ -18710,7 +18710,7 @@ case 'spotify':
       if (downloadResult.ok && downloadResult.buffer) {
         await nazu.sendMessage(from, {
           audio: downloadResult.buffer,
-          mimetype: 'audio/mp4',
+          mimetype: 'audio/ogg; codecs=opus',
           ptt: true
         }, { quoted: info });
       } else {
@@ -18776,7 +18776,7 @@ case 'playspotify':
       if (downloadResult.ok && downloadResult.buffer) {
         await nazu.sendMessage(from, {
           audio: downloadResult.buffer,
-          mimetype: 'audio/mp4',
+          mimetype: 'audio/ogg; codecs=opus',
           ptt: true
         }, { quoted: info });
       } else {
