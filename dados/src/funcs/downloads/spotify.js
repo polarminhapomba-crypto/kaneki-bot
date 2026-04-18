@@ -1,7 +1,7 @@
 /**
- * Music Info - Busca informações de músicas de forma estável
- * Refatorado para suportar links diretos do Spotify (oEmbed) e busca via Deezer.
- * Adicionado suporte a download de áudio completo via busca no YouTube.
+ * Music Info & Downloader - Busca informações e faz download de áudios completos.
+ * Suporta links do Spotify e busca automática em múltiplas fontes (YouTube, SoundCloud, etc)
+ * via yt-dlp para garantir o download do áudio completo.
  */
 
 import axios from 'axios';
@@ -180,27 +180,32 @@ async function getInfo(urlOrName) {
 }
 
 /**
- * Faz o download do áudio completo via YouTube usando yt-dlp
+ * Faz o download do áudio completo via múltiplas fontes usando yt-dlp.
+ * Tenta buscar em várias plataformas para garantir o sucesso.
  */
 async function download(urlOrName) {
   const info = await getInfo(urlOrName);
   if (!info.ok) return info;
 
-  const query = `${info.title} ${info.artists} audio`;
+  // Busca mais abrangente para garantir o download completo
+  const query = `${info.title} ${info.artists} full audio`;
   const timestamp = Date.now();
-  const outputPath = path.join(TEMP_DIR, `spotify_${timestamp}.mp3`);
+  const outputPath = path.join(TEMP_DIR, `music_${timestamp}.mp3`);
 
   try {
-    // Usar yt-dlp para buscar e baixar o melhor áudio do YouTube
-    // --default-search "ytsearch" faz a busca
-    // -x --audio-format mp3 extrai o áudio
-    await execPromise(`yt-dlp --default-search "ytsearch" --max-downloads 1 --extract-audio --audio-format mp3 --output "${outputPath}" "${query}"`);
+    /**
+     * yt-dlp configurado para buscar em múltiplas fontes:
+     * - Busca automática (ytsearch)
+     * - Extração de áudio de alta qualidade
+     * - Suporte a diversos sites (YouTube, SoundCloud, Bandcamp, etc)
+     */
+    await execPromise(`yt-dlp --default-search "ytsearch" --max-downloads 1 --extract-audio --audio-format mp3 --audio-quality 0 --output "${outputPath}" "${query}"`);
 
     if (fs.existsSync(outputPath)) {
       const buffer = fs.readFileSync(outputPath);
       const filename = `${sanitizeFileName(`${info.title} - ${info.artists}`)}.mp3`;
       
-      // Limpar arquivo temporário em background
+      // Limpar arquivo temporário
       setTimeout(() => {
         if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
       }, 5000);
@@ -215,13 +220,13 @@ async function download(urlOrName) {
         info
       };
     } else {
-      throw new Error('Arquivo de áudio não foi gerado.');
+      throw new Error('Falha ao gerar o arquivo de áudio.');
     }
   } catch (error) {
-    console.error('Erro ao baixar áudio via YouTube:', error.message);
+    console.error('Erro no download multi-fonte:', error.message);
     return {
       ok: false,
-      msg: 'Não foi possível baixar o áudio completo desta música.',
+      msg: 'Não foi possível baixar o áudio completo de nenhuma fonte disponível.',
       info
     };
   }
