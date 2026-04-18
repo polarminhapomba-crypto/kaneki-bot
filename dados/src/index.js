@@ -18709,9 +18709,10 @@ case 'spotify':
       const downloadResult = await spotifyModule.download(q);
       if (downloadResult.ok && downloadResult.buffer) {
         await nazu.sendMessage(from, {
-          audio: downloadResult.buffer,
-          mimetype: 'audio/ogg; codecs=opus',
-          ptt: true
+          document: downloadResult.buffer,
+          mimetype: 'audio/mpeg',
+          fileName: downloadResult.filename,
+          caption: `✅ Áudio completo: *${downloadResult.info.title}*`
         }, { quoted: info });
       } else {
         await reply('❌ Não foi possível baixar o áudio completo.');
@@ -18775,9 +18776,10 @@ case 'playspotify':
       const downloadResult = await spotifyModule.download(track.link || q);
       if (downloadResult.ok && downloadResult.buffer) {
         await nazu.sendMessage(from, {
-          audio: downloadResult.buffer,
-          mimetype: 'audio/ogg; codecs=opus',
-          ptt: true
+          document: downloadResult.buffer,
+          mimetype: 'audio/mpeg',
+          fileName: downloadResult.filename,
+          caption: `✅ Áudio completo: *${downloadResult.info.title}*`
         }, { quoted: info });
       } else {
         await reply('❌ Não foi possível baixar o áudio completo.');
