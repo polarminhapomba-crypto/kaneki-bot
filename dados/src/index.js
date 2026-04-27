@@ -1702,6 +1702,8 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
       };
   // default flags
   groupData.modorpg = typeof groupData.modorpg === 'boolean' ? groupData.modorpg : false;
+      groupData.assistente = typeof groupData.assistente === 'boolean' ? groupData.assistente : true;
+      groupData.assistentePersonality = groupData.assistentePersonality || 'kaneki';
       groupData.minMessage = groupData.minMessage || null;
       groupData.moderators = groupData.moderators || [];
       groupData.allowedModCommands = groupData.allowedModCommands || [];
@@ -4118,10 +4120,17 @@ Código: *${roleCode}*`,
     if (!isGroup && !info.key.fromMe && !isCmd) {
       try {
         const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-        let assistentePvData = {};
+        let assistentePvData = { ativo: true, personality: 'kaneki' };
         try {
           if (fs.existsSync(assistentePvPath)) {
-            assistentePvData = JSON.parse(fs.readFileSync(assistentePvPath));
+            const _pvLoaded = JSON.parse(fs.readFileSync(assistentePvPath));
+            // Só sobrescreve se o arquivo existir e tiver a chave 'ativo' definida explicitamente
+            if (typeof _pvLoaded.ativo === 'boolean') {
+              assistentePvData = _pvLoaded;
+            } else {
+              // Arquivo existe mas sem 'ativo' definido: mantém ativo por padrão
+              assistentePvData = { ..._pvLoaded, ativo: true, personality: _pvLoaded.personality || 'kaneki' };
+            }
           }
         } catch (e) {}
         
@@ -27531,13 +27540,18 @@ Exemplos:
           if (!isOwner) return reply('🚫 Este comando é apenas para o dono do bot!');
           
           const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-          let assistentePvData = {};
+          let assistentePvData = { ativo: true, personality: 'kaneki' };
           try {
             if (fs.existsSync(assistentePvPath)) {
-              assistentePvData = JSON.parse(fs.readFileSync(assistentePvPath));
+              const _pvCmd = JSON.parse(fs.readFileSync(assistentePvPath));
+              if (typeof _pvCmd.ativo === 'boolean') {
+                assistentePvData = _pvCmd;
+              } else {
+                assistentePvData = { ..._pvCmd, ativo: true, personality: _pvCmd.personality || 'kaneki' };
+              }
             }
           } catch (e) {
-            assistentePvData = {};
+            assistentePvData = { ativo: true, personality: 'kaneki' };
           }
           
           if (!q) {
@@ -27606,6 +27620,8 @@ Exemplos:
           
           const groupFilePath = __dirname + `/../database/grupos/${from}.json`;
           let groupData = fs.existsSync(groupFilePath) ? JSON.parse(fs.readFileSync(groupFilePath)) : {};
+          // Garante que o padrão seja true quando não definido
+          if (typeof groupData.assistente !== 'boolean') groupData.assistente = true;
           
           // Se não tem argumento, apenas ativa/desativa
           if (!q) {
