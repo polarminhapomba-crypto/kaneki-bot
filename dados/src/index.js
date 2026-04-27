@@ -4117,7 +4117,9 @@ Código: *${roleCode}*`,
     const _botShort = (nazu && nazu.user && (nazu.user.id || nazu.user.lid)) ? String((nazu.user.id || nazu.user.lid).split(':')[0]) : '';
     // Não processar pela assistente se a mensagem veio do PRO (evita loop infinito)
     // ASSISTENTE PV - Funciona no privado, somente se o dono ativou
-    if (!isGroup && !info.key.fromMe && !isCmd) {
+    // Lógica Híbrida PV: Responde a tudo, ignora comandos válidos, ajuda em comandos errados
+    const isPotentialCommandPv = budy2.startsWith(prefix) || budy2.startsWith('/');
+    if (!isGroup && !info.key.fromMe && (!isCmd || (isPotentialCommandPv && !isCmd))) {
       try {
         const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
         let assistentePvData = { ativo: true, personality: 'humana' };
@@ -4246,8 +4248,16 @@ Código: *${roleCode}*`,
         console.error('Erro ao processar assistente PV:', e);
       }
     }
-    if (!info.key.fromMe && isAssistente && !isCmd && !info._fromPro && ((_botShort && budy2.includes(_botShort)) || (menc_os2 && menc_os2 == botNumber))) {
-      if (budy2.replaceAll('@' + _botShort, '').length > 2) {
+    // Lógica Híbrida: Responde a tudo (se ativado), ignora comandos válidos, mas ajuda em comandos errados
+    const isPotentialCommand = budy2.startsWith(prefix) || budy2.startsWith('/');
+    const shouldRespondIA = isAssistente && !info.key.fromMe && !info._fromPro && (
+      (!isCmd && !isPotentialCommand) || // Mensagem normal (IA responde tudo)
+      (isPotentialCommand && !isCmd) || // Comando errado (IA ajuda)
+      ((_botShort && budy2.includes(_botShort)) || (menc_os2 && menc_os2 == botNumber)) // Mencionado diretamente
+    );
+
+    if (shouldRespondIA) {
+      if (budy2.length > 2) {
         // Detectar tipo de mídia da mensagem atual
         const tipoMidiaAtual = info.message?.imageMessage ? 'imagem' : 
                               info.message?.videoMessage ? 'video' : 
@@ -31204,7 +31214,8 @@ ${prefix}wl.add @usuario | antilink,antistatus`);
       default:
         if (isCmd) {
           const cmdNotFoundConfig = loadCmdNotFoundConfig();
-          if (cmdNotFoundConfig.enabled) {
+          // Desativado para permitir que a IA híbrida trate comandos errados
+          if (false && cmdNotFoundConfig.enabled) {
             const userName = pushname || getUserName(sender);
             const commandName = command || body.trim().slice(groupPrefix.length).split(/ +/).shift().trim();
             
