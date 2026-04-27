@@ -4136,7 +4136,7 @@ Código: *${roleCode}*`,
           }
         } catch (e) {}
         
-        if (assistentePvData.ativo && budy2 && budy2.length > 2) {
+        if (assistentePvData.ativo && budy2 && budy2.length >= 2) {
           const personality = assistentePvData.personality || 'kaneki';
           
           const jSoNzInPv = {
@@ -4257,7 +4257,7 @@ Código: *${roleCode}*`,
     );
 
     if (shouldRespondIA) {
-      if (budy2.length > 2) {
+      if (budy2.length >= 2) {
         // Detectar tipo de mídia da mensagem atual
         const tipoMidiaAtual = info.message?.imageMessage ? 'imagem' : 
                               info.message?.videoMessage ? 'video' : 
@@ -27569,7 +27569,7 @@ Exemplos:
             if (!assistentePvData.ativo) {
               delete assistentePvData.personality;
             } else {
-              assistentePvData.personality = assistentePvData.personality || 'kaneki';
+              assistentePvData.personality = assistentePvData.personality || 'humana';
             }
             fs.writeFileSync(assistentePvPath, JSON.stringify(assistentePvData, null, 2));
             
