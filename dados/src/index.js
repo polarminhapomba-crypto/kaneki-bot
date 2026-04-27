@@ -1703,7 +1703,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
   // default flags
   groupData.modorpg = typeof groupData.modorpg === 'boolean' ? groupData.modorpg : false;
       groupData.assistente = typeof groupData.assistente === 'boolean' ? groupData.assistente : true;
-      groupData.assistentePersonality = groupData.assistentePersonality || 'kaneki';
+      groupData.assistentePersonality = groupData.assistentePersonality || 'humana';
       groupData.minMessage = groupData.minMessage || null;
       groupData.moderators = groupData.moderators || [];
       groupData.allowedModCommands = groupData.allowedModCommands || [];
@@ -4120,7 +4120,7 @@ Código: *${roleCode}*`,
     if (!isGroup && !info.key.fromMe && !isCmd) {
       try {
         const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-        let assistentePvData = { ativo: true, personality: 'kaneki' };
+        let assistentePvData = { ativo: true, personality: 'humana' };
         try {
           if (fs.existsSync(assistentePvPath)) {
             const _pvLoaded = JSON.parse(fs.readFileSync(assistentePvPath));
@@ -4129,7 +4129,7 @@ Código: *${roleCode}*`,
               assistentePvData = _pvLoaded;
             } else {
               // Arquivo existe mas sem 'ativo' definido: mantém ativo por padrão
-              assistentePvData = { ..._pvLoaded, ativo: true, personality: _pvLoaded.personality || 'kaneki' };
+              assistentePvData = { ..._pvLoaded, ativo: true, personality: _pvLoaded.personality || 'humana' };
             }
           }
         } catch (e) {}
@@ -27540,18 +27540,18 @@ Exemplos:
           if (!isOwner) return reply('🚫 Este comando é apenas para o dono do bot!');
           
           const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-          let assistentePvData = { ativo: true, personality: 'kaneki' };
+          let assistentePvData = { ativo: true, personality: 'humana' };
           try {
             if (fs.existsSync(assistentePvPath)) {
               const _pvCmd = JSON.parse(fs.readFileSync(assistentePvPath));
               if (typeof _pvCmd.ativo === 'boolean') {
                 assistentePvData = _pvCmd;
               } else {
-                assistentePvData = { ..._pvCmd, ativo: true, personality: _pvCmd.personality || 'kaneki' };
+                assistentePvData = { ..._pvCmd, ativo: true, personality: _pvCmd.personality || 'humana' };
               }
             }
           } catch (e) {
-            assistentePvData = { ativo: true, personality: 'kaneki' };
+            assistentePvData = { ativo: true, personality: 'humana' };
           }
           
           if (!q) {
@@ -27631,7 +27631,7 @@ Exemplos:
               delete groupData.assistentePersonality;
             } else {
               // Se ativar sem especificar, usa padrão
-              groupData.assistentePersonality = groupData.assistentePersonality || 'kaneki';
+              groupData.assistentePersonality = groupData.assistentePersonality || 'humana';
             }
             fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
             
