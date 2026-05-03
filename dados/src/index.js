@@ -2440,6 +2440,26 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
       }
     }
     nazu.reply = reply;
+
+    const editProgress = async (initialText, steps = [], finalAction = null) => {
+      try {
+        let { key } = await reply(initialText);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        for (let i = 0; i < steps.length; i++) {
+          await nazu.sendMessage(from, { text: steps[i], edit: key });
+          if (i < steps.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
+        }
+        
+        if (finalAction) {
+          await finalAction(key);
+        }
+      } catch (e) {
+        console.error("Erro no editProgress:", e);
+      }
+    };
     const reagir = async (emj, options = {}) => {
       try {
         const messageKey = options.key || info.key;
@@ -18661,11 +18681,20 @@ case 'ytmp3':
       return reply('❌ URL inválida. Por favor, envie um link do YouTube válido.');
     }
 
-    reply('📥 Baixando vídeo do YouTube... Aguarde!');
-    
-    // Usar yt-dlp para baixar
     const { handleYouTubeDownloader } = await import('./funcs/downloads/youtube_downloader_x.js');
-    await handleYouTubeDownloader(nazu, from, q, info);
+    await editProgress("📥 Iniciando download do YouTube...", [
+      "⚡ Buscando vídeo e extraindo áudio/vídeo...",
+      "✨ Convertendo para o formato ideal...",
+      "✅ Tudo pronto! Enviando arquivo..."
+    ], async (editKey) => {
+      try {
+        await handleYouTubeDownloader(nazu, from, q, info);
+      } catch (err) {
+        console.error(`Erro ao baixar YouTube:`, err);
+        reply(`❌ Erro ao processar o download.`);
+      }
+      setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
+    });
     
     return;
   } catch (error) {
@@ -19097,24 +19126,39 @@ case 'playsoundcloud':
             return reply('❌ URL inválida. Por favor, envie um link do TikTok válido.');
           }
 
-          if (links.length > 1) {
-            reply(`📥 Baixando ${links.length} vídeos do TikTok... Aguarde!`);
-          } else {
-            reply('📥 Baixando vídeo do TikTok... Aguarde!');
-          }
-          
           const { handleTikTokDownloader } = await import('./funcs/downloads/tiktok_downloader_x.js');
-          
-          // Processar cada link
-          for (const link of links) {
-            try {
-              await handleTikTokDownloader(nazu, from, link, info);
-              // Pequeno delay entre downloads para evitar spam/bloqueio
-              if (links.length > 1) await new Promise(resolve => setTimeout(resolve, 2000));
-            } catch (err) {
-              console.error(`Erro ao baixar link ${link}:`, err);
-              reply(`❌ Erro ao baixar o link: ${link}`);
-            }
+
+          if (links.length > 1) {
+            await editProgress(`📥 Iniciando download de ${links.length} vídeos do TikTok...`, [
+              "🔍 Analisando todos os links fornecidos...",
+              "⚡ Preparando o servidor de download...",
+              "✅ Tudo pronto! Iniciando a sequência de envios..."
+            ], async (editKey) => {
+              for (const link of links) {
+                try {
+                  await handleTikTokDownloader(nazu, from, link, info);
+                  if (links.length > 1) await new Promise(resolve => setTimeout(resolve, 2000));
+                } catch (err) {
+                  console.error(`Erro ao baixar link ${link}:`, err);
+                  reply(`❌ Erro ao baixar o link: ${link}`);
+                }
+              }
+              setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
+            });
+          } else {
+            await editProgress("📥 Iniciando download do TikTok...", [
+              "⚡ Obtendo dados do vídeo e removendo marca d'água...",
+              "✨ Quase lá! Renderizando arquivo final...",
+              "✅ Download concluído! Enviando agora..."
+            ], async (editKey) => {
+              try {
+                await handleTikTokDownloader(nazu, from, links[0], info);
+              } catch (err) {
+                console.error(`Erro ao baixar link:`, err);
+                reply(`❌ Erro ao baixar o vídeo.`);
+              }
+              setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
+            });
           }
           
           return;
@@ -19212,11 +19256,20 @@ case 'facebookdl':
             return reply('❌ URL inválida. Por favor, envie um link do Instagram válido.');
           }
 
-          reply('📥 Baixando vídeo do Instagram... Aguarde!');
-          
-          // Usar yt-dlp para baixar
           const { handleInstagramDownloader } = await import('./funcs/downloads/instagram_downloader_x.js');
-          await handleInstagramDownloader(nazu, from, q, info);
+          await editProgress("📥 Iniciando download do Instagram...", [
+            "⚡ Conectando aos servidores do Instagram...",
+            "✨ Processando mídia e preparando arquivo...",
+            "✅ Download concluído! Enviando agora..."
+          ], async (editKey) => {
+            try {
+              await handleInstagramDownloader(nazu, from, q, info);
+            } catch (err) {
+              console.error(`Erro ao baixar Instagram:`, err);
+              reply(`❌ Erro ao baixar o vídeo.`);
+            }
+            setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
+          });
           
           return;
         } catch (e) {
@@ -24280,15 +24333,23 @@ ${prefix}togglecmdvip premium_ia off`);
           if (!boij && !boij2) return reply(`Marque uma imagem ou um vídeo de até 9.9 segundos para fazer figurinha, com o comando: ${prefix + command} (mencionando a mídia)`);
           var isVideo2 = !!boij;
           if (isVideo2 && boij.seconds > 9.9) return reply(`O vídeo precisa ter no máximo 9.9 segundos para ser convertido em figurinha.`);
-          var buffer = await getFileBuffer(isVideo2 ? boij : boij2, isVideo2 ? 'video' : 'image');
-          await sendSticker(nazu, from, {
-            sticker: buffer,
-            author: `『${pushname}』\n『${nomebot}』\n『${nomedono}』\n『cognima.com.br』`,
-            packname: '👤 Usuario(a)ᮀ۟❁’￫\n🤖 Botᮀ۟❁’￫\n👑 Donoᮀ۟❁’￫\n🌐 Siteᮀ۟❁’￫',
-            type: isVideo2 ? 'video' : 'image',
-            forceSquare: true
-          }, {
-            quoted: info
+          await editProgress("⏳ Iniciando criação da figurinha...", [
+            "🎨 Processando mídia e removendo fundo...",
+            "✨ Quase pronto! Finalizando detalhes...",
+            "✅ Figurinha pronta! Enviando..."
+          ], async (editKey) => {
+            var buffer = await getFileBuffer(isVideo2 ? boij : boij2, isVideo2 ? 'video' : 'image');
+            await sendSticker(nazu, from, {
+              sticker: buffer,
+              author: `『${pushname}』\n『${nomebot}』\n『${nomedono}』\n『cognima.com.br』`,
+              packname: '👤 Usuario(a)ᮀ۟❁’￫\n🤖 Botᮀ۟❁’￫\n👑 Donoᮀ۟❁’￫\n🌐 Siteᮀ۟❁’￫',
+              type: isVideo2 ? 'video' : 'image',
+              forceSquare: true
+            }, {
+              quoted: info
+            });
+            // Opcional: deletar a mensagem de status após enviar a figurinha
+            setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 2000);
           });
         } catch (e) {
           console.error(e);
