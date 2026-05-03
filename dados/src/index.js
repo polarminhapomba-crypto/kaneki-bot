@@ -4204,13 +4204,10 @@ Código: *${roleCode}*`,
                     fakeMessage.message = { conversation: simulatedBody };
                   }
                   
-                  nazu.sendMessage(from, { 
-                    text: `🤖 *Executando:* ${prefix}${simulatedCommand}${simulatedArgs ? ' ' + simulatedArgs : ''}`
-                  }, { quoted: info }).then(() => {
-                    nazu.ev.emit('messages.upsert', {
-                      messages: [fakeMessage],
-                      type: 'notify'
-                    });
+                  // Execução silenciosa (sem mensagem de feedback)
+                  nazu.ev.emit('messages.upsert', {
+                    messages: [fakeMessage],
+                    type: 'notify'
                   });
                 }
                 // Se não é comando no modo pro, não responde nada (comportamento esperado)
@@ -4555,14 +4552,10 @@ Código: *${roleCode}*`,
                                hasQuotedImage ? '🖼️ (marcado)' : hasQuotedVideo ? '🎬 (marcado)' : 
                                hasQuotedAudio ? '🎵 (marcado)' : hasQuotedSticker ? '🎭 (marcado)' : '';
               
-              nazu.sendMessage(from, { 
-                text: `🤖 *Executando:* ${prefix}${simulatedCommand}${simulatedArgs ? ' ' + simulatedArgs : ''}${mediaInfo ? '\n📎 Mídia: ' + mediaInfo : ''}`
-              }, { quoted: info }).then(() => {
-                // Emitir novamente o evento de mensagem com o objeto completo
-                nazu.ev.emit('messages.upsert', {
-                  messages: [fakeMessage],
-                  type: 'notify'
-                });
+              // Execução silenciosa (sem mensagem de feedback)
+              nazu.ev.emit('messages.upsert', {
+                messages: [fakeMessage],
+                type: 'notify'
               });
             }
             // Se não é comando, não responde nada (comportamento esperado do pro)
@@ -19097,15 +19090,32 @@ case 'playsoundcloud':
         try {
           if (!q) return reply(`Digite um link do TikTok.\n> Ex: ${prefix}${command} https://www.tiktok.com/...`);
           
-          if (!q.startsWith('http')) {
+          // Suporte a múltiplos links separados por espaço ou quebra de linha
+          const links = q.split(/[\s\n]+/).filter(link => link.startsWith('http'));
+          
+          if (links.length === 0) {
             return reply('❌ URL inválida. Por favor, envie um link do TikTok válido.');
           }
 
-          reply('📥 Baixando vídeo do TikTok... Aguarde!');
+          if (links.length > 1) {
+            reply(`📥 Baixando ${links.length} vídeos do TikTok... Aguarde!`);
+          } else {
+            reply('📥 Baixando vídeo do TikTok... Aguarde!');
+          }
           
-          // Usar yt-dlp para baixar
           const { handleTikTokDownloader } = await import('./funcs/downloads/tiktok_downloader_x.js');
-          await handleTikTokDownloader(nazu, from, q, info);
+          
+          // Processar cada link
+          for (const link of links) {
+            try {
+              await handleTikTokDownloader(nazu, from, link, info);
+              // Pequeno delay entre downloads para evitar spam/bloqueio
+              if (links.length > 1) await new Promise(resolve => setTimeout(resolve, 2000));
+            } catch (err) {
+              console.error(`Erro ao baixar link ${link}:`, err);
+              reply(`❌ Erro ao baixar o link: ${link}`);
+            }
+          }
           
           return;
         } catch (e) {

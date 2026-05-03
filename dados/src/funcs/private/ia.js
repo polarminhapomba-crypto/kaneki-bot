@@ -1180,6 +1180,7 @@ O usuário pode pedir de várias formas:
 - "mostra meu perfil" → comando: perfil
 - "pesquisa sobre gatos no google" → comando: google, args: gatos
 - "baixa esse vídeo do tiktok" → comando: tiktok (se tem URL na mensagem ou marcada)
+- "baixa todos esses links do tiktok: [link1] [link2]" → comando: tiktok, args: [link1] [link2] (extraia todos os links)
 - "coloca grave nesse áudio" → comando: grave (se tem_midia="audio" ou tem_midia_marcada="audio")
 - "acelera esse vídeo" → comando: videorapido (se tem_midia="video" ou tem_midia_marcada="video")
 - "converte pra mp3" → comando: tomp3 (se tem vídeo anexo ou marcado)
@@ -1188,7 +1189,7 @@ O usuário pode pedir de várias formas:
 
 1. **APENAS** identifique comandos - NUNCA responda como chatbot
 2. Se não for um pedido de comando, retorne isCommand: false
-3. Extraia parâmetros quando possível (nome da música, cidade, etc)
+3. Extraia parâmetros quando possível (nome da música, cidade, links, etc). Se houver múltiplos links do mesmo tipo (ex: TikTok), coloque todos nos args separados por espaço.
 4. Se o comando precisa de algo que não foi fornecido E não tem mídia anexa, inclua no campo "falta"
 5. Seja inteligente: "baixa funk do MC Kevin" → play funk do MC Kevin
 6. Se tem mídia anexa e o comando precisa de mídia, NÃO coloque "falta"
@@ -1763,6 +1764,46 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
       
       updateHistorico(userId, 'user', msgValidada.texto, msgValidada.nome_enviou);
       
+      // Lógica Híbrida: Se for 'humana', tenta primeiro identificar se é um comando (modo pro)
+      if (personality === 'humana') {
+        const proInput = {
+          mensagem: msgValidada.texto,
+          tem_midia: msgValidada.tem_midia || false,
+          tipo_midia: msgValidada.tipo_midia || null,
+          marcou_mensagem: msgValidada.marcou_mensagem || false,
+          tem_midia_marcada: msgValidada.tem_midia_marcada || false,
+          tipo_midia_marcada: msgValidada.tipo_midia_marcada || null,
+          tem_mencao: msgValidada.tem_mencao || false,
+          primeira_mencao: msgValidada.primeira_mencao || null
+        };
+
+        try {
+          const proResponse = (await makeCognimaRequest(
+            'qwen/qwen3-235b-a22b',
+            JSON.stringify(proInput),
+            ASSISTANT_PROMPT_PRO,
+            []
+          )).data;
+
+          if (proResponse && proResponse.choices && proResponse.choices[0]) {
+            const proResult = extractJSON(proResponse.choices[0].message.content);
+            if (proResult.isCommand === true && proResult.command && proResult.confianca >= 0.7) {
+              console.log(`[HIBRIDO] Comando identificado em modo Humana: ${proResult.command}`);
+              return {
+                isPro: true,
+                isCommand: true,
+                command: proResult.command,
+                args: proResult.args || '',
+                falta: proResult.falta || null,
+                confianca: proResult.confianca
+              };
+            }
+          }
+        } catch (e) {
+          console.warn('[HIBRIDO] Erro ao tentar detecção pro:', e.message);
+        }
+      }
+
       // Selecionar o prompt baseado na personalidade
       let selectedPrompt;
       if (personality === 'humana') {
