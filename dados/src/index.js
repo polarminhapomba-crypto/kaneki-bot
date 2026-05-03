@@ -18693,7 +18693,6 @@ case 'ytmp3':
         console.error(`Erro ao baixar YouTube:`, err);
         reply(`❌ Erro ao processar o download.`);
       }
-      setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
     });
     
     return;
@@ -19119,8 +19118,8 @@ case 'playsoundcloud':
         try {
           if (!q) return reply(`Digite um link do TikTok.\n> Ex: ${prefix}${command} https://www.tiktok.com/...`);
           
-          // Suporte a múltiplos links separados por espaço ou quebra de linha
-          const links = q.split(/[\s\n]+/).filter(link => link.startsWith('http'));
+          // Suporte a múltiplos links, extraindo apenas as URLs (ignora textos do TikTok Lite)
+          const links = q.match(/https?:\/\/[^\s\n]+/g)?.filter(link => link.includes('tiktok.com')) || [];
           
           if (links.length === 0) {
             return reply('❌ URL inválida. Por favor, envie um link do TikTok válido.');
@@ -19143,7 +19142,6 @@ case 'playsoundcloud':
                   reply(`❌ Erro ao baixar o link: ${link}`);
                 }
               }
-              setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
             });
           } else {
             await editProgress("📥 Iniciando download do TikTok...", [
@@ -19157,7 +19155,6 @@ case 'playsoundcloud':
                 console.error(`Erro ao baixar link:`, err);
                 reply(`❌ Erro ao baixar o vídeo.`);
               }
-              setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
             });
           }
           
@@ -19268,7 +19265,6 @@ case 'facebookdl':
               console.error(`Erro ao baixar Instagram:`, err);
               reply(`❌ Erro ao baixar o vídeo.`);
             }
-            setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 3000);
           });
           
           return;
@@ -24348,8 +24344,6 @@ ${prefix}togglecmdvip premium_ia off`);
             }, {
               quoted: info
             });
-            // Opcional: deletar a mensagem de status após enviar a figurinha
-            setTimeout(() => nazu.sendMessage(from, { delete: editKey }), 2000);
           });
         } catch (e) {
           console.error(e);
