@@ -2444,17 +2444,23 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
     const editProgress = async (initialText, steps = [], finalAction = null) => {
       try {
         let { key } = await reply(initialText);
-        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        for (let i = 0; i < steps.length; i++) {
-          await nazu.sendMessage(from, { text: steps[i], edit: key });
-          if (i < steps.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 1500));
+        // Executa as edições de forma mais rápida (500ms)
+        const runEdits = async () => {
+          for (let i = 0; i < steps.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+            await nazu.sendMessage(from, { text: steps[i], edit: key });
           }
-        }
-        
+        };
+
+        // Se houver uma ação final (download), executa em paralelo com as edições
         if (finalAction) {
-          await finalAction(key);
+          await Promise.all([
+            runEdits(),
+            finalAction(key)
+          ]);
+        } else {
+          await runEdits();
         }
       } catch (e) {
         console.error("Erro no editProgress:", e);
