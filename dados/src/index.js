@@ -4267,10 +4267,16 @@ Código: *${roleCode}*`,
     }
     // Lógica Híbrida: Responde a tudo (se ativado), ignora comandos válidos, mas ajuda em comandos errados
     const isPotentialCommand = budy2.startsWith(prefix) || budy2.startsWith('/');
+    
+    // Filtros para IA em grupos: só responde se mencionado, respondido ou chamado pelo nome
+    const isMentioned = (_botShort && budy2.includes(_botShort)) || (menc_os2 && menc_os2 == botNumber) || (menc_os2 && menc_os2 == botNumberLid);
+    const isReplied = info.message?.extendedTextMessage?.contextInfo?.participant === botNumber || info.message?.extendedTextMessage?.contextInfo?.participant === botNumberLid;
+    const isCalledByName = /nasaki|kaneki|jarvis/i.test(budy2);
+    
     const shouldRespondIA = isAssistente && !info.key.fromMe && !info._fromPro && (
-      (!isCmd && !isPotentialCommand) || // Mensagem normal (IA responde tudo)
-      (isPotentialCommand && !isCmd) || // Comando errado (IA ajuda)
-      ((_botShort && budy2.includes(_botShort)) || (menc_os2 && menc_os2 == botNumber)) // Mencionado diretamente
+      (!isGroup) || // No privado responde tudo
+      (isGroup && (isMentioned || isReplied || isCalledByName)) || // No grupo só se for chamado
+      (isPotentialCommand && !isCmd) // Comando errado (IA ajuda a corrigir)
     );
 
     if (shouldRespondIA) {
