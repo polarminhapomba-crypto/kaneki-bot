@@ -26,7 +26,6 @@ async function handleTikTokDownloader(sock, from, url, info) {
     });
 
     if (!response.data?.data) {
-      await sock.sendMessage(from, { text: "❌ Não foi possível obter dados do vídeo" }, { quoted: info });
       return;
     }
 
@@ -56,8 +55,6 @@ async function handleTikTokDownloader(sock, from, url, info) {
         mimetype: "video/mp4",
         caption: `📹 ${data.title || 'TikTok Video'}\n\n👤 @${data.author?.unique_id || 'unknown'}`,
       }, { quoted: info });
-    } else {
-      await sock.sendMessage(from, { text: "❌ Não foi possível encontrar o vídeo" }, { quoted: info });
     }
 
     // Enviar áudio se disponível
@@ -78,9 +75,6 @@ async function handleTikTokDownloader(sock, from, url, info) {
 
   } catch (err) {
     console.error("❌ Erro ao baixar TikTok:", err.message);
-    await sock.sendMessage(from, {
-      text: "❌ Falha ao baixar vídeo do TikTok. Tente novamente com outro link.",
-    }, { quoted: info });
   }
 }
 

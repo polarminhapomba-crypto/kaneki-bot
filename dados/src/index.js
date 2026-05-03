@@ -19139,7 +19139,6 @@ case 'playsoundcloud':
                   if (links.length > 1) await new Promise(resolve => setTimeout(resolve, 2000));
                 } catch (err) {
                   console.error(`Erro ao baixar link ${link}:`, err);
-                  reply(`❌ Erro ao baixar o link: ${link}`);
                 }
               }
             });
@@ -19153,7 +19152,6 @@ case 'playsoundcloud':
                 await handleTikTokDownloader(nazu, from, links[0], info);
               } catch (err) {
                 console.error(`Erro ao baixar link:`, err);
-                reply(`❌ Erro ao baixar o vídeo.`);
               }
             });
           }
