@@ -1,18 +1,16 @@
 # Toji Bot 🗡️💰
 
-![Toji Bot Banner](dados/midias/banner.jpg)
+<img src="dados/midias/banner.jpg" width="600" alt="Toji Bot Banner">
 
 ## O Assassino de Feiticeiros no seu WhatsApp
 
-Este é o Toji Bot, um bot de WhatsApp com a personalidade inconfundível de Toji Fushiguro. Direto, sarcástico e focado no que realmente importa: resultados. Ele não está aqui para papo furado, a menos que você tenha algo interessante (e lucrativo) a oferecer.
+Este é o Toji Bot, um bot de WhatsApp com a personalidade inconfundível de Toji Fushiguro. Direto, sarcástico e focado no que realmente importa: resultados. Ele não está aqui para papo furado, a menos que você tenha algo interessante a oferecer.
 
-![Toji Action](dados/midias/toji_action.gif)
+<img src="dados/midias/toji_action.gif" width="300" alt="Toji Action">
 
 ### Modo Misto: O Toji Bot no seu Comando
 
-O Toji Bot vem de fábrica com um modo "misto" ativado. Isso significa que ele não só responde com a personalidade do Toji, mas também **executa comandos em linguagem natural** (sem precisar de prefixo!). Peça e ele fará o trabalho, mas talvez com um resmungo ou uma pergunta sobre pagamento. Afinal, tempo é dinheiro.
-
-![Toji Money](dados/midias/toji_money.png)
+O Toji Bot vem de fábrica com um modo "misto" ativado. Isso significa que ele não só responde com a personalidade do Toji, mas também **executa comandos em linguagem natural** (sem precisar de prefixo!). Peça e ele fará o trabalho, mas talvez com um resmungo. Afinal, tempo é dinheiro.
 
 ## Instalação
 
@@ -43,16 +41,18 @@ npm start
 
 ## Comandos Principais
 
-O Toji Bot é prático e eficiente. Aqui estão alguns dos comandos que você pode usar para tirar o máximo proveito dele:
+O Toji Bot é prático e eficiente. Abaixo estão os menus principais para você interagir com as funcionalidades:
 
-- `/menuia` — Acesse o menu de funcionalidades de Inteligência Artificial.
-- `/menudown` — Explore as opções de download de mídias.
-- `/menubn` — Gerencie e interaja com o sistema de banco de dados do bot.
-- `/menufig` — Crie e manipule figurinhas para suas conversas.
+| Comando | Descrição |
+|---|---|
+| `/menuia` | **Inteligência Artificial**: Acesse ferramentas de IA, processamento de texto e interações inteligentes. |
+| `/menudown` | **Downloads**: Baixe vídeos, músicas e mídias de diversas plataformas diretamente no WhatsApp. |
+| `/menubn` | **Banco de Dados**: Gerencie informações, perfis e interaja com o sistema de armazenamento do bot. |
+| `/menufig` | **Figurinhas**: Transforme imagens, vídeos e GIFs em figurinhas personalizadas instantaneamente. |
 
 Lembre-se: você pode simplesmente pedir o que precisa em linguagem natural, e o Toji fará o trabalho.
 
-![Toji Cool](dados/midias/toji_cool.gif)
+<img src="dados/midias/toji_cool.gif" width="300" alt="Toji Cool">
 
 ## Solução de Problemas
 
