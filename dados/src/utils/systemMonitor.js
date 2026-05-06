@@ -236,7 +236,7 @@ class SystemMonitor {
         try {
             const logPaths = [
                 path.join(__dirname, '../../logs'),
-                '/tmp/kaneki-logs',
+                '/tmp/toji-logs',
                 './logs'
             ];
 

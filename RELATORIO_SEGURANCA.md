@@ -1,4 +1,4 @@
-# Relatório de Segurança - Kaneki Bot
+# Relatório de Segurança - Toji Bot
 
 Este documento detalha as vulnerabilidades identificadas e as melhorias aplicadas para garantir a segurança do bot contra acessos não autorizados e edições maliciosas.
 
@@ -30,4 +30,4 @@ Para garantir que as edições anteriores não fiquem expostas no histórico do 
 3. **Não compartilhe o `config.json`**: Nunca envie este arquivo para ninguém.
 
 ---
-*Relatório gerado automaticamente para melhoria da segurança do Kaneki Bot.*
+*Relatório gerado automaticamente para melhoria da segurança do Toji Bot.*

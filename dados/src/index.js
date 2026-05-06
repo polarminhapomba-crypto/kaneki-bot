@@ -1703,7 +1703,7 @@ async function NazuninhaBotExec(nazu, info, store, messagesCache, rentalExpirati
   // default flags
   groupData.modorpg = typeof groupData.modorpg === 'boolean' ? groupData.modorpg : false;
       groupData.assistente = typeof groupData.assistente === 'boolean' ? groupData.assistente : true;
-      groupData.assistentePersonality = groupData.assistentePersonality || 'humana';
+      groupData.assistentePersonality = groupData.assistentePersonality || 'misto';
       groupData.minMessage = groupData.minMessage || null;
       groupData.moderators = groupData.moderators || [];
       groupData.allowedModCommands = groupData.allowedModCommands || [];
@@ -4148,7 +4148,7 @@ Código: *${roleCode}*`,
     if (!isGroup && !info.key.fromMe && (!isCmd || (isPotentialCommandPv && !isCmd))) {
       try {
         const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-        let assistentePvData = { ativo: true, personality: 'humana' };
+        let assistentePvData = { ativo: true, personality: 'misto' };
         try {
           if (fs.existsSync(assistentePvPath)) {
             const _pvLoaded = JSON.parse(fs.readFileSync(assistentePvPath));
@@ -4163,7 +4163,7 @@ Código: *${roleCode}*`,
         } catch (e) {}
         
         if (assistentePvData.ativo && budy2 && budy2.length >= 2) {
-          const personality = assistentePvData.personality || 'kaneki';
+          const personality = assistentePvData.personality || 'toji';
           
           const jSoNzInPv = {
             texto: budy2.trim(),
@@ -4204,40 +4204,42 @@ Código: *${roleCode}*`,
             ia.makeAssistentRequest({ mensagens: [jSoNzInPv] }, nazu, nmrdn, personality).then((respAssist) => {
               if (respAssist.erro === 'Sistema de IA temporariamente desativado') return;
               
-              // Tratamento especial para personalidade 'pro' (interpretador de comandos) no PV
+              // Tratamento especial para personalidade 'pro' e 'misto' (interpretador de comandos) no PV
               if (respAssist.isPro) {
                 if (respAssist.isCommand && respAssist.command) {
                   if (respAssist.falta) {
                     reply(`⚠️ Para executar *${prefix}${respAssist.command}*, preciso que você informe: ${respAssist.falta}`);
-                    return;
-                  }
-                  
-                  console.log(`🤖 [PRO-PV] Comando identificado: ${respAssist.command} ${respAssist.args || ''}`);
-                  
-                  const simulatedCommand = respAssist.command.toLowerCase();
-                  let simulatedArgs = respAssist.args || '';
-                  const simulatedBody = `${prefix}${simulatedCommand} ${simulatedArgs}`.trim();
-                  
-                  // Clonar o objeto info original
-                  const fakeMessage = JSON.parse(JSON.stringify(info));
-                  fakeMessage.messageTimestamp = Math.floor(Date.now() / 1000);
-                  fakeMessage._fromPro = true;
-                  
-                  if (fakeMessage.message) {
-                    fakeMessage.message.conversation = simulatedBody;
-                    delete fakeMessage.message.extendedTextMessage;
+                    // No modo misto, não retorna aqui pois ainda vai processar a resposta falada
+                    if (!respAssist.resp || respAssist.resp.length === 0) return;
                   } else {
-                    fakeMessage.message = { conversation: simulatedBody };
+                    console.log(`🤖 [MISTO-PV] Comando identificado: ${respAssist.command} ${respAssist.args || ''}`);
+                    
+                    const simulatedCommand = respAssist.command.toLowerCase();
+                    let simulatedArgs = respAssist.args || '';
+                    const simulatedBody = `${prefix}${simulatedCommand} ${simulatedArgs}`.trim();
+                    
+                    // Clonar o objeto info original
+                    const fakeMessage = JSON.parse(JSON.stringify(info));
+                    fakeMessage.messageTimestamp = Math.floor(Date.now() / 1000);
+                    fakeMessage._fromPro = true;
+                    
+                    if (fakeMessage.message) {
+                      fakeMessage.message.conversation = simulatedBody;
+                      delete fakeMessage.message.extendedTextMessage;
+                    } else {
+                      fakeMessage.message = { conversation: simulatedBody };
+                    }
+                    
+                    // Execução do comando
+                    nazu.ev.emit('messages.upsert', {
+                      messages: [fakeMessage],
+                      type: 'notify'
+                    });
                   }
-                  
-                  // Execução silenciosa (sem mensagem de feedback)
-                  nazu.ev.emit('messages.upsert', {
-                    messages: [fakeMessage],
-                    type: 'notify'
-                  });
                 }
-                // Se não é comando no modo pro, não responde nada (comportamento esperado)
-                return;
+                // No modo misto, continua para processar a resposta falada do Toji
+                // No modo pro puro, não responde nada
+                if (!respAssist.resp || respAssist.resp.length === 0) return;
               }
               
               if (respAssist.resp && Array.isArray(respAssist.resp) && respAssist.resp.length > 0) {
@@ -4277,7 +4279,7 @@ Código: *${roleCode}*`,
     // Filtros para IA em grupos: só responde se mencionado, respondido ou chamado pelo nome
     const isMentioned = (_botShort && budy2.includes(_botShort)) || (menc_os2 && menc_os2 == botNumber) || (menc_os2 && menc_os2 == botNumberLid);
     const isReplied = info.message?.extendedTextMessage?.contextInfo?.participant === botNumber || info.message?.extendedTextMessage?.contextInfo?.participant === botNumberLid;
-    const isCalledByName = /nasaki|kaneki|jarvis/i.test(budy2);
+    const isCalledByName = /nasaki|toji|jarvis/i.test(budy2);
     
     const shouldRespondIA = isAssistente && !info.key.fromMe && !info._fromPro && (
       (!isGroup) || // No privado responde tudo
@@ -4377,7 +4379,7 @@ Código: *${roleCode}*`,
         }
         
         // Obter a personalidade atual do grupo
-        const personality = groupData.assistentePersonality || 'kaneki';
+        const personality = groupData.assistentePersonality || 'toji';
         
         ia.makeAssistentRequest({
           mensagens: [jSoNzIn]
@@ -4386,7 +4388,7 @@ Código: *${roleCode}*`,
             return;
           }
           
-          // Tratamento especial para personalidade 'pro' (interpretador de comandos)
+          // Tratamento especial para personalidade 'pro' e 'misto' (interpretador de comandos)
           if (respAssist.isPro) {
             if (respAssist.isCommand && respAssist.command) {
               // Se falta algo para executar o comando, avisa o usuário
@@ -4590,8 +4592,9 @@ Código: *${roleCode}*`,
                 type: 'notify'
               });
             }
-            // Se não é comando, não responde nada (comportamento esperado do pro)
-            return;
+            // Se não é comando, não responde nada (comportamento esperado do pro puro)
+            // No modo misto, continua para processar a resposta falada do Toji
+            if (!respAssist.resp || respAssist.resp.length === 0) return;
           }
           
           if (respAssist.resp && Array.isArray(respAssist.resp) && respAssist.resp.length > 0) {
@@ -15592,7 +15595,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
         try {
           if (!isOwner || isOwner && isSubOwner) return reply("🚫 Apenas o Dono principal pode utilizar esse comando!");
           if (!fs.existsSync(pathz.join(__dirname, '..', 'database', 'updateSave.json'))) return reply('❌ Sua versão não tem suporte a esse sistema ainda.');
-          const AtualCom = await axios.get('https://api.github.com/repos/polarminhapomba-crypto/kaneki-bot/commits?per_page=1', {
+          const AtualCom = await axios.get('https://api.github.com/repos/polarminhapomba-crypto/toji-bot/commits?per_page=1', {
             headers: {
               Accept: 'application/vnd.github+json'
             }
@@ -15601,7 +15604,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
             total
           } = JSON.parse(fs.readFileSync(pathz.join(__dirname, '..', 'database', 'updateSave.json'), 'utf-8'));
           if (AtualCom > total) {
-            const TextZin = await VerifyUpdate('hiudyy/kaneki', AtualCom - total);
+            const TextZin = await VerifyUpdate('hiudyy/toji', AtualCom - total);
             await reply(TextZin);
           } else {
             await reply('Você ja esta utilizando a versão mais recente da bot.');
@@ -18346,7 +18349,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
           if (!q) return reply(`❌️ *Forma incorreta, use está como exemplo:* ${prefix + command} https://instagram.com/hiudyyy_`);
           const shortResponse = await axios.post("https://spoo.me/api/v1/shorten", { 
             long_url: q, 
-            alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
+            alias: `toji_${Math.floor(10000 + Math.random() * 90000)}` 
           });
           reply(`✅ *Link encurtado com sucesso!*\n\n🔗 *Link curto:* ${shortResponse.data.short_url}\n📎 *Link original:* ${shortResponse.data.long_url}`);
         } catch (e) {
@@ -18358,7 +18361,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
       case 'gerarnick':
       case 'nickgenerator':
         try {
-          if (!q) return reply(`🎮 *GERADOR DE NICK*\n\n📝 *Como usar:*\n• Digite o nick após o comando\n• Ex: ${prefix}nick kaneki`);
+          if (!q) return reply(`🎮 *GERADOR DE NICK*\n\n📝 *Como usar:*\n• Digite o nick após o comando\n• Ex: ${prefix}nick toji`);
           var datzn;
           datzn = await styleText(q);
           await reply(datzn.join('\n'));
@@ -18663,7 +18666,7 @@ Exemplo: ${prefix}tradutor espanhol | Olá mundo! ✨`);
           if (!datz.ok) return reply(datz.msg);
           return axios.post("https://spoo.me/api/v1/shorten", { 
             long_url: datz.url, 
-            alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
+            alias: `toji_${Math.floor(10000 + Math.random() * 90000)}` 
           }).then((shortLinkPlugin) => {
             return nazu.sendMessage(from, {
               image: { url: datz.image },
@@ -19336,7 +19339,7 @@ case 'facebookdl':
           if (fileSizeBytes > maxSize) {
             const shortLinkGdrive = await axios.post("https://spoo.me/api/v1/shorten", { 
               long_url: downloadUrl, 
-              alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
+              alias: `toji_${Math.floor(10000 + Math.random() * 90000)}` 
             });
             return reply(`📁 *Arquivo encontrado!*\n\n📄 *Nome:* ${fileName}\n📊 *Tamanho:* ${fileSize}\n📋 *Tipo:* ${mimetype}\n\n⚠️ *Arquivo muito grande para enviar!*\nO limite do WhatsApp é 100MB.\n\n🔗 *Link direto:*\n${shortLinkGdrive.data.short_url}`);
           }
@@ -19433,7 +19436,7 @@ case 'facebookdl':
           if (fileSizeBytes > maxSize) {
             const shortLinkMf = await axios.post("https://spoo.me/api/v1/shorten", { 
               long_url: downloadUrl, 
-              alias: `kaneki_${Math.floor(10000 + Math.random() * 90000)}` 
+              alias: `toji_${Math.floor(10000 + Math.random() * 90000)}` 
             });
             return reply(`📁 *Arquivo encontrado!*\n\n📄 *Nome:* ${fileName}\n📊 *Tamanho:* ${fileSize}\n📅 *Upload:* ${uploadDate || 'N/A'}\n📋 *Tipo:* ${extension || mimetype}\n\n⚠️ *Arquivo muito grande para enviar!*\nO limite do WhatsApp é 100MB.\n\n🔗 *Link direto:*\n${shortLinkMf.data.short_url}`);
           }
@@ -19777,7 +19780,7 @@ case 'facebookdl':
         try {
           await reply('📦 Baixando o código-fonte do bot... Aguarde!');
           
-          const zipResponse = await axios.get('https://github.com/polarminhapomba-crypto/kaneki-bot/archive/refs/heads/main.zip', {
+          const zipResponse = await axios.get('https://github.com/polarminhapomba-crypto/toji-bot/archive/refs/heads/main.zip', {
             responseType: 'arraybuffer',
             timeout: 60000 // 60 segundos de timeout
           });
@@ -19788,9 +19791,9 @@ case 'facebookdl':
           
           await nazu.sendMessage(from, {
             document: Buffer.from(zipResponse.data),
-            fileName: 'kaneki-bot.zip',
+            fileName: 'toji-bot.zip',
             mimetype: 'application/zip',
-            caption: `📦 *Código-fonte do ${nomebot}*\n\n📖 Leia a documentação no repositório para entender melhor como instalar:\n🔗 https://github.com/polarminhapomba-crypto/kaneki-bot\n\n⚠️ *Importante:* Certifique-se de ter Node.js instalado e siga os passos do README.md!`
+            caption: `📦 *Código-fonte do ${nomebot}*\n\n📖 Leia a documentação no repositório para entender melhor como instalar:\n🔗 https://github.com/polarminhapomba-crypto/toji-bot\n\n⚠️ *Importante:* Certifique-se de ter Node.js instalado e siga os passos do README.md!`
           }, { quoted: info });
           
         } catch (e) {
@@ -19801,7 +19804,7 @@ case 'facebookdl':
             ? '❌ Tempo de conexão esgotado. Tente novamente.'
             : '❌ Erro ao baixar o arquivo.';
           
-          await reply(`${errorMsg}\n\nTente acessar diretamente:\n🔗 https://github.com/polarminhapomba-crypto/kaneki-bot`);
+          await reply(`${errorMsg}\n\nTente acessar diretamente:\n🔗 https://github.com/polarminhapomba-crypto/toji-bot`);
         }
         break;
       case 'gitbot':
@@ -19818,8 +19821,8 @@ case 'facebookdl':
             const githubHeaders = { 'Accept': 'application/vnd.github+json' };
             
             Promise.all([
-              axios.get('https://api.github.com/repos/polarminhapomba-crypto/kaneki-bot', { headers: githubHeaders }),
-              axios.get('https://api.github.com/repos/polarminhapomba-crypto/kaneki-bot/commits?per_page=1', { headers: githubHeaders })
+              axios.get('https://api.github.com/repos/polarminhapomba-crypto/toji-bot', { headers: githubHeaders }),
+              axios.get('https://api.github.com/repos/polarminhapomba-crypto/toji-bot/commits?per_page=1', { headers: githubHeaders })
             ]).then(([repoResponse, commitsResponse]) => {
               const repo = repoResponse.data;
               
@@ -19870,7 +19873,7 @@ case 'facebookdl':
 │ 🔄 *Atualizado:* ${updatedAt}
 │ 📤 *Último push:* ${pushedAt}
 │
-│ ⏱️ *Kaneki vem sendo ativamente*
+│ ⏱️ *Toji vem sendo ativamente*
 │ *mantida há:* ${tempoAtivo}
 │
 │ 🔗 *Links:*
@@ -19886,7 +19889,7 @@ case 'facebookdl':
               reply(gitInfo);
             }).catch((e) => {
               console.error('Erro ao buscar info do GitHub:', e);
-              reply(`❌ Erro ao buscar informações. Acesse diretamente:\n🔗 https://github.com/polarminhapomba-crypto/kaneki-bot\n📞 Suporte: wa.me/553391967445`);
+              reply(`❌ Erro ao buscar informações. Acesse diretamente:\n🔗 https://github.com/polarminhapomba-crypto/toji-bot\n📞 Suporte: wa.me/553391967445`);
             });
           });
         } catch (e) {
@@ -20231,7 +20234,7 @@ Exemplo: ${prefix}msgprefix Use #prefixo# antes do comando!
 
 🔹 *Nome do Bot*
 Use: ${prefix}nomebot <nome>
-Exemplo: ${prefix}nomebot Kaneki
+Exemplo: ${prefix}nomebot Toji
 • Altera o nome exibido nos menus
 • Use nomes curtos e memoráveis
 
@@ -21555,7 +21558,7 @@ Precisa de ajuda? Entre em contato:
       case 'nome-bot':
         try {
           if (!isOwner) return reply("Este comando é exclusivo para o meu dono!");
-          if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Kaneki`);
+          if (!q) return reply(`Por favor, digite o novo nome do bot.\nExemplo: ${prefix}${command} Toji`);
           let config = JSON.parse(fs.readFileSync(CONFIG_FILE));
           config.nomebot = q;
           writeJsonFile(CONFIG_FILE, config);
@@ -24054,7 +24057,7 @@ ${prefix}togglecmdvip premium_ia off`);
             return sendSticker(nazu, from, {
               sticker: { url: resultUrl },
               author: `${pushname}\n${nomebot}\n${nomedono}`,
-              packname: 'Kaneki Bot - Stickers',
+              packname: 'Toji Bot - Stickers',
               type: 'image'
             }, {
               quoted: info
@@ -27625,18 +27628,18 @@ Exemplos:
           if (!isOwner) return reply('🚫 Este comando é apenas para o dono do bot!');
           
           const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-          let assistentePvData = { ativo: true, personality: 'humana' };
+          let assistentePvData = { ativo: true, personality: 'misto' };
           try {
             if (fs.existsSync(assistentePvPath)) {
               const _pvCmd = JSON.parse(fs.readFileSync(assistentePvPath));
               if (typeof _pvCmd.ativo === 'boolean') {
                 assistentePvData = _pvCmd;
               } else {
-                assistentePvData = { ..._pvCmd, ativo: true, personality: _pvCmd.personality || 'humana' };
+                assistentePvData = { ..._pvCmd, ativo: true, personality: _pvCmd.personality || 'misto' };
               }
             }
           } catch (e) {
-            assistentePvData = { ativo: true, personality: 'humana' };
+            assistentePvData = { ativo: true, personality: 'misto' };
           }
           
           if (!q) {
@@ -27644,15 +27647,15 @@ Exemplos:
             if (!assistentePvData.ativo) {
               delete assistentePvData.personality;
             } else {
-              assistentePvData.personality = assistentePvData.personality || 'humana';
+              assistentePvData.personality = assistentePvData.personality || 'misto';
             }
             fs.writeFileSync(assistentePvPath, JSON.stringify(assistentePvData, null, 2));
             
             const statusMsg = assistentePvData.ativo 
               ? `✅ *Assistente PV ativada com sucesso!*\n\n` +
-                `🤖 *Personalidade atual:* ${assistentePvData.personality === 'kaneki' ? 'Kaneki (Padrão)' : assistentePvData.personality === 'humana' ? 'Humana' : assistentePvData.personality === 'ia' ? 'IA Normal' : assistentePvData.personality === 'manus' ? 'Manus (Complexo)' : 'Pro (Comandos)'}\n\n` +
+                `🤖 *Personalidade atual:* ${assistentePvData.personality === 'toji' ? 'Toji (Padrão)' : assistentePvData.personality === 'humana' ? 'Humana' : assistentePvData.personality === 'ia' ? 'IA Normal' : assistentePvData.personality === 'manus' ? 'Manus (Complexo)' : 'Pro (Comandos)'}\n\n` +
                 `💡 *Trocar personalidade:*\n` +
-                `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki\n` +
+                `• ${prefix}assistentepv toji - Personalidade Toji\n                • ${prefix}assistentepv misto - Toji + Executa comandos (Padrão)\n` +
                 `• ${prefix}assistentepv humana - Age 100% como humana\n` +
                 `• ${prefix}assistentepv ia - IA normal sem personalidade\n` +
                 `• ${prefix}assistentepv pro - Interpreta comandos em linguagem natural\n` +
@@ -27665,10 +27668,10 @@ Exemplos:
           
           const personality = q.toLowerCase().trim();
           
-          if (!['kaneki', 'humana', 'ia', 'pro', 'manus'].includes(personality)) {
+          if (!['toji', 'humana', 'ia', 'pro', 'manus', 'misto'].includes(personality)) {
             return reply(`❌ *Personalidade inválida!*\n\n` +
               `Escolha uma das opções:\n` +
-              `• ${prefix}assistentepv kaneki - Personalidade padrão Kaneki (vampira tsundere)\n` +
+              `• ${prefix}assistentepv toji - Personalidade Toji\n                • ${prefix}assistentepv misto - Toji + Executa comandos (Padrão) (mercenário)\n              • ${prefix}assistentepv misto - Toji + Executa comandos (Padrão)\n` +
               `• ${prefix}assistentepv humana - Age 100% como uma pessoa real\n` +
               `• ${prefix}assistentepv ia - IA normal e objetiva\n` +
               `• ${prefix}assistentepv pro - Interpreta comandos em linguagem natural\n` +
@@ -27680,7 +27683,8 @@ Exemplos:
           fs.writeFileSync(assistentePvPath, JSON.stringify(assistentePvData, null, 2));
           
           const personalityNames = {
-            'kaneki': '🌙 *Kaneki* - Vampira moderna com personalidade tsundere',
+            'toji': '💰 *Toji* - Mercenário sarcástico e direto',
+            'misto': '🔥 *Misto* - Toji + Executa comandos em linguagem natural',
             'humana': '👤 *Humana* - Age como uma pessoa real, nunca admite ser IA',
 	            'ia': '🤖 *IA Normal* - Assistente objetiva e direta',
 	            'manus': '🧠 *Manus* - Assistente avançado para tarefas complexas',
@@ -27716,15 +27720,15 @@ Exemplos:
               delete groupData.assistentePersonality;
             } else {
               // Se ativar sem especificar, usa padrão
-              groupData.assistentePersonality = groupData.assistentePersonality || 'humana';
+              groupData.assistentePersonality = groupData.assistentePersonality || 'misto';
             }
             fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
             
             const statusMsg = groupData.assistente 
               ? `✅ *Assistente ativada com sucesso!*\n\n` +
-                `🤖 *Personalidade atual:* ${groupData.assistentePersonality === 'kaneki' ? 'Kaneki (Padrão)' : groupData.assistentePersonality === 'humana' ? 'Humana' : groupData.assistentePersonality === 'pro' ? 'Pro (Comandos)' : 'IA Normal'}\n\n` +
+                `🤖 *Personalidade atual:* ${groupData.assistentePersonality === 'toji' ? 'Toji (Padrão)' : groupData.assistentePersonality === 'humana' ? 'Humana' : groupData.assistentePersonality === 'pro' ? 'Pro (Comandos)' : 'IA Normal'}\n\n` +
                 `💡 *Trocar personalidade:*\n` +
-                `• ${prefix}assistente kaneki - Personalidade padrão Kaneki\n` +
+                `• ${prefix}assistente toji - Personalidade Toji\n                • ${prefix}assistente misto - Toji + Executa comandos (Padrão)\n` +
                 `• ${prefix}assistente humana - Age 100% como humana\n` +
                 `• ${prefix}assistente ia - IA normal sem personalidade\n` +
                 `• ${prefix}assistente pro - Interpreta comandos em linguagem natural\n\n` +
@@ -27737,10 +27741,10 @@ Exemplos:
           // Se tem argumento, define a personalidade
           const personality = q.toLowerCase().trim();
           
-          if (!['kaneki', 'humana', 'ia', 'pro', 'manus'].includes(personality)) {
+          if (!['toji', 'humana', 'ia', 'pro', 'manus', 'misto'].includes(personality)) {
             return reply(`❌ *Personalidade inválida!*\n\n` +
               `Escolha uma das opções:\n` +
-              `• ${prefix}assistente kaneki - Personalidade padrão Kaneki (vampira tsundere)\n` +
+              `• ${prefix}assistente toji - Personalidade Toji\n                • ${prefix}assistente misto - Toji + Executa comandos (Padrão) (mercenário)\n              • ${prefix}assistente misto - Toji + Executa comandos (Padrão)\n` +
               `• ${prefix}assistente humana - Age 100% como uma pessoa real\n` +
               `• ${prefix}assistente ia - IA normal e objetiva\n` +
               `• ${prefix}assistente pro - Interpreta comandos em linguagem natural`);
@@ -27751,7 +27755,8 @@ Exemplos:
           fs.writeFileSync(groupFilePath, JSON.stringify(groupData, null, 2));
           
           const personalityNames = {
-            'kaneki': '🌙 *Kaneki* - Vampira moderna com personalidade tsundere',
+            'toji': '💰 *Toji* - Mercenário sarcástico e direto',
+            'misto': '🔥 *Misto* - Toji + Executa comandos em linguagem natural',
             'humana': '👤 *Humana* - Age como uma pessoa real, nunca admite ser IA',
             'ia': '🤖 *IA Normal* - Assistente objetiva e direta',
             'pro': '⚡ *Pro* - Interpreta comandos em linguagem natural (não responde, só executa)'

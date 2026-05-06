@@ -1,4 +1,17 @@
-# Kaneki Bot
+# Toji Bot 🗡️
+
+Bot de WhatsApp com a personalidade do Toji Fushiguro (Assassino de Feiticeiros).
+
+## Personalidades Disponíveis
+
+| Personalidade | Descrição |
+|---|---|
+| `misto` | 🔥 Toji + Executa comandos (Padrão) |
+| `toji` | 💰 Mercenário sarcástico e direto |
+| `humana` | 👤 Age como uma pessoa real |
+| `ia` | 🤖 IA Normal e objetiva |
+| `pro` | ⚡ Interpreta comandos em linguagem natural |
+| `manus` | 🧠 Integração com Manus para tarefas complexas |
 
 ## Instalação
 

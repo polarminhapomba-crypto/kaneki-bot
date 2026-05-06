@@ -1,7 +1,7 @@
 {
-    "name": "kaneki",
+    "name": "toji-bot",
     "version": "8.0.0",
-    "description": "Bot de whatsapp criada por hiudy",
+    "description": "Toji Bot - Bot de WhatsApp com personalidade do Toji Fushiguro",
     "type": "module",
     "main": "dados/src/connect.js",
     "scripts": {
@@ -13,10 +13,10 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/hiudyy/kaneki.git"
+        "url": "git+https://github.com/polarminhapomba-crypto/kaneki-bot.git"
     },
-    "homepage": "https://cognima.com.br",
-    "author": "Hiudy",
+    "homepage": "https://github.com/polarminhapomba-crypto/kaneki-bot",
+    "author": "polar",
     "license": "ISC",
     "dependencies": {
         "@hapi/boom": "^10.0.1",

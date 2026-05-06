@@ -127,9 +127,9 @@ class UserContextDB {
           comandos: 0
         }
       },
-      relacionamento_kaneki: {
+      relacionamento_toji: {
         nivel_intimidade: 1,
-        apelido_kaneki: null,
+        apelido_toji: null,
         memorias_especiais: [],
         conversas_marcantes: [],
         sentimento: 'neutro'
@@ -288,13 +288,13 @@ class UserContextDB {
   }
 
   /**
-   * Atualiza o relacionamento com Kaneki
+   * Atualiza o relacionamento com Toji
    */
   updateRelationship(userId, campo, valor) {
     const context = this.getUserContext(userId);
     
-    if (context.relacionamento_kaneki.hasOwnProperty(campo)) {
-      context.relacionamento_kaneki[campo] = valor;
+    if (context.relacionamento_toji.hasOwnProperty(campo)) {
+      context.relacionamento_toji[campo] = valor;
       context.ultima_atualizacao = getBrazilDateTime();
       this.saveDatabase();
     }
@@ -312,12 +312,12 @@ class UserContextDB {
       importancia: 'alta'
     };
     
-    context.relacionamento_kaneki.memorias_especiais.push(novaMemoria);
+    context.relacionamento_toji.memorias_especiais.push(novaMemoria);
     
     // Manter apenas as 30 memórias mais especiais
-    if (context.relacionamento_kaneki.memorias_especiais.length > 30) {
-      context.relacionamento_kaneki.memorias_especiais = 
-        context.relacionamento_kaneki.memorias_especiais.slice(-30);
+    if (context.relacionamento_toji.memorias_especiais.length > 30) {
+      context.relacionamento_toji.memorias_especiais = 
+        context.relacionamento_toji.memorias_especiais.slice(-30);
     }
     
     context.ultima_atualizacao = getBrazilDateTime();
@@ -414,12 +414,12 @@ class UserContextDB {
         
       case 'memoria_especial':
       case 'memória':
-        const indexMemoria = context.relacionamento_kaneki.memorias_especiais.findIndex(
+        const indexMemoria = context.relacionamento_toji.memorias_especiais.findIndex(
           m => m.texto === valorAntigo
         );
         if (indexMemoria !== -1) {
-          context.relacionamento_kaneki.memorias_especiais[indexMemoria].texto = valorNovo;
-          context.relacionamento_kaneki.memorias_especiais[indexMemoria].data = getBrazilDateTime();
+          context.relacionamento_toji.memorias_especiais[indexMemoria].texto = valorNovo;
+          context.relacionamento_toji.memorias_especiais[indexMemoria].data = getBrazilDateTime();
           atualizado = true;
         }
         break;
@@ -530,11 +530,11 @@ class UserContextDB {
         
       case 'memoria_especial':
       case 'memória':
-        const indexMemoria = context.relacionamento_kaneki.memorias_especiais.findIndex(
+        const indexMemoria = context.relacionamento_toji.memorias_especiais.findIndex(
           m => m.texto === valor
         );
         if (indexMemoria !== -1) {
-          context.relacionamento_kaneki.memorias_especiais.splice(indexMemoria, 1);
+          context.relacionamento_toji.memorias_especiais.splice(indexMemoria, 1);
           removido = true;
         }
         break;
@@ -572,10 +572,10 @@ class UserContextDB {
       assuntos_favoritos: context.preferencias.assuntos_favoritos.slice(-5).join(', ') || 'Não definido',
       total_conversas: context.historico_conversa.total_mensagens,
       frequencia: context.historico_conversa.frequencia_interacao,
-      nivel_intimidade: context.relacionamento_kaneki.nivel_intimidade,
+      nivel_intimidade: context.relacionamento_toji.nivel_intimidade,
       topicos_recentes: context.historico_conversa.topicos_recentes.slice(-5).join(', ') || 'Nenhum',
       notas_importantes: context.notas_importantes.slice(-10).map(n => n.texto).join('\n- ') || 'Nenhuma',
-      memorias_especiais: context.relacionamento_kaneki.memorias_especiais.slice(-5).map(m => m.texto).join('\n- ') || 'Nenhuma'
+      memorias_especiais: context.relacionamento_toji.memorias_especiais.slice(-5).map(m => m.texto).join('\n- ') || 'Nenhuma'
     };
     
     return summary;

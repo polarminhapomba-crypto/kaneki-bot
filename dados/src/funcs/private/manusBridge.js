@@ -36,7 +36,7 @@ export async function handleManusCommand(userMessage, socket, m) {
                 headers: {
                     'Content-Type': 'application/json',
                     'API_KEY': process.env.MANUS_API_KEY || '', // Requer chave de API
-                    'User-Agent': 'Kaneki-Bot/1.0'
+                    'User-Agent': 'Toji-Bot/1.0'
                 }
             }
         );

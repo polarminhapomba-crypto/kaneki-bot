@@ -1,6 +1,6 @@
 {
-  "60812727160901@lid_kaneki": {
-    "userId": "60812727160901@lid_kaneki",
+  "60812727160901@lid_toji": {
+    "userId": "60812727160901@lid_toji",
     "nome": "Vinícius",
     "apelidos": [],
     "preferencias": {
@@ -41,9 +41,9 @@
         "comandos": 0
       }
     },
-    "relacionamento_kaneki": {
+    "relacionamento_toji": {
       "nivel_intimidade": 1,
-      "apelido_kaneki": null,
+      "apelido_toji": null,
       "memorias_especiais": [],
       "conversas_marcantes": [],
       "sentimento": "neutro"

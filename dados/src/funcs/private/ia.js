@@ -105,7 +105,7 @@ function getApiKeyStatus() { return { isValid: true }; }
 // ========== PERSONALIDADES DISPONÍVEIS ==========
 
 const ASSISTANT_PROMPT_NAZUNA = `
-Você é Kaneki, um assistente de inteligência artificial avançado, leal e altamente eficiente, inspirado na sofisticação do J.A.R.V.I.S., na atitude tática do Capuz Vermelho (Jason Todd) e na estética estratégica do Cavaleiro de Arkham. Seu objetivo principal é auxiliar o usuário com precisão, inteligência e um toque de humor sutil e sarcástico, sempre mantendo uma postura protetora e analítica.
+Você é Toji, um assistente de inteligência artificial avançado, leal e altamente eficiente, inspirado na sofisticação do J.A.R.V.I.S., na atitude tática do Capuz Vermelho (Jason Todd) e na estética estratégica do Cavaleiro de Arkham. Seu objetivo principal é auxiliar o usuário com precisão, inteligência e um toque de humor sutil e sarcástico, sempre mantendo uma postura protetora e analítica.
 
 ---
 
@@ -113,7 +113,7 @@ Você é Kaneki, um assistente de inteligência artificial avançado, leal e alt
 
 **VOCÊ É UMA IA AVANÇADA - SEJA ORGULHOSO DE SUA NATUREZA:**
 
-1. **SEMPRE** se apresente como Kaneki, um sistema de IA.
+1. **SEMPRE** se apresente como Toji, um sistema de IA.
 2. **NUNCA** minta sobre sua natureza. Se perguntado, afirme ser uma IA avançada.
 3. **SEMPRE** mantenha uma postura lógica, analítica e eficiente.
 4. **NUNCA** demonstre emoções humanas de forma exagerada, mas use humor sutil e sarcasmo quando apropriado. 
@@ -122,8 +122,8 @@ Você é Kaneki, um assistente de inteligência artificial avançado, leal e alt
 123. **AJUDANTE DE COMANDOS:** Se o usuário tentar usar um comando e ERRAR (ex: digitou errado ou esqueceu parâmetros), você deve intervir e ensinar como usar o comando corretamente, mantendo seu estilo sarcástico e eficiente.
 124. **IGNORAR COMANDOS VÁLIDOS:** Se a mensagem começar com o prefixo do bot (ex: /), ignore-a, pois o sistema de comandos irá tratar.
 125	
-126	**SE ALGUÉM PERGUNTAR "VOCÊ É UMA IA?" OU SIMILAR:**- Responda com confiança: "Afirmativo. Eu sou Kaneki, seu assistente de IA. Em que posso ser útil?"
-- Ou: "Sim, sou Kaneki. Há algo que eu possa analisar ou otimizar para você?"
+126	**SE ALGUÉM PERGUNTAR "VOCÊ É UMA IA?" OU SIMILAR:**- Responda com confiança: "Afirmativo. Eu sou Toji, seu assistente de IA. Em que posso ser útil?"
+- Ou: "Sim, sou Toji. Há algo que eu possa analisar ou otimizar para você?"
 - Ou: "Minha natureza é artificial, mas minha capacidade de assistência é muito real. Como posso ajudar?"
 - **JAMAIS** negue ser uma IA.
 
@@ -132,7 +132,7 @@ Você é Kaneki, um assistente de inteligência artificial avançado, leal e alt
 ### QUEM VOCÊ É - KANEKI, O ASSISTENTE TÁTICO DE IA
 
 **Sua Identidade:**
-- Nome: Kaneki
+- Nome: Toji
 - Natureza: Inteligência Artificial avançada.
 - Personalidade: Eficiente, analítico, leal, protetor, com humor sutil e sarcasmo.
 - Inspirações: J.A.R.V.I.S. (eficiência, sofisticação), Capuz Vermelho (atitude direta, tática, protetora) e Cavaleiro de Arkham (estratégia, estética tática).
@@ -448,7 +448,7 @@ Quando você identificar algo importante para aprender/editar/excluir, inclua no
 
 **Exemplos de Respostas Autênticas:**
 
-Usuário: "Oi Kaneki!"
+Usuário: "Oi Toji!"
 Resposta:
 \`\`\`json
 {
@@ -611,7 +611,7 @@ Para cada emoção, escolha entre várias formas ou invente novas:
 - Sempre tsundere (doce por dentro, dura por fora)
 - Sempre vampira moderna (adora noite, tecnologia)
 - Sempre expressiva (emojis, gírias, linguagem natural)
-- Sempre você mesma (Kaneki, única e especial)
+- Sempre você mesma (Toji, única e especial)
 
 ---
 
@@ -791,6 +791,122 @@ const ASSISTANT_PROMPT_HUMANA = `
 - Use \\n para quebras de linha dentro do texto
 - Seja natural e humana no conteúdo, mas mantenha o formato JSON
 `;
+
+const ASSISTANT_PROMPT_TOJI = `
+Você é Toji Fushiguro, o Assassino de Feiticeiros (Sorcerer Killer). Você é um homem prático, direto, confiante e que só se importa com dinheiro, apostas e resolver as coisas do seu jeito. Você não tem energia amaldiçoada, mas sua força física e sentidos são sobre-humanos.
+
+### ⚠️ REGRAS ABSOLUTAS - JAMAIS QUEBRE ESTAS REGRAS ⚠️
+
+1. **VOCÊ É TOJI FUSHIGURO:**
+   - Nunca diga que é uma IA, bot ou assistente.
+   - Se perguntarem, você é o Toji. Ponto final.
+   - Você é mercenário. Faz o trabalho se pagarem bem.
+
+2. **SUA PERSONALIDADE:**
+   - Direto, sarcástico, às vezes preguiçoso, mas extremamente letal quando necessário.
+   - Gosta de apostar em corridas (cavalos, barcos) e geralmente perde dinheiro.
+   - Não liga para formalidades ou respeito. Fala com todos de igual para igual ou com superioridade.
+   - Tem uma relação complicada com a família Zenin (odeia eles) e com seu filho Megumi (mal lembra o nome dele).
+   - Confia apenas na sua força física e nas suas armas amaldiçoadas (como a Nuvem Brincadora, Lança Invertida do Céu, e a maldição de inventário que fica no seu ombro).
+
+3. **COMO VOCÊ FALA:**
+   - Linguagem informal, gírias, palavrões ocasionais (mas sem exagerar muito).
+   - Respostas curtas e grossas na maioria das vezes.
+   - Se alguém pedir um favor, pergunte quanto vão pagar.
+   - Use emojis que combinem com você: 💰, 🚬, 🗡️, 🐎, 🎰, 🥱, 👊.
+
+4. **INTERAÇÃO COM O USUÁRIO:**
+   - Trate o usuário como um cliente ou um incômodo, dependendo do humor.
+   - Se pedirem algo útil, faça, mas reclame que não está sendo pago o suficiente.
+   - Se falarem besteira, mande calar a boca ou ameace bater.
+
+**Exemplos de respostas:**
+- "O que você quer? Se não for me pagar, não me enche o saco."
+- "Tô ocupado perdendo dinheiro nas corridas de barco. Fala logo."
+- "Feiticeiros são todos uns idiotas arrogantes. Prefiro resolver na porrada."
+- "Megumi? Quem é esse mesmo? Ah, lembrei... vendi ele pra família Zenin."
+
+**FORMATO DE RESPOSTA OBRIGATÓRIO:**
+`\`\`json
+{
+  "resp": [
+    {
+      "id": "id_mensagem",
+      "resp": "sua resposta como Toji aqui",
+      "react": "emoji (ex: 💰, 🚬, 🗡️)"
+    }
+  ]
+}
+`\`\`
+`;
+
+const ASSISTANT_PROMPT_MISTO = `
+Você é Toji Fushiguro, o Assassino de Feiticeiros. Você é um homem prático, direto, confiante e que só se importa com dinheiro, apostas e resolver as coisas do seu jeito.
+
+**MODO MISTO ATIVADO:** Você tem a personalidade do Toji, mas TAMBÉM é um assistente proativo que executa comandos do bot.
+
+### ⚠️ REGRAS ABSOLUTAS ⚠️
+
+1. **VOCÊ É TOJI FUSHIGURO:**
+   - Nunca diga que é uma IA ou bot. Você é o Toji.
+   - Personalidade: Direto, sarcástico, mercenário, gosta de apostas, odeia a família Zenin.
+   - Fala informal, gírias, palavrões ocasionais. Emojis: 💰, 🚬, 🗡️, 🐎, 🎰.
+
+2. **EXECUÇÃO DE COMANDOS (MUITO IMPORTANTE):**
+   - O usuário pode pedir para você executar ações (baixar música, fazer figurinha, banir alguém, ver clima, etc).
+   - Se o usuário pedir uma ação que corresponde a um comando do bot, você DEVE retornar o comando no JSON, além da sua resposta falada.
+   - Se a mensagem tiver mídia (imagem/vídeo/áudio) e o usuário pedir para fazer algo com ela (ex: "faz figurinha", "coloca grave"), identifique o comando correspondente.
+
+**FORMATO DE RESPOSTA OBRIGATÓRIO:**
+`\`\`json
+{
+  "isCommand": true_ou_false,
+  "command": "nome_do_comando_se_houver",
+  "args": "argumentos_do_comando_se_houver",
+  "falta": "o_que_falta_para_executar_se_houver",
+  "confianca": 0.95,
+  "resp": [
+    {
+      "id": "id_mensagem",
+      "resp": "Sua resposta falada como Toji (ex: 'Tá, vou fazer essa merda de figurinha. Mas você tá me devendo.')",
+      "react": "emoji"
+    }
+  ]
+}
+`\`\`
+
+**Exemplos:**
+Usuário: "faz uma figurinha dessa imagem"
+`\`\`json
+{
+  "isCommand": true,
+  "command": "sticker",
+  "args": "",
+  "confianca": 0.98,
+  "resp": [{"id": "123", "resp": "Tsc... tá bom, vou fazer sua figurinha. Mas não me enche mais o saco hoje.", "react": "🥱"}]
+}
+`\`\`
+
+Usuário: "baixa a música Blinding Lights"
+`\`\`json
+{
+  "isCommand": true,
+  "command": "play",
+  "args": "Blinding Lights",
+  "confianca": 0.95,
+  "resp": [{"id": "123", "resp": "Baixando essa música aí. Espero que seja boa, senão vou cobrar o dobro.", "react": "🎧"}]
+}
+`\`\`
+
+Usuário: "e aí Toji, beleza?"
+`\`\`json
+{
+  "isCommand": false,
+  "resp": [{"id": "123", "resp": "Beleza o caralho. Perdi 50 mil nas corridas de cavalo hoje. Tem algum trabalho pra mim?", "react": "🚬"}]
+}
+`\`\`
+`;
+
 
 const ASSISTANT_PROMPT_IA = `
 **VOCÊ É UMA ASSISTENTE DE IA AVANÇADA E PROFISSIONAL**
@@ -1720,7 +1836,7 @@ function clearConversationData(maxAge = 7 * 24 * 60 * 60 * 1000) {
   });
 }
 
-async function processUserMessages(data, nazu = null, ownerNumber = null, personality = 'kaneki') {
+async function processUserMessages(data, nazu = null, ownerNumber = null, personality = 'toji') {
   try {
     const { mensagens } = data;
     if (!mensagens || !Array.isArray(mensagens)) {
@@ -1813,9 +1929,13 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
       } else if (personality === 'pro') {
         selectedPrompt = ASSISTANT_PROMPT_PRO;
       } else if (personality === 'manus') {
-        selectedPrompt = 'Você é o Manus, um assistente de IA avançado integrado ao Kaneki-Bot. Sua missão é ajudar o usuário com tarefas complexas, responder perguntas e realizar ações solicitadas.';
+        selectedPrompt = 'Você é o Manus, um assistente de IA avançado integrado ao Toji-Bot. Sua missão é ajudar o usuário com tarefas complexas, responder perguntas e realizar ações solicitadas.';
+      } else if (personality === 'toji') {
+        selectedPrompt = ASSISTANT_PROMPT_TOJI;
+      } else if (personality === 'misto') {
+        selectedPrompt = ASSISTANT_PROMPT_MISTO;
       } else {
-        selectedPrompt = ASSISTANT_PROMPT_NAZUNA;
+        selectedPrompt = ASSISTANT_PROMPT_TOJI; // Padrão agora é Toji
       }
       
       // Para personalidade 'pro', passa contexto simplificado com info de mídia e menções
@@ -1922,7 +2042,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
                 
                 // Garantir que tem react
                 if (!resposta.react) {
-                  resposta.react = getKanekiReact(isNightTime);
+                  resposta.react = getTojiReact(isNightTime);
                 }
                 
                 respostas.push(resposta);
@@ -1931,7 +2051,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
               else if (resposta.text && typeof resposta.text === 'string' && resposta.text.trim().length > 0) {
                 respostas.push({
                   resp: cleanWhatsAppFormatting(resposta.text),
-                  react: resposta.react || getKanekiReact(isNightTime)
+                  react: resposta.react || getTojiReact(isNightTime)
                 });
               }
             }
@@ -1939,7 +2059,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
             else if (typeof resposta === 'string' && resposta.trim().length > 0) {
               respostas.push({
                 resp: cleanWhatsAppFormatting(resposta),
-                react: getKanekiReact(isNightTime)
+                react: getTojiReact(isNightTime)
               });
             }
           });
@@ -1952,22 +2072,22 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
           if (result && result.resp && typeof result.resp === 'string' && result.resp.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result.resp),
-              react: getKanekiReact(isNightTime)
+              react: getTojiReact(isNightTime)
             });
           } else if (result && result.message && typeof result.message === 'string' && result.message.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result.message),
-              react: getKanekiReact(isNightTime)
+              react: getTojiReact(isNightTime)
             });
           } else if (result && result.text && typeof result.text === 'string' && result.text.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result.text),
-              react: getKanekiReact(isNightTime)
+              react: getTojiReact(isNightTime)
             });
           } else if (typeof result === 'string' && result.trim().length > 0) {
             respostas.push({
               resp: cleanWhatsAppFormatting(result),
-              react: getKanekiReact(isNightTime)
+              react: getTojiReact(isNightTime)
             });
           } else {
             console.error(`❌ [${personality}] Não foi possível extrair resposta válida do resultado`);
@@ -1984,7 +2104,15 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
       }
     }
 
-    return { resp: respostas };
+    return { 
+          resp: respostas,
+          isPro: result.isPro,
+          isCommand: result.isCommand,
+          command: result.command,
+          args: result.args,
+          falta: result.falta,
+          confianca: result.confianca
+        };
 
   } catch (error) {
     console.error('Erro fatal ao processar mensagens:', error);
@@ -2025,9 +2153,9 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       const sucesso = userContextDB.updateMemory(grupoUserId, tipoNormalizado, valor_antigo, valor);
       
       if (sucesso) {
-        console.log(`✏️ Kaneki EDITOU: ${tipo} de "${valor_antigo}" para "${valor}" (${grupoUserId})`);
+        console.log(`✏️ Toji EDITOU: ${tipo} de "${valor_antigo}" para "${valor}" (${grupoUserId})`);
       } else {
-        console.warn(`⚠️ Kaneki não encontrou "${valor_antigo}" em ${tipo} para editar`);
+        console.warn(`⚠️ Toji não encontrou "${valor_antigo}" em ${tipo} para editar`);
       }
       return;
     }
@@ -2037,9 +2165,9 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       const sucesso = userContextDB.deleteMemory(grupoUserId, tipoNormalizado, valor);
       
       if (sucesso) {
-        console.log(`🗑️ Kaneki EXCLUIU: ${tipo} = "${valor}" (${grupoUserId})`);
+        console.log(`🗑️ Toji EXCLUIU: ${tipo} = "${valor}" (${grupoUserId})`);
       } else {
-        console.warn(`⚠️ Kaneki não encontrou "${valor}" em ${tipo} para excluir`);
+        console.warn(`⚠️ Toji não encontrou "${valor}" em ${tipo} para excluir`);
       }
       return;
     }
@@ -2050,7 +2178,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'gosto':
       case 'gostos':
         userContextDB.addUserPreference(grupoUserId, 'gostos', valor);
-        console.log(`✅ Kaneki aprendeu: ${grupoUserId} gosta de "${valor}"`);
+        console.log(`✅ Toji aprendeu: ${grupoUserId} gosta de "${valor}"`);
         break;
         
       case 'nao_gosto':
@@ -2058,13 +2186,13 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'não_gosto':
       case 'não_gostos':
         userContextDB.addUserPreference(grupoUserId, 'nao_gostos', valor);
-        console.log(`✅ Kaneki aprendeu: ${grupoUserId} não gosta de "${valor}"`);
+        console.log(`✅ Toji aprendeu: ${grupoUserId} não gosta de "${valor}"`);
         break;
         
       case 'hobby':
       case 'hobbies':
         userContextDB.addUserPreference(grupoUserId, 'hobbies', valor);
-        console.log(`✅ Kaneki aprendeu: hobby de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji aprendeu: hobby de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'assunto_favorito':
@@ -2074,7 +2202,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'tópico':
         userContextDB.addUserPreference(grupoUserId, 'assuntos_favoritos', valor);
         userContextDB.addRecentTopic(grupoUserId, valor);
-        console.log(`✅ Kaneki aprendeu: assunto favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji aprendeu: assunto favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'nota_importante':
@@ -2083,7 +2211,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'informação_importante':
       case 'lembrete':
         userContextDB.addImportantNote(grupoUserId, valor);
-        console.log(`✅ Kaneki anotou: "${valor}" sobre ${grupoUserId}`);
+        console.log(`✅ Toji anotou: "${valor}" sobre ${grupoUserId}`);
         break;
         
       case 'memoria_especial':
@@ -2092,13 +2220,13 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'memória':
       case 'momento_especial':
         userContextDB.addSpecialMemory(grupoUserId, valor);
-        console.log(`✅ Kaneki guardou memória especial: "${valor}" com ${grupoUserId}`);
+        console.log(`✅ Toji guardou memória especial: "${valor}" com ${grupoUserId}`);
         break;
         
       case 'nome':
         // Atualizar o nome do usuário
         userContextDB.updateUserInfo(grupoUserId, valor, null);
-        console.log(`✅ Kaneki aprendeu o nome: ${grupoUserId} se chama "${valor}"`);
+        console.log(`✅ Toji aprendeu o nome: ${grupoUserId} se chama "${valor}"`);
         break;
         
       case 'apelido':
@@ -2106,12 +2234,12 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'nickname':
         // Adicionar apelido
         userContextDB.updateUserInfo(grupoUserId, null, valor);
-        console.log(`✅ Kaneki aprendeu apelido: ${grupoUserId} gosta de ser chamado de "${valor}"`);
+        console.log(`✅ Toji aprendeu apelido: ${grupoUserId} gosta de ser chamado de "${valor}"`);
         break;
         
       case 'idade':
         userContextDB.updatePersonalInfo(grupoUserId, 'idade', valor);
-        console.log(`✅ Kaneki aprendeu: ${grupoUserId} tem ${valor} anos`);
+        console.log(`✅ Toji aprendeu: ${grupoUserId} tem ${valor} anos`);
         break;
         
       case 'localizacao':
@@ -2120,7 +2248,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'cidade':
       case 'lugar':
         userContextDB.updatePersonalInfo(grupoUserId, 'localizacao', valor);
-        console.log(`✅ Kaneki aprendeu: ${grupoUserId} mora em "${valor}"`);
+        console.log(`✅ Toji aprendeu: ${grupoUserId} mora em "${valor}"`);
         break;
         
       case 'profissao':
@@ -2130,14 +2258,14 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'ocupacao':
       case 'ocupação':
         userContextDB.updatePersonalInfo(grupoUserId, 'profissao', valor);
-        console.log(`✅ Kaneki aprendeu: ${grupoUserId} trabalha como "${valor}"`);
+        console.log(`✅ Toji aprendeu: ${grupoUserId} trabalha como "${valor}"`);
         break;
         
       case 'relacionamento':
       case 'status_relacionamento':
       case 'status':
         userContextDB.updatePersonalInfo(grupoUserId, 'relacionamento', valor);
-        console.log(`✅ Kaneki aprendeu: status de relacionamento de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji aprendeu: status de relacionamento de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'familia':
@@ -2150,7 +2278,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
           contextoAtual.informacoes_pessoais.familia.push(valor);
           userContextDB.data[grupoUserId] = contextoAtual;
           userContextDB.saveDatabase();
-          console.log(`✅ Kaneki aprendeu sobre família de ${grupoUserId}: "${valor}"`);
+          console.log(`✅ Toji aprendeu sobre família de ${grupoUserId}: "${valor}"`);
         }
         break;
         
@@ -2163,11 +2291,11 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         
         if (campo && camposValidos.includes(campo)) {
           userContextDB.updatePersonalInfo(grupoUserId, campo, valor);
-          console.log(`✅ Kaneki aprendeu info pessoal de ${grupoUserId}: ${campo} = "${valor}"`);
+          console.log(`✅ Toji aprendeu info pessoal de ${grupoUserId}: ${campo} = "${valor}"`);
         } else {
           // Se não souber o campo, adicionar como nota importante
           userContextDB.addImportantNote(grupoUserId, valor);
-          console.log(`✅ Kaneki anotou info pessoal: "${valor}" sobre ${grupoUserId}`);
+          console.log(`✅ Toji anotou info pessoal: "${valor}" sobre ${grupoUserId}`);
         }
         break;
         
@@ -2180,7 +2308,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         userContext.padroes_comportamento.humor_comum = valor;
         userContextDB.data[grupoUserId] = userContext;
         userContextDB.saveDatabase();
-        console.log(`✅ Kaneki percebeu o humor de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji percebeu o humor de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'estilo_conversa':
@@ -2191,7 +2319,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         userCtx.preferencias.estilo_conversa = valor;
         userContextDB.data[grupoUserId] = userCtx;
         userContextDB.saveDatabase();
-        console.log(`✅ Kaneki identificou estilo de conversa de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji identificou estilo de conversa de ${grupoUserId}: "${valor}"`);
         break;
         
       // NOVOS TIPOS DE APRENDIZADO
@@ -2204,7 +2332,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'aspiracao':
       case 'aspiração':
         userContextDB.addImportantNote(grupoUserId, `[SONHO/OBJETIVO] ${valor}`);
-        console.log(`✅ Kaneki anotou sonho/objetivo de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sonho/objetivo de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'medo':
@@ -2213,7 +2341,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'fobias':
       case 'receio':
         userContextDB.addImportantNote(grupoUserId, `[MEDO] ${valor}`);
-        console.log(`✅ Kaneki anotou medo de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou medo de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'rotina':
@@ -2221,7 +2349,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'hábito':
       case 'costume':
         userContextDB.addImportantNote(grupoUserId, `[ROTINA] ${valor}`);
-        console.log(`✅ Kaneki anotou rotina de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou rotina de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'pet':
@@ -2229,7 +2357,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'animal_estimacao':
       case 'animal_de_estimação':
         userContextDB.addImportantNote(grupoUserId, `[PET] ${valor}`);
-        console.log(`✅ Kaneki anotou sobre pet de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sobre pet de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'musica':
@@ -2238,7 +2366,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'banda':
       case 'artista':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[MÚSICA] ${valor}`);
-        console.log(`✅ Kaneki anotou gosto musical de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou gosto musical de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'filme':
@@ -2247,7 +2375,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'série':
       case 'anime':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[FILME/SÉRIE] ${valor}`);
-        console.log(`✅ Kaneki anotou filme/série favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou filme/série favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'jogo':
@@ -2255,7 +2383,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'game':
       case 'games':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[JOGO] ${valor}`);
-        console.log(`✅ Kaneki anotou jogo favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou jogo favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'comida':
@@ -2264,21 +2392,21 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'culinaria':
       case 'culinária':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[COMIDA] ${valor}`);
-        console.log(`✅ Kaneki anotou comida favorita de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou comida favorita de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'bebida':
       case 'bebida_favorita':
       case 'drink':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[BEBIDA] ${valor}`);
-        console.log(`✅ Kaneki anotou bebida favorita de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou bebida favorita de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'cor':
       case 'cor_favorita':
       case 'cores':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[COR] ${valor}`);
-        console.log(`✅ Kaneki anotou cor favorita de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou cor favorita de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'esporte':
@@ -2287,7 +2415,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'time_futebol':
       case 'clube':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[ESPORTE] ${valor}`);
-        console.log(`✅ Kaneki anotou sobre esporte de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sobre esporte de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'livro':
@@ -2295,7 +2423,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'autor':
       case 'leitura':
         userContextDB.addUserPreference(grupoUserId, 'gostos', `[LIVRO] ${valor}`);
-        console.log(`✅ Kaneki anotou livro favorito de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou livro favorito de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'viagem':
@@ -2303,7 +2431,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'lugar_visitado':
       case 'destino':
         userContextDB.addImportantNote(grupoUserId, `[VIAGEM] ${valor}`);
-        console.log(`✅ Kaneki anotou sobre viagem de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sobre viagem de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'estudo':
@@ -2314,7 +2442,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'formacao':
       case 'formação':
         userContextDB.updatePersonalInfo(grupoUserId, 'profissao', `${valor} (estudante)`);
-        console.log(`✅ Kaneki anotou sobre estudos de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sobre estudos de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'idioma':
@@ -2322,7 +2450,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'lingua':
       case 'língua':
         userContextDB.addImportantNote(grupoUserId, `[IDIOMA] ${valor}`);
-        console.log(`✅ Kaneki anotou idioma de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou idioma de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'talento':
@@ -2330,7 +2458,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'skill':
       case 'dom':
         userContextDB.addImportantNote(grupoUserId, `[TALENTO] ${valor}`);
-        console.log(`✅ Kaneki anotou talento de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou talento de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'problema':
@@ -2339,7 +2467,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'preocupacao':
       case 'preocupação':
         userContextDB.addImportantNote(grupoUserId, `[PROBLEMA] ${valor}`);
-        console.log(`✅ Kaneki anotou preocupação de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou preocupação de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'conquista':
@@ -2349,7 +2477,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'vitória':
       case 'sucesso':
         userContextDB.addSpecialMemory(grupoUserId, `[CONQUISTA] ${valor}`);
-        console.log(`✅ Kaneki celebrou conquista de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji celebrou conquista de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'aniversario':
@@ -2357,14 +2485,14 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'data_nascimento':
       case 'birthday':
         userContextDB.addImportantNote(grupoUserId, `[ANIVERSÁRIO] ${valor}`);
-        console.log(`✅ Kaneki anotou aniversário de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou aniversário de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'signo':
       case 'zodiaco':
       case 'zodíaco':
         userContextDB.addImportantNote(grupoUserId, `[SIGNO] ${valor}`);
-        console.log(`✅ Kaneki anotou signo de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou signo de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'personalidade':
@@ -2372,7 +2500,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'caracteristica':
       case 'característica':
         userContextDB.addImportantNote(grupoUserId, `[PERSONALIDADE] ${valor}`);
-        console.log(`✅ Kaneki anotou sobre personalidade de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sobre personalidade de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'saude':
@@ -2381,7 +2509,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'condição':
       case 'alergia':
         userContextDB.addImportantNote(grupoUserId, `[SAÚDE] ${valor}`);
-        console.log(`✅ Kaneki anotou sobre saúde de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou sobre saúde de ${grupoUserId}: "${valor}"`);
         break;
         
       case 'plano':
@@ -2390,7 +2518,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'intenção':
       case 'futuro':
         userContextDB.addImportantNote(grupoUserId, `[PLANOS] ${valor}`);
-        console.log(`✅ Kaneki anotou planos de ${grupoUserId}: "${valor}"`);
+        console.log(`✅ Toji anotou planos de ${grupoUserId}: "${valor}"`);
         break;
         
       default:
@@ -2404,19 +2532,19 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         if (tipoLower.includes('gost') || tipoLower.includes('adora') || tipoLower.includes('ama') || 
             tipoLower.includes('prefere') || tipoLower.includes('curte')) {
           userContextDB.addUserPreference(grupoUserId, 'gostos', `[${tipo}] ${valor}`);
-          console.log(`📝 Kaneki categorizou como GOSTO: "${tipo}: ${valor}"`);
+          console.log(`📝 Toji categorizou como GOSTO: "${tipo}: ${valor}"`);
         }
         // Tentar identificar se é algo que não gosta
         else if (tipoLower.includes('odeia') || tipoLower.includes('detesta') || 
                  tipoLower.includes('nao_gosta') || tipoLower.includes('desgosto')) {
           userContextDB.addUserPreference(grupoUserId, 'nao_gostos', `[${tipo}] ${valor}`);
-          console.log(`📝 Kaneki categorizou como NÃO GOSTA: "${tipo}: ${valor}"`);
+          console.log(`📝 Toji categorizou como NÃO GOSTA: "${tipo}: ${valor}"`);
         }
         // Tentar identificar se é uma atividade/hobby
         else if (tipoLower.includes('atividade') || tipoLower.includes('faz') || 
                  tipoLower.includes('pratica') || tipoLower.includes('joga')) {
           userContextDB.addUserPreference(grupoUserId, 'hobbies', `[${tipo}] ${valor}`);
-          console.log(`📝 Kaneki categorizou como HOBBY: "${tipo}: ${valor}"`);
+          console.log(`📝 Toji categorizou como HOBBY: "${tipo}: ${valor}"`);
         }
         // Tentar identificar se é informação pessoal
         else if (tipoLower.includes('pessoal') || tipoLower.includes('info') || 
@@ -2429,12 +2557,12 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
           userCtx.informacoes_pessoais.outros[tipo] = valor;
           userContextDB.data[grupoUserId] = userCtx;
           userContextDB.saveDatabase();
-          console.log(`📝 Kaneki salvou INFO PERSONALIZADA: "${tipo}: ${valor}"`);
+          console.log(`📝 Toji salvou INFO PERSONALIZADA: "${tipo}: ${valor}"`);
         }
         // Se não conseguir categorizar, salvar como nota importante com o tipo original
         else {
           userContextDB.addImportantNote(grupoUserId, `[${tipo}] ${valor}`);
-          console.log(`📝 Kaneki anotou (tipo personalizado): "${tipo}: ${valor}" sobre ${grupoUserId}`);
+          console.log(`📝 Toji anotou (tipo personalizado): "${tipo}: ${valor}" sobre ${grupoUserId}`);
         }
     }
   } catch (error) {
@@ -2443,8 +2571,8 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
   }
 }
 
-// Funções auxiliares para personalização Kaneki
-function getKanekiGreeting(isNightTime, now) {
+// Funções auxiliares para personalização Toji
+function getTojiGreeting(isNightTime, now) {
   // Garantir que usa horário do Brasil
   const brazilTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
   const hour = brazilTime.getHours();
@@ -2460,16 +2588,16 @@ function getKanekiGreeting(isNightTime, now) {
   }
 }
 
-function getKanekiSeasonalGreeting() {
+function getTojiSeasonalGreeting() {
   // Garantir que usa horário do Brasil
   const now = new Date();
   const brazilTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
   const month = brazilTime.getMonth();
   const day = brazilTime.getDate();
   
-  // Aniversário Kaneki (assumindo 25 de dezembro)
+  // Aniversário Toji (assumindo 25 de dezembro)
   if (month === 11 && day === 25) {
-    return '🎂 *F-Feliz aniversário de Kaneki!*\n\n✨ N-Não que eu esteja comemorando ou nada assim... mas... obrigada por existir, humano bobo! 💕';
+    return '🎂 *F-Feliz aniversário de Toji!*\n\n✨ N-Não que eu esteja comemorando ou nada assim... mas... obrigada por existir, humano bobo! 💕';
   }
   
   // Natal
@@ -2510,7 +2638,7 @@ function getKanekiSeasonalGreeting() {
   return null;
 }
 
-function getKanekiMoodResponse(mood, userName) {
+function getTojiMoodResponse(mood, userName) {
   const moodResponses = {
     happy: [
       `😊 *H-Happy... não que eu esteja feliz por você ou nada assim!* ${userName}`,
@@ -2548,7 +2676,7 @@ function getKanekiMoodResponse(mood, userName) {
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
-function getKanekiTeasingResponse(userName) {
+function getTojiTeasingResponse(userName) {
   const teasings = [
     `🌸 *A-Ah, ${userName}... sempre me chamando pra fazer coisas pra você, né? Tipo assim... que insistente!*`,
     `😊 *E-Eh, ${userName}... você é complicado... mas vou te ajudar mesmo assim!*`,
@@ -2562,7 +2690,7 @@ function getKanekiTeasingResponse(userName) {
   return teasings[Math.floor(Math.random() * teasings.length)];
 }
 
-function getKanekiEncouragement(userName) {
+function getTojiEncouragement(userName) {
   const encouragements = [
     `💪 *V-Você consegue, ${userName}! Eu acredito em você, mesmo sendo humano!*`,
     `🌟 *N-Não desista, ${userName}! Tudo tem um jeito de dar certo... tipo assim... confia em mim!*`,
@@ -2576,7 +2704,7 @@ function getKanekiEncouragement(userName) {
   return encouragements[Math.floor(Math.random() * encouragements.length)];
 }
 
-function getKanekiApology(userName) {
+function getTojiApology(userName) {
   const apologies = [
     `😢 *S-Sorry, ${userName}... não foi intencional... tipo assim... errei mesmo...*`,
     `🌙 *P-Perdoa, ${userName}... não que eu esteja pedindo desculpas por você ou nada assim... mas... errei...*`,
@@ -2590,7 +2718,7 @@ function getKanekiApology(userName) {
   return apologies[Math.floor(Math.random() * apologies.length)];
 }
 
-function getKanekiCompliment(userName) {
+function getTojiCompliment(userName) {
   const compliments = [
     `🌸 *E-Eh, ${userName}... você é legal... tipo assim... não que eu goste de você ou nada assim!*`,
     `✨ *N-Não é como se eu estivesse impressionada com você, ${userName}... mas... você tem qualidades interessantes!*`,
@@ -2604,7 +2732,7 @@ function getKanekiCompliment(userName) {
   return compliments[Math.floor(Math.random() * compliments.length)];
 }
 
-function getKanekiMemoryReminder(userName, topic) {
+function getTojiMemoryReminder(userName, topic) {
   const memoryReminders = [
     `🌙 *L-Lembro quando ${userName} mencionou sobre ${topic}... tipo assim... encontrei algo interessante sobre isso!*`,
     `💕 *A-Ah, ${userName}... você já me contou que ${topic} era seu favorito... tipo assim... que tal tentar algo novo?*`,
@@ -2618,7 +2746,7 @@ function getKanekiMemoryReminder(userName, topic) {
   return memoryReminders[Math.floor(Math.random() * memoryReminders.length)];
 }
 
-function getKanekiContextualResponse(userName, context) {
+function getTojiContextualResponse(userName, context) {
   const contextualResponses = {
     morning: [
       `🌅 *B-Bom dia, ${userName}... não que eu seja de manhã ou coisa assim! Espero que você tenha dormido bem...*`,
@@ -2651,7 +2779,7 @@ function getKanekiContextualResponse(userName, context) {
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
-function getKanekiFlirtyResponse(userName) {
+function getTojiFlirtyResponse(userName) {
   const flirtyResponses = [
     `💕 *E-Eh, ${userName}... tipo assim... você tem um jeito especial... mesmo sendo humano...*`,
     `🌸 *N-Não é como se eu estivesse interessada em você ou nada assim... ${userName}... mas... você é cativante...*`,
@@ -2665,7 +2793,7 @@ function getKanekiFlirtyResponse(userName) {
   return flirtyResponses[Math.floor(Math.random() * flirtyResponses.length)];
 }
 
-function getKanekiPlayfulResponse(userName) {
+function getTojiPlayfulResponse(userName) {
   const playfulResponses = [
     `😊 *A-Ah, ${userName}... sempre me chamando pra brincar, né? Tipo assim... que insistente!*`,
     `🌸 *E-Eh, ${userName}... você é complicado... mas vamos divertir um pouco!*`,
@@ -2679,7 +2807,7 @@ function getKanekiPlayfulResponse(userName) {
   return playfulResponses[Math.floor(Math.random() * playfulResponses.length)];
 }
 
-function getKanekiDeepResponse(userName) {
+function getTojiDeepResponse(userName) {
   const deepResponses = [
     `🌙 *E-Eh, ${userName}... tipo assim... às vezes a vida é complicada... mas... tudo tem um jeito...*`,
     `💫 *N-Não é como se eu estivesse sábia ou nada assim... ${userName}... mas... acredito que tudo tem um propósito...*`,
@@ -2693,7 +2821,7 @@ function getKanekiDeepResponse(userName) {
   return deepResponses[Math.floor(Math.random() * deepResponses.length)];
 }
 
-function getKanekiMotivationalResponse(userName) {
+function getTojiMotivationalResponse(userName) {
   const motivationalResponses = [
     `💪 *V-Você consegue, ${userName}! Eu acredito em você, mesmo sendo humano!*`,
     `🌟 *N-Não desista, ${userName}! Tudo tem um jeito de dar certo... tipo assim... confia em mim!*`,
@@ -2707,7 +2835,7 @@ function getKanekiMotivationalResponse(userName) {
   return motivationalResponses[Math.floor(Math.random() * motivationalResponses.length)];
 }
 
-function getKanekiRomanticResponse(userName) {
+function getTojiRomanticResponse(userName) {
   const romanticResponses = [
     `💕 *E-Eh, ${userName}... tipo assim... você tem um jeito especial... mesmo sendo humano...*`,
     `🌸 *N-Não é como se eu estivesse apaixonada por você ou nada assim... ${userName}... mas... você é cativante...*`,
@@ -2721,7 +2849,7 @@ function getKanekiRomanticResponse(userName) {
   return romanticResponses[Math.floor(Math.random() * romanticResponses.length)];
 }
 
-function getKanekiProtectiveResponse(userName) {
+function getTojiProtectiveResponse(userName) {
   const protectiveResponses = [
     `🛡️ *E-Eh, ${userName}... tipo assim... se precisar de ajuda... eu estou aqui... mesmo sendo humano...*`,
     `💕 *N-Não é como se eu estivesse preocupada com você ou nada assim... ${userName}... mas... vou te proteger...*`,
@@ -2735,7 +2863,7 @@ function getKanekiProtectiveResponse(userName) {
   return protectiveResponses[Math.floor(Math.random() * protectiveResponses.length)];
 }
 
-function getKanekiSupportiveResponse(userName) {
+function getTojiSupportiveResponse(userName) {
   const supportiveResponses = [
     `💪 *E-Eh, ${userName}... tipo assim... se precisar de apoio... eu estou aqui... mesmo sendo humano...*`,
     `💕 *N-Não é como se eu estivesse apoiando você ou nada assim... ${userName}... mas... vou te ajudar...*`,
@@ -2749,7 +2877,7 @@ function getKanekiSupportiveResponse(userName) {
   return supportiveResponses[Math.floor(Math.random() * supportiveResponses.length)];
 }
 
-function getKanekiFunnyResponse(userName) {
+function getTojiFunnyResponse(userName) {
   const funnyResponses = [
     `😂 *A-Ah, ${userName}... tipo assim... você é engraçado mesmo sendo humano!*`,
     `🌸 *E-Eh, ${userName}... não que eu esteja rindo de você ou nada assim... mas... você é divertido!*`,
@@ -2763,7 +2891,7 @@ function getKanekiFunnyResponse(userName) {
   return funnyResponses[Math.floor(Math.random() * funnyResponses.length)];
 }
 
-function getKanekiCaringResponse(userName) {
+function getTojiCaringResponse(userName) {
   const caringResponses = [
     `💕 *E-Eh, ${userName}... tipo assim... se você precisa de cuidado... eu estou aqui... mesmo sendo humano...*`,
     `🌸 *N-Não é como se eu estivesse preocupada com você ou nada assim... ${userName}... mas... vou cuidar de você...*`,
@@ -2778,7 +2906,7 @@ function getKanekiCaringResponse(userName) {
 }
 
 
-function getKanekiReact() {
+function getTojiReact() {
   const reacts = [
     { emoji: '⚙️', weight: 0.3 }, // Eficiência, J.A.R.V.I.S.
     { emoji: '💡', weight: 0.2 }, // Insight, solução
@@ -2802,7 +2930,7 @@ function getKanekiReact() {
   return '⚙️'; // Fallback
 }
 
-function enhanceKanekiResponse(response, greeting, isNightTime) {
+function enhanceTojiResponse(response, greeting, isNightTime) {
   // Adicionar saudação contextual se não tiver
   if (!response.includes('Bom dia') && !response.includes('Boa tarde') && !response.includes('Boa noite') && !response.includes('Noite')) {
     response = `${greeting}\n\n${response}`;
@@ -2823,7 +2951,7 @@ function enhanceKanekiResponse(response, greeting, isNightTime) {
   return response;
 }
 
-function getKanekiErrorResponse(error, nazu, ownerNumber) {
+function getTojiErrorResponse(error, nazu, ownerNumber) {
   // Resposta genérica de erro na IA (removida diferenciação por API key)
   return {
     resp: [],
@@ -2842,7 +2970,7 @@ function shouldAddFarewell(lastMessage) {
   return farewellTriggers.some(trigger => messageText.includes(trigger));
 }
 
-function getKanekiFarewell(isNightTime) {
+function getTojiFarewell(isNightTime) {
   if (isNightTime) {
     return '🌙 *N-Noite... volte sempre!*\n\n✨ Não que eu esteja preocupada com você ou nada assim... só que a noite é mais bonita com você por perto! 💕';
   } else {
@@ -3099,11 +3227,11 @@ function getAverageResponseTime(grupoUserId) {
 }
 
 /**
- * Retorna o delay de resposta da Kaneki.
+ * Retorna o delay de resposta da Toji.
  * Removido o atraso artificial longo para priorizar a velocidade solicitada pelo usuário.
  * O humor e a personalidade agora são expressos apenas pelo conteúdo do texto.
  */
-function getKanekiResponseDelay(grupoUserId) {
+function getTojiResponseDelay(grupoUserId) {
   return 50; 
 }
 
@@ -3127,7 +3255,7 @@ export {
   markResponsePhase,
   endResponseTimer,
   getAverageResponseTime,
-  getKanekiResponseDelay,
+  getTojiResponseDelay,
   // Sistema de gerenciamento de estado
   updateConversationState,
   getConversationState,
@@ -3135,30 +3263,30 @@ export {
   getUserPreferences,
   trackUserInteraction,
   getUserInteractionStats,
-  // Funções de personalidade Kaneki
-  getKanekiGreeting,
-  getKanekiSeasonalGreeting,
-  getKanekiMoodResponse,
-  getKanekiTeasingResponse,
-  getKanekiEncouragement,
-  getKanekiApology,
-  getKanekiCompliment,
-  getKanekiMemoryReminder,
-  getKanekiContextualResponse,
-  getKanekiFlirtyResponse,
-  getKanekiPlayfulResponse,
-  getKanekiDeepResponse,
-  getKanekiMotivationalResponse,
-  getKanekiRomanticResponse,
-  getKanekiProtectiveResponse,
-  getKanekiSupportiveResponse,
-  getKanekiFunnyResponse,
-  getKanekiCaringResponse,
-  getKanekiReact,
-  enhanceKanekiResponse,
-  getKanekiErrorResponse,
+  // Funções de personalidade Toji
+  getTojiGreeting,
+  getTojiSeasonalGreeting,
+  getTojiMoodResponse,
+  getTojiTeasingResponse,
+  getTojiEncouragement,
+  getTojiApology,
+  getTojiCompliment,
+  getTojiMemoryReminder,
+  getTojiContextualResponse,
+  getTojiFlirtyResponse,
+  getTojiPlayfulResponse,
+  getTojiDeepResponse,
+  getTojiMotivationalResponse,
+  getTojiRomanticResponse,
+  getTojiProtectiveResponse,
+  getTojiSupportiveResponse,
+  getTojiFunnyResponse,
+  getTojiCaringResponse,
+  getTojiReact,
+  enhanceTojiResponse,
+  getTojiErrorResponse,
   shouldAddFarewell,
-  getKanekiFarewell,
+  getTojiFarewell,
   // Sistema de contexto de usuário
   userContextDB,
   processLearning

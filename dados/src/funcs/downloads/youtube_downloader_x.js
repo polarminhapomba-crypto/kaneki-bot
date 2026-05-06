@@ -1,4 +1,4 @@
-// Adaptado do DownloaderX para kaneki - Versão com encoding de compatibilidade máxima para WhatsApp
+// Adaptado do DownloaderX para toji - Versão com encoding de compatibilidade máxima para WhatsApp
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';

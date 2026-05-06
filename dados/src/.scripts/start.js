@@ -78,7 +78,7 @@ am startservice --user 0 \\
   -a com.termux.RUN_COMMAND \\
   --es com.termux.RUN_COMMAND_PATH '/data/data/com.termux/files/usr/bin/npm' \\
   --esa com.termux.RUN_COMMAND_ARGUMENTS 'start' \\
-  --es com.termux.RUN_COMMAND_SESSION_NAME 'Kaneki Bot' \\
+  --es com.termux.RUN_COMMAND_SESSION_NAME 'Toji Bot' \\
   --es com.termux.RUN_COMMAND_WORKDIR '${path.join(process.cwd())}' \\
   --ez com.termux.RUN_COMMAND_BACKGROUND 'false' \\
   --es com.termux.RUN_COMMAND_SESSION_ACTION '0'
@@ -104,7 +104,7 @@ am startservice --user 0 \\
 
 function setupGracefulShutdown() {
   const shutdown = () => {
-    mensagem('🛑 Encerrando o Kaneki... Até logo!');
+    mensagem('🛑 Encerrando o Toji... Até logo!');
     if (botProcess) {
       botProcess.removeAllListeners();
       botProcess.kill();
@@ -126,7 +126,7 @@ function setupGracefulShutdown() {
 
 async function displayHeader() {
   const header = [
-    `${colors.bold}🚀 Kaneki - Conexão WhatsApp${colors.reset}`,
+    `${colors.bold}🚀 Toji - Conexão WhatsApp${colors.reset}`,
     `${colors.bold}📦 Versão: ${version}${colors.reset}`,
   ];
 
