@@ -1,14 +1,18 @@
 # Toji Bot 🗡️💰
 
+![Toji Bot Banner](dados/midias/banner.jpg)
+
 ## O Assassino de Feiticeiros no seu WhatsApp
 
 Este é o Toji Bot, um bot de WhatsApp com a personalidade inconfundível de Toji Fushiguro. Direto, sarcástico e focado no que realmente importa: resultados. Ele não está aqui para papo furado, a menos que você tenha algo interessante (e lucrativo) a oferecer.
 
-### O que esperar do Toji Bot:
+![Toji Action](dados/midias/toji_action.gif)
 
-- **Personalidade Toji**: Respostas afiadas, sarcasmo e a visão de mundo de um mercenário que não se importa com formalidades.
-- **Modo Misto (Padrão)**: O Toji Bot vem de fábrica com um modo "misto" ativado. Isso significa que ele não só responde com a personalidade do Toji, mas também **executa comandos em linguagem natural** (sem precisar de prefixo!). Peça e ele fará, mas talvez com um resmungo ou uma pergunta sobre pagamento.
-- **Assistente PV Ativado**: No privado, o Toji Bot já está pronto para interagir no modo misto.
+### Modo Misto: O Toji Bot no seu Comando
+
+O Toji Bot vem de fábrica com um modo "misto" ativado. Isso significa que ele não só responde com a personalidade do Toji, mas também **executa comandos em linguagem natural** (sem precisar de prefixo!). Peça e ele fará o trabalho, mas talvez com um resmungo ou uma pergunta sobre pagamento. Afinal, tempo é dinheiro.
+
+![Toji Money](dados/midias/toji_money.png)
 
 ## Instalação
 
@@ -37,17 +41,18 @@ Para ligar o bot, execute:
 npm start
 ```
 
-## Comandos do Assistente
+## Comandos Principais
 
-O Toji Bot opera principalmente no modo misto, interpretando suas mensagens. No entanto, você pode ajustar o comportamento dele com os seguintes comandos:
+O Toji Bot é prático e eficiente. Aqui estão alguns dos comandos que você pode usar para tirar o máximo proveito dele:
 
-- `/assistentepv` — Ativa/desativa o assistente no PV
-- `/assistentepv misto` — Define a personalidade Misto (Toji + comandos)
-- `/assistentepv toji` — Define a personalidade Toji pura
-- `/assistentepv humana` — Define a personalidade humana
-- `/assistentepv pro` — Define o modo de execução de comandos (sem respostas)
-- `/assistentepv manus` — Integração com Manus para tarefas complexas
-- `/assistente` — Configura o assistente no grupo
+- `/menuia` — Acesse o menu de funcionalidades de Inteligência Artificial.
+- `/menudown` — Explore as opções de download de mídias.
+- `/menubn` — Gerencie e interaja com o sistema de banco de dados do bot.
+- `/menufig` — Crie e manipule figurinhas para suas conversas.
+
+Lembre-se: você pode simplesmente pedir o que precisa em linguagem natural, e o Toji fará o trabalho.
+
+![Toji Cool](dados/midias/toji_cool.gif)
 
 ## Solução de Problemas
 
