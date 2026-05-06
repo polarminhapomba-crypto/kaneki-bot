@@ -1482,10 +1482,10 @@ async function makeCognimaRequest(modelo, texto, systemPrompt = null, historico 
       };
       // Adicionar Authorization apenas se houver chave configurada
       if (IA_API_KEY) {
-        requestHeaders['Authorization'] = \`Bearer ${IA_API_KEY}`;
+        requestHeaders['Authorization'] = `Bearer ${IA_API_KEY}`;
       }
       const response = await axios.post(
-        \`${IA_API_BASE_URL}/openai\`,
+        `${IA_API_BASE_URL}/openai\`,
         {
           messages,
           model: IA_DEFAULT_MODEL,
@@ -1518,7 +1518,7 @@ async function makeCognimaRequest(modelo, texto, systemPrompt = null, historico 
 
       // retry handling — sem marcar status de API key
       if (attempt === retries - 1) {
-        throw new Error(\`Falha na requisição após ${retries} tentativas: ${error.response?.data?.message || error.message}\`);
+        throw new Error(\`Falha na requisição após ${retries} tentativas: ${error.response?.data?.message || error.message}`);
       }
 
       // Aumentar o tempo de espera entre tentativas (backoff) para evitar rate limit
@@ -1831,7 +1831,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
     
     for (const msgValidada of mensagensValidadas) {
       // Agora usa apenas o ID do usuário + personalidade para manter contexto entre grupos
-      const userId = \`${msgValidada.id_enviou}_${personality}`;
+      const userId = `${msgValidada.id_enviou}_${personality}`;
       
       // Registrar interação
       userContextDB.registerInteraction(userId, msgValidada.texto);
@@ -1866,7 +1866,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
           if (proResponse && proResponse.choices && proResponse.choices[0]) {
             const proResult = extractJSON(proResponse.choices[0].message.content);
             if (proResult.isCommand === true && proResult.command && proResult.confianca >= 0.7) {
-              console.log(\`[HIBRIDO] Comando identificado em modo Humana: ${proResult.command}\`);
+              console.log(\`[HIBRIDO] Comando identificado em modo Humana: ${proResult.command}`);
               return {
                 isPro: true,
                 isCommand: true,
@@ -1928,7 +1928,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
       try {
         // Integração com Manus
         if (personality === 'manus') {
-          console.log(\`[MANUS-PV] Processando mensagem via ManusBridge: ${msgValidada.texto}\`);
+          console.log(\`[MANUS-PV] Processando mensagem via ManusBridge: ${msgValidada.texto}`);
           const manusResponse = await manusBridge.handleManusCommand(msgValidada.texto, nazu, { sender: msgValidada.id_enviou });
           
           result = {
@@ -2173,7 +2173,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'informação_importante':
       case 'lembrete':
         userContextDB.addImportantNote(grupoUserId, valor);
-        console.log(\`✅ Toji anotou: "${valor}" sobre ${grupoUserId}\`);
+        console.log(\`✅ Toji anotou: "${valor}" sobre ${grupoUserId}`);
         break;
         
       case 'memoria_especial':
@@ -2182,7 +2182,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'memória':
       case 'momento_especial':
         userContextDB.addSpecialMemory(grupoUserId, valor);
-        console.log(\`✅ Toji guardou memória especial: "${valor}" com ${grupoUserId}\`);
+        console.log(\`✅ Toji guardou memória especial: "${valor}" com ${grupoUserId}`);
         break;
         
       case 'nome':
@@ -2257,7 +2257,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         } else {
           // Se não souber o campo, adicionar como nota importante
           userContextDB.addImportantNote(grupoUserId, valor);
-          console.log(\`✅ Toji anotou info pessoal: "${valor}" sobre ${grupoUserId}\`);
+          console.log(\`✅ Toji anotou info pessoal: "${valor}" sobre ${grupoUserId}`);
         }
         break;
         
@@ -2293,7 +2293,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'metas':
       case 'aspiracao':
       case 'aspiração':
-        userContextDB.addImportantNote(grupoUserId, \`[SONHO/OBJETIVO] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[SONHO/OBJETIVO] ${valor}`);
         console.log(\`✅ Toji anotou sonho/objetivo de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2302,7 +2302,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'fobia':
       case 'fobias':
       case 'receio':
-        userContextDB.addImportantNote(grupoUserId, \`[MEDO] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[MEDO] ${valor}`);
         console.log(\`✅ Toji anotou medo de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2310,7 +2310,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'habito':
       case 'hábito':
       case 'costume':
-        userContextDB.addImportantNote(grupoUserId, \`[ROTINA] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[ROTINA] ${valor}`);
         console.log(\`✅ Toji anotou rotina de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2318,7 +2318,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'animal':
       case 'animal_estimacao':
       case 'animal_de_estimação':
-        userContextDB.addImportantNote(grupoUserId, \`[PET] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[PET] ${valor}`);
         console.log(\`✅ Toji anotou sobre pet de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2327,7 +2327,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'musica_favorita':
       case 'banda':
       case 'artista':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[MÚSICA] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[MÚSICA] ${valor}`);
         console.log(\`✅ Toji anotou gosto musical de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2336,7 +2336,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'serie':
       case 'série':
       case 'anime':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[FILME/SÉRIE] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[FILME/SÉRIE] ${valor}`);
         console.log(\`✅ Toji anotou filme/série favorito de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2344,7 +2344,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'jogos':
       case 'game':
       case 'games':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[JOGO] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[JOGO] ${valor}`);
         console.log(\`✅ Toji anotou jogo favorito de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2353,21 +2353,21 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'prato':
       case 'culinaria':
       case 'culinária':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[COMIDA] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[COMIDA] ${valor}`);
         console.log(\`✅ Toji anotou comida favorita de ${grupoUserId}: "${valor}"\`);
         break;
         
       case 'bebida':
       case 'bebida_favorita':
       case 'drink':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[BEBIDA] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[BEBIDA] ${valor}`);
         console.log(\`✅ Toji anotou bebida favorita de ${grupoUserId}: "${valor}"\`);
         break;
         
       case 'cor':
       case 'cor_favorita':
       case 'cores':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[COR] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[COR] ${valor}`);
         console.log(\`✅ Toji anotou cor favorita de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2376,7 +2376,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'time':
       case 'time_futebol':
       case 'clube':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[ESPORTE] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[ESPORTE] ${valor}`);
         console.log(\`✅ Toji anotou sobre esporte de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2384,7 +2384,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'livros':
       case 'autor':
       case 'leitura':
-        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[LIVRO] ${valor}\`);
+        userContextDB.addUserPreference(grupoUserId, 'gostos', \`[LIVRO] ${valor}`);
         console.log(\`✅ Toji anotou livro favorito de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2392,7 +2392,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'viagens':
       case 'lugar_visitado':
       case 'destino':
-        userContextDB.addImportantNote(grupoUserId, \`[VIAGEM] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[VIAGEM] ${valor}`);
         console.log(\`✅ Toji anotou sobre viagem de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2403,7 +2403,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'universidade':
       case 'formacao':
       case 'formação':
-        userContextDB.updatePersonalInfo(grupoUserId, 'profissao', \`${valor} (estudante)\`);
+        userContextDB.updatePersonalInfo(grupoUserId, 'profissao', `${valor} (estudante)\`);
         console.log(\`✅ Toji anotou sobre estudos de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2411,7 +2411,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'idiomas':
       case 'lingua':
       case 'língua':
-        userContextDB.addImportantNote(grupoUserId, \`[IDIOMA] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[IDIOMA] ${valor}`);
         console.log(\`✅ Toji anotou idioma de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2419,7 +2419,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'habilidade':
       case 'skill':
       case 'dom':
-        userContextDB.addImportantNote(grupoUserId, \`[TALENTO] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[TALENTO] ${valor}`);
         console.log(\`✅ Toji anotou talento de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2428,7 +2428,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'desafio':
       case 'preocupacao':
       case 'preocupação':
-        userContextDB.addImportantNote(grupoUserId, \`[PROBLEMA] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[PROBLEMA] ${valor}`);
         console.log(\`✅ Toji anotou preocupação de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2438,7 +2438,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'vitoria':
       case 'vitória':
       case 'sucesso':
-        userContextDB.addSpecialMemory(grupoUserId, \`[CONQUISTA] ${valor}\`);
+        userContextDB.addSpecialMemory(grupoUserId, \`[CONQUISTA] ${valor}`);
         console.log(\`✅ Toji celebrou conquista de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2446,14 +2446,14 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'aniversário':
       case 'data_nascimento':
       case 'birthday':
-        userContextDB.addImportantNote(grupoUserId, \`[ANIVERSÁRIO] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[ANIVERSÁRIO] ${valor}`);
         console.log(\`✅ Toji anotou aniversário de ${grupoUserId}: "${valor}"\`);
         break;
         
       case 'signo':
       case 'zodiaco':
       case 'zodíaco':
-        userContextDB.addImportantNote(grupoUserId, \`[SIGNO] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[SIGNO] ${valor}`);
         console.log(\`✅ Toji anotou signo de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2461,7 +2461,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'jeito_de_ser':
       case 'caracteristica':
       case 'característica':
-        userContextDB.addImportantNote(grupoUserId, \`[PERSONALIDADE] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[PERSONALIDADE] ${valor}`);
         console.log(\`✅ Toji anotou sobre personalidade de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2470,7 +2470,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'condicao':
       case 'condição':
       case 'alergia':
-        userContextDB.addImportantNote(grupoUserId, \`[SAÚDE] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[SAÚDE] ${valor}`);
         console.log(\`✅ Toji anotou sobre saúde de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2479,7 +2479,7 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
       case 'intencao':
       case 'intenção':
       case 'futuro':
-        userContextDB.addImportantNote(grupoUserId, \`[PLANOS] ${valor}\`);
+        userContextDB.addImportantNote(grupoUserId, \`[PLANOS] ${valor}`);
         console.log(\`✅ Toji anotou planos de ${grupoUserId}: "${valor}"\`);
         break;
         
@@ -2493,19 +2493,19 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         // Tentar identificar se é uma preferência (contém palavras-chave)
         if (tipoLower.includes('gost') || tipoLower.includes('adora') || tipoLower.includes('ama') || 
             tipoLower.includes('prefere') || tipoLower.includes('curte')) {
-          userContextDB.addUserPreference(grupoUserId, 'gostos', \`[${tipo}] ${valor}\`);
+          userContextDB.addUserPreference(grupoUserId, 'gostos', \`[${tipo}] ${valor}`);
           console.log(\`📝 Toji categorizou como GOSTO: "${tipo}: ${valor}"\`);
         }
         // Tentar identificar se é algo que não gosta
         else if (tipoLower.includes('odeia') || tipoLower.includes('detesta') || 
                  tipoLower.includes('nao_gosta') || tipoLower.includes('desgosto')) {
-          userContextDB.addUserPreference(grupoUserId, 'nao_gostos', \`[${tipo}] ${valor}\`);
+          userContextDB.addUserPreference(grupoUserId, 'nao_gostos', \`[${tipo}] ${valor}`);
           console.log(\`📝 Toji categorizou como NÃO GOSTA: "${tipo}: ${valor}"\`);
         }
         // Tentar identificar se é uma atividade/hobby
         else if (tipoLower.includes('atividade') || tipoLower.includes('faz') || 
                  tipoLower.includes('pratica') || tipoLower.includes('joga')) {
-          userContextDB.addUserPreference(grupoUserId, 'hobbies', \`[${tipo}] ${valor}\`);
+          userContextDB.addUserPreference(grupoUserId, 'hobbies', \`[${tipo}] ${valor}`);
           console.log(\`📝 Toji categorizou como HOBBY: "${tipo}: ${valor}"\`);
         }
         // Tentar identificar se é informação pessoal
@@ -2523,8 +2523,8 @@ function processLearning(grupoUserId, aprender, mensagemOriginal) {
         }
         // Se não conseguir categorizar, salvar como nota importante com o tipo original
         else {
-          userContextDB.addImportantNote(grupoUserId, \`[${tipo}] ${valor}\`);
-          console.log(\`📝 Toji anotou (tipo personalizado): "${tipo}: ${valor}" sobre ${grupoUserId}\`);
+          userContextDB.addImportantNote(grupoUserId, \`[${tipo}] ${valor}`);
+          console.log(\`📝 Toji anotou (tipo personalizado): "${tipo}: ${valor}" sobre ${grupoUserId}`);
         }
     }
   } catch (error) {
@@ -2603,34 +2603,34 @@ function getTojiSeasonalGreeting() {
 function getTojiMoodResponse(mood, userName) {
   const moodResponses = {
     happy: [
-      \`😊 *H-Happy... não que eu esteja feliz por você ou nada assim!* ${userName}\`,
-      \`🌸 *S-Sinto bem... tipo assim... você sabe?* ${userName}\`,
-      \`✨ *N-Não é como se eu estivesse radiante ou nada!* ${userName}\`
+      \`😊 *H-Happy... não que eu esteja feliz por você ou nada assim!* ${userName}`,
+      \`🌸 *S-Sinto bem... tipo assim... você sabe?* ${userName}`,
+      \`✨ *N-Não é como se eu estivesse radiante ou nada!* ${userName}`
     ],
     sad: [
-      \`😢 *E-Está tudo bem... não que eu esteja preocupada ou nada assim!* ${userName}\`,
-      \`🌙 *S-Se precisar de alguém... tipo assim... eu estou aqui...* ${userName}\`,
-      \`💕 *N-Não chore... tudo vai ficar bem... tipo assim... eu prometo...* ${userName}\`
+      \`😢 *E-Está tudo bem... não que eu esteja preocupada ou nada assim!* ${userName}`,
+      \`🌙 *S-Se precisar de alguém... tipo assim... eu estou aqui...* ${userName}`,
+      \`💕 *N-Não chore... tudo vai ficar bem... tipo assim... eu prometo...* ${userName}`
     ],
     angry: [
-      \`😠 *A-Anoiiada... não que eu esteja brava com você ou nada assim!* ${userName}\`,
-      \`🦇 *D-Deixa eu sozinha um pouco... tipo assim... preciso respirar...* ${userName}\`,
-      \`😳 *S-Sorry... não foi intencional... tipo assim... estava nervosa...* ${userName}\`
+      \`😠 *A-Anoiiada... não que eu esteja brava com você ou nada assim!* ${userName}`,
+      \`🦇 *D-Deixa eu sozinha um pouco... tipo assim... preciso respirar...* ${userName}`,
+      \`😳 *S-Sorry... não foi intencional... tipo assim... estava nervosa...* ${userName}`
     ],
     excited: [
-      \`🌟 *E-Energética... não que eu esteja animada ou nada assim!* ${userName}\`,
-      \`✨ *T-Tem algo especial acontecendo? Tipo assim... estou curiosa!* ${userName}\`,
-      \`🎉 *N-Não é como se eu estivesse eufórica ou nada!* ${userName}\`
+      \`🌟 *E-Energética... não que eu esteja animada ou nada assim!* ${userName}`,
+      \`✨ *T-Tem algo especial acontecendo? Tipo assim... estou curiosa!* ${userName}`,
+      \`🎉 *N-Não é como se eu estivesse eufórica ou nada!* ${userName}`
     ],
     tired: [
-      \`😴 *C-Cansada... não que eu esteja exausta ou nada assim!* ${userName}\`,
-      \`🌙 *P-Preciso de um pouco de descanso... tipo assim... só um minutinho...* ${userName}\`,
-      \`💤 *N-Não é como se eu estivesse sonolenta ou nada!* ${userName}\`
+      \`😴 *C-Cansada... não que eu esteja exausta ou nada assim!* ${userName}`,
+      \`🌙 *P-Preciso de um pouco de descanso... tipo assim... só um minutinho...* ${userName}`,
+      \`💤 *N-Não é como se eu estivesse sonolenta ou nada!* ${userName}`
     ],
     romantic: [
-      \`💕 *C-Carinhosa... não que eu esteja apaixonada ou nada assim!* ${userName}\`,
-      \`🌸 *S-Se você quer... tipo assim... posso ser mais doce...* ${userName}\`,
-      \`✨ *N-Não é como se eu estivesse sendo afetuosa por você ou nada!* ${userName}\`
+      \`💕 *C-Carinhosa... não que eu esteja apaixonada ou nada assim!* ${userName}`,
+      \`🌸 *S-Se você quer... tipo assim... posso ser mais doce...* ${userName}`,
+      \`✨ *N-Não é como se eu estivesse sendo afetuosa por você ou nada!* ${userName}`
     ]
   };
   
@@ -2895,7 +2895,7 @@ function getTojiReact() {
 function enhanceTojiResponse(response, greeting, isNightTime) {
   // Adicionar saudação contextual se não tiver
   if (!response.includes('Bom dia') && !response.includes('Boa tarde') && !response.includes('Boa noite') && !response.includes('Noite')) {
-    response = \`${greeting}\n\n${response}`;
+    response = `${greeting}\n\n${response}`;
   }
   
   // Adicionar expressões tsundere se não tiver
@@ -2907,7 +2907,7 @@ function enhanceTojiResponse(response, greeting, isNightTime) {
       'T-Tchau, humano bobo! '
     ];
     const randomPhrase = tsunderePhrases[Math.floor(Math.random() * tsunderePhrases.length)];
-    response = \`${randomPhrase}${response}`;
+    response = `${randomPhrase}${response}`;
   }
   
   return response;
