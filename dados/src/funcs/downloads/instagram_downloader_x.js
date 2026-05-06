@@ -1,5 +1,9 @@
-// Adaptado do DownloaderX para kaneki - Versão sem yt-dlp
 import axios from 'axios';
+
+const APIS = [
+  'https://nayan-video-downloader.vercel.app/ndown',
+  'https://api.vreden.my.id/api/igdl'
+];
 
 async function handleInstagramDownloader(sock, from, url, info) {
   if (!url.startsWith('http')) {
@@ -7,61 +11,55 @@ async function handleInstagramDownloader(sock, from, url, info) {
     return;
   }
 
-  try {
-    // Usar API nayan-video-downloader
-    const response = await axios.get(`https://nayan-video-downloader.vercel.app/ndown?url=${encodeURIComponent(url)}`, {
-      timeout: 120000
-    });
+  let success = false;
+  let errorMsg = '❌ Postagem não encontrada ou perfil privado.';
 
-    if (!response.data?.data?.length) {
-      await sock.sendMessage(from, { text: '❌ Postagem não encontrada' }, { quoted: info });
-      return;
-    }
+  for (const apiBase of APIS) {
+    try {
+      const apiUrl = `${apiBase}?url=${encodeURIComponent(url)}`;
+      const response = await axios.get(apiUrl, { timeout: 30000 });
+      
+      // Ajuste para diferentes formatos de resposta das APIs
+      let data = response.data?.data || response.data?.result;
+      if (!Array.isArray(data) && data?.url) data = [data];
+      if (!Array.isArray(data)) continue;
 
-    const uniqueUrls = new Set();
+      if (data.length > 0) {
+        const uniqueUrls = new Set();
+        for (const item of data) {
+          const mediaUrl = item.url || item.downloadUrl || (typeof item === 'string' ? item : null);
+          if (!mediaUrl || uniqueUrls.has(mediaUrl)) continue;
+          uniqueUrls.add(mediaUrl);
 
-    // Processar cada item de mídia
-    for (const item of response.data.data) {
-      if (uniqueUrls.has(item.url)) continue;
-      uniqueUrls.add(item.url);
+          try {
+            const mediaResponse = await axios.get(mediaUrl, {
+              responseType: 'arraybuffer',
+              timeout: 60000,
+              headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
+            });
 
-      try {
-        // Verificar tipo de mídia via HEAD request
-        const headResponse = await axios.head(item.url, { timeout: 30000 });
-        const contentType = headResponse.headers['content-type'] || '';
-        
-        // Baixar o conteúdo
-        const mediaResponse = await axios.get(item.url, {
-          responseType: 'arraybuffer',
-          timeout: 120000,
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            const buffer = Buffer.from(mediaResponse.data);
+            const contentType = mediaResponse.headers['content-type'] || '';
+            
+            if (contentType.startsWith('image/')) {
+              await sock.sendMessage(from, { image: buffer, caption: '📸 Instagram' }, { quoted: info });
+            } else {
+              await sock.sendMessage(from, { video: buffer, mimetype: 'video/mp4', caption: '📹 Instagram' }, { quoted: info });
+            }
+            success = true;
+          } catch (e) {
+            console.error('Erro ao baixar mídia individual:', e.message);
           }
-        });
-        
-        const buffer = Buffer.from(mediaResponse.data);
-        const isImage = contentType.startsWith('image/');
-
-        if (isImage) {
-          await sock.sendMessage(from, {
-            image: buffer,
-            caption: '📸 Instagram Image'
-          }, { quoted: info });
-        } else {
-          await sock.sendMessage(from, {
-            video: buffer,
-            mimetype: 'video/mp4',
-            caption: '📹 Instagram Video'
-          }, { quoted: info });
         }
-      } catch (downloadError) {
-        console.error('Erro ao baixar mídia do Instagram:', downloadError.message);
+        if (success) break;
       }
+    } catch (err) {
+      console.error(`Erro na API ${apiBase}:`, err.message);
     }
+  }
 
-  } catch (err) {
-    console.error('❌ Erro ao baixar Instagram:', err.message);
-    await sock.sendMessage(from, { text: '❌ Falha ao baixar do Instagram. Tente novamente.' }, { quoted: info });
+  if (!success) {
+    await sock.sendMessage(from, { text: errorMsg }, { quoted: info });
   }
 }
 
