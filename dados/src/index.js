@@ -4149,19 +4149,13 @@ Código: *${roleCode}*`,
     if (!isGroup && !info.key.fromMe && (!isCmd || (isPotentialCommandPv && !isCmd))) {
       try {
         const assistentePvPath = __dirname + '/../database/dono/assistentepv.json';
-        let assistentePvData = { ativo: true, personality: 'misto' };
-        try {
-          if (fs.existsSync(assistentePvPath)) {
-            const _pvLoaded = JSON.parse(fs.readFileSync(assistentePvPath));
-            // Só sobrescreve se o arquivo existir e tiver a chave 'ativo' definida explicitamente
-            if (typeof _pvLoaded.ativo === 'boolean') {
-              assistentePvData = _pvLoaded;
-            } else {
-              // Arquivo existe mas sem 'ativo' definido: mantém ativo por padrão
-              assistentePvData = { ..._pvLoaded, ativo: true, personality: _pvLoaded.personality || 'humana' };
-            }
-          }
-        } catch (e) {}
+        if (!global.assistentePvCache || Date.now() - (global.assistentePvLastRead || 0) > 30000) {
+          try {
+            global.assistentePvCache = fs.existsSync(assistentePvPath) ? JSON.parse(fs.readFileSync(assistentePvPath)) : { ativo: true, personality: 'misto' };
+            global.assistentePvLastRead = Date.now();
+          } catch (e) { global.assistentePvCache = { ativo: true, personality: 'misto' }; }
+        }
+        const assistentePvData = global.assistentePvCache;
         
         if (assistentePvData.ativo && budy2 && budy2.length >= 2) {
           const personality = assistentePvData.personality || 'toji';
@@ -27651,6 +27645,8 @@ Exemplos:
               assistentePvData.personality = assistentePvData.personality || 'misto';
             }
             fs.writeFileSync(assistentePvPath, JSON.stringify(assistentePvData, null, 2));
+            global.assistentePvCache = assistentePvData;
+            global.assistentePvLastRead = Date.now();
             
             const statusMsg = assistentePvData.ativo 
               ? `✅ *Assistente PV ativada com sucesso!*\n\n` +
