@@ -1,4 +1,5 @@
-import makeWASocket from '@whiskeysockets/baileys';
+import pkg from '@whiskeysockets/baileys';
+const { default: makeWASocket } = pkg;
 import {
   downloadContentFromMessage,
   generateWAMessageFromContent,
