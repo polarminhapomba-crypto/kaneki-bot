@@ -56,5 +56,57 @@
       }
     ],
     "ultima_atualizacao": "2026-02-05T15:12:20.000Z"
+  },
+  "60812727160901@lid_misto": {
+    "userId": "60812727160901@lid_misto",
+    "nome": "Vinícius",
+    "apelidos": [],
+    "preferencias": {
+      "assuntos_favoritos": [],
+      "gostos": [],
+      "nao_gostos": [],
+      "hobbies": [],
+      "estilo_conversa": "casual",
+      "usa_emojis": true,
+      "formal": false
+    },
+    "informacoes_pessoais": {
+      "idade": null,
+      "localizacao": null,
+      "profissao": null,
+      "relacionamento": null,
+      "familia": []
+    },
+    "historico_conversa": {
+      "total_mensagens": 2,
+      "primeira_conversa": "2026-05-26T13:59:01.000Z",
+      "ultima_conversa": "2026-05-26T13:59:39.000Z",
+      "frequencia_interacao": "baixa",
+      "topicos_recentes": []
+    },
+    "padroes_comportamento": {
+      "horarios_ativos": {
+        "10": 2
+      },
+      "dias_semana_ativos": {
+        "terça-feira": 2
+      },
+      "humor_comum": "neutro",
+      "tipo_mensagens": {
+        "perguntas": 0,
+        "afirmacoes": 0,
+        "emocoes": 0,
+        "comandos": 0
+      }
+    },
+    "relacionamento_toji": {
+      "nivel_intimidade": 1,
+      "apelido_toji": null,
+      "memorias_especiais": [],
+      "conversas_marcantes": [],
+      "sentimento": "neutro"
+    },
+    "notas_importantes": [],
+    "ultima_atualizacao": "2026-05-26T13:59:39.000Z"
   }
 }
