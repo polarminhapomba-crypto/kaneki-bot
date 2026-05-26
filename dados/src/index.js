@@ -1,4 +1,4 @@
-import makeWASocket from 'whaileys';
+import makeWASocket from '@whiskeysockets/baileys';
 import {
   downloadContentFromMessage,
   generateWAMessageFromContent,
@@ -8,7 +8,7 @@ import {
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore
-} from 'whaileys';
+} from '@whiskeysockets/baileys';
 import { exec, execSync, spawn } from 'child_process';
 import { promisify } from 'util';
 
