@@ -180,14 +180,26 @@ async function checkPrerequisites() {
 }
 
 function startBot(codeMode = false) {
-  const args = ['--expose-gc', CONNECT_FILE];
+  // Otimização para 1GB de RAM (Railway/Termux)
+  const args = [
+    '--expose-gc',
+    '--max-old-space-size=768', // Limita a 768MB para deixar margem pro sistema
+    '--gc-interval=100',        // Coleta lixo com mais frequência
+    CONNECT_FILE
+  ];
+  
   if (codeMode) args.push('--code');
 
-  info(`📷 Iniciando com ${codeMode ? 'código de pareamento' : 'QR Code'}`);
+  info(`📷 Iniciando com ${codeMode ? 'código de pareamento' : 'QR Code'} (Otimizado para 1GB RAM)`);
 
   botProcess = spawn('node', args, {
     stdio: 'inherit',
-    env: { ...process.env, FORCE_COLOR: '1' },
+    env: { 
+      ...process.env, 
+      FORCE_COLOR: '1',
+      NODE_ENV: 'production',
+      UV_THREADPOOL_SIZE: '4' // Reduz threads para economizar memória
+    },
   });
 
   botProcess.on('error', (error) => {
