@@ -1924,7 +1924,7 @@ async function processUserMessages(data, nazu = null, ownerNumber = null, person
         }
       };
 
-      let result;
+      let result = { resp: [], isPro: false, isCommand: false };
       try {
         // Integração com Manus
         if (personality === 'manus') {

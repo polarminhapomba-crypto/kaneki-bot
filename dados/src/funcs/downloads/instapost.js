@@ -65,7 +65,10 @@ async function downloadInstaPost(url) {
       return { ok: false, msg: 'URL inválida.' };
     }
 
-    const cached = getCached(`instapost:${url}`);
+    // Normaliza URL removendo parâmetros de rastreio que podem quebrar o download
+    const cleanUrl = url.split('?')[0].split('&')[0];
+
+    const cached = getCached(`instapost:${cleanUrl}`);
     if (cached) return { ok: true, ...cached, cached: true };
 
     let successData = null;
@@ -74,7 +77,7 @@ async function downloadInstaPost(url) {
     // Tenta em múltiplas APIs para garantir o download
     for (const apiBase of INSTA_APIS) {
       try {
-        const response = await axios.get(`${apiBase}?url=${encodeURIComponent(url)}`, {
+        const response = await axios.get(`${apiBase}?url=${encodeURIComponent(cleanUrl)}`, {
           timeout: 45000
         });
 
@@ -129,13 +132,13 @@ async function downloadInstaPost(url) {
     }
 
     const result = {
-      isStory: isStoryUrl(url),
-      username: isStoryUrl(url) ? extractUsername(url) : null,
+      isStory: isStoryUrl(cleanUrl),
+      username: isStoryUrl(cleanUrl) ? extractUsername(cleanUrl) : null,
       data: results,
       count: results.length
     };
 
-    setCache(`instapost:${url}`, result);
+    setCache(`instapost:${cleanUrl}`, result);
 
     return { ok: true, ...result };
   } catch (error) {
