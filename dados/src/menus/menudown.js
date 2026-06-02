@@ -43,7 +43,7 @@ ${bottomBorder}
 ${menuTopBorder}${separatorIcon} *${downloadMenuTitle}*
 ${middleBorder}
 ${middleBorder}${menuItemIcon}${prefix}tiktok
-${middleBorder}${menuItemIcon}${prefix}insta-post
+${middleBorder}${menuItemIcon}${prefix}insta
 ${middleBorder}${menuItemIcon}${prefix}facebook
 ${middleBorder}${menuItemIcon}${prefix}gdrive
 	${middleBorder}${menuItemIcon}${prefix}mediafire

@@ -19251,11 +19251,17 @@ case 'facebookdl':
   break;
 
       case 'instagram':
+      case 'insta':
       case 'igdl':
       case 'ig':
       case 'instavideo':
+      case 'igstory':
+      case 'instastory':
+      case 'storydl':
+      case 'storyig':
+      case 'insta-post':
         try {
-          if (!q) return reply(`Digite um link do Instagram.\n> Ex: ${prefix}${command} https://www.instagram.com/reel/DFaq_X7uoiT/?igsh=M3Q3N2ZyMWU1M3Bo`);
+          if (!q) return reply(`Digite um link do Instagram (Post, Reel, Story ou Destaque).\n> Ex: ${prefix}${command} https://www.instagram.com/reel/DFaq_X7uoiT/`);
           
           if (!q.startsWith('http')) {
             return reply('❌ URL inválida. Por favor, envie um link do Instagram válido.');
@@ -19271,37 +19277,13 @@ case 'facebookdl':
               await handleInstaPost(nazu, from, q, info);
             } catch (err) {
               console.error(`Erro ao baixar Instagram:`, err);
-              reply(`❌ Erro ao baixar o conteúdo.`);
+              reply(`❌ Erro ao baixar o conteúdo. Verifique se o perfil é público.`);
             }
           });
           
           return;
         } catch (e) {
           console.error('Erro no comando Instagram:', e);
-          reply("❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
-        }
-        break;
-      
-      case 'igstory':
-      case 'instastory':
-      case 'storydl':
-      case 'storyig':
-        try {
-          if (!q) return reply(`Digite um link do story do Instagram.\n> Ex: ${prefix}${command} https://www.instagram.com/stories/username/`);
-          
-          if (!q.startsWith('http')) {
-            return reply('❌ URL inválida. Por favor, envie um link do Instagram válido.');
-          }
-
-          reply('📥 Baixando story do Instagram... Aguarde!');
-          
-          // Importar e usar o handler unificado
-          const { handleInstaPost } = await import('./funcs/downloads/instapost.js');
-          await handleInstaPost(nazu, from, q, info);
-          
-          return;
-        } catch (e) {
-          console.error('Erro no comando Instagram Story:', e);
           reply("❌ Ocorreu um erro ao processar sua solicitação. Por favor, tente novamente mais tarde.");
         }
         break;
