@@ -9,9 +9,17 @@ import { mediaClient } from '../../utils/httpClient.js';
 
 const INSTA_APIS = [
   'https://api.ayanapi.com.br/api/dowloader/instagram?url=',
-  'https://nayan-video-downloader.vercel.app/ndown?url=',
   'https://api.vreden.my.id/api/igdl?url=',
-  'https://api.vreden.my.id/api/igstory?url='
+  'https://api.vreden.my.id/api/igstory?url=',
+  'https://nayan-video-downloader.vercel.app/ndown?url=',
+  'https://api.caliph.biz.id/api/instagram?url=',
+  'https://api.diego-api.com/api/v1/dl/instagram?url='
+];
+
+const STORY_SPECIFIC_APIS = [
+  'https://api.vreden.my.id/api/igstory?url=',
+  'https://api.diego-api.com/api/v1/dl/igstory?url=',
+  'https://api.ayanapi.com.br/api/dowloader/instagram?url='
 ];
 
 // Cache simples
@@ -75,8 +83,11 @@ async function downloadInstaPost(url) {
     let successData = null;
     let lastError = null;
 
+    const isStory = isStoryUrl(cleanUrl) || cleanUrl.includes('/s/');
+    const apisToTry = isStory ? [...STORY_SPECIFIC_APIS, ...INSTA_APIS] : INSTA_APIS;
+
     // Tenta em múltiplas APIs para garantir o download
-    for (const apiBase of INSTA_APIS) {
+    for (const apiBase of apisToTry) {
       try {
         // Algumas APIs já incluem o ?url=, outras não. Vamos padronizar.
         const separator = apiBase.includes('?') ? '' : '?url=';
