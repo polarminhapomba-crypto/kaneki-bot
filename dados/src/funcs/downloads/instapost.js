@@ -7,7 +7,11 @@
 import axios from 'axios';
 import { mediaClient } from '../../utils/httpClient.js';
 
-const NAYAN_API = 'https://nayan-video-downloader.vercel.app/ndown';
+const INSTA_APIS = [
+  'https://nayan-video-downloader.vercel.app/ndown',
+  'https://api.vreden.my.id/api/igdl',
+  'https://api.vreden.my.id/api/igstory'
+];
 
 // Cache simples
 const cache = new Map();
@@ -64,15 +68,34 @@ async function downloadInstaPost(url) {
     const cached = getCached(`instapost:${url}`);
     if (cached) return { ok: true, ...cached, cached: true };
 
-    const response = await axios.get(`${NAYAN_API}?url=${encodeURIComponent(url)}`, {
-      timeout: 120000
-    });
+    let successData = null;
+    let lastError = null;
 
-    if (!response.data?.data?.length) {
+    // Tenta em múltiplas APIs para garantir o download
+    for (const apiBase of INSTA_APIS) {
+      try {
+        const response = await axios.get(`${apiBase}?url=${encodeURIComponent(url)}`, {
+          timeout: 45000
+        });
+
+        const rawData = response.data?.data || response.data?.result || response.data;
+        const mediaList = Array.isArray(rawData) ? rawData : (rawData?.url ? [rawData] : []);
+
+        if (mediaList.length > 0) {
+          successData = mediaList;
+          break;
+        }
+      } catch (e) {
+        lastError = e.message;
+        continue;
+      }
+    }
+
+    if (!successData || successData.length === 0) {
       return {
         ok: false,
-        msg: isStoryUrl(url)
-          ? 'Story não encontrado ou já expirou. Stories ficam disponíveis por apenas 24 horas.'
+        msg: isStoryUrl(url) || url.includes('/s/')
+          ? 'Story/Destaque não encontrado ou já expirou. Verifique se o perfil é público.'
           : 'Postagem não encontrada. Verifique se o link está correto e se o perfil é público.'
       };
     }
@@ -80,24 +103,24 @@ async function downloadInstaPost(url) {
     const results = [];
     const uniqueUrls = new Set();
 
-    for (const item of response.data.data) {
-      if (uniqueUrls.has(item.url)) continue;
-      uniqueUrls.add(item.url);
+    for (const item of successData) {
+      const mediaUrl = item.url || item.downloadUrl || (typeof item === 'string' ? item : null);
+      if (!mediaUrl || uniqueUrls.has(mediaUrl)) continue;
+      uniqueUrls.add(mediaUrl);
 
       try {
-        const headResponse = await axios.head(item.url, { timeout: 30000 });
-        const contentType = headResponse.headers['content-type'] || '';
-
-        const mediaResponse = await mediaClient.get(item.url, { timeout: 120000 });
+        // Tenta obter o buffer da mídia
+        const mediaResponse = await mediaClient.get(mediaUrl, { timeout: 60000 });
+        const contentType = mediaResponse.headers['content-type'] || '';
 
         results.push({
           type: contentType.startsWith('image/') ? 'image' : 'video',
           buff: mediaResponse.data,
-          url: item.url,
+          url: mediaUrl,
           mime: contentType || 'application/octet-stream'
         });
       } catch (dlErr) {
-        console.error('[instapost] Erro ao baixar mídia:', dlErr.message);
+        console.error('[instapost] Erro ao baixar mídia individual:', dlErr.message);
       }
     }
 
