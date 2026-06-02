@@ -19261,17 +19261,17 @@ case 'facebookdl':
             return reply('❌ URL inválida. Por favor, envie um link do Instagram válido.');
           }
 
-          const { handleInstagramDownloader } = await import('./funcs/downloads/instagram_downloader_x.js');
+          const { handleInstaPost } = await import('./funcs/downloads/instapost.js');
           await editProgress("📥 Iniciando download do Instagram...", [
             "⚡ Conectando aos servidores do Instagram...",
             "✨ Processando mídia e preparando arquivo...",
             "✅ Download concluído! Enviando agora..."
           ], async (editKey) => {
             try {
-              await handleInstagramDownloader(nazu, from, q, info);
+              await handleInstaPost(nazu, from, q, info);
             } catch (err) {
               console.error(`Erro ao baixar Instagram:`, err);
-              reply(`❌ Erro ao baixar o vídeo.`);
+              reply(`❌ Erro ao baixar o conteúdo.`);
             }
           });
           
@@ -19295,9 +19295,9 @@ case 'facebookdl':
 
           reply('📥 Baixando story do Instagram... Aguarde!');
           
-          // Importar e usar o handler de stories
-          const { handleInstagramStoryDownloader } = await import('./funcs/downloads/igstory.js');
-          await handleInstagramStoryDownloader(nazu, from, q, info);
+          // Importar e usar o handler unificado
+          const { handleInstaPost } = await import('./funcs/downloads/instapost.js');
+          await handleInstaPost(nazu, from, q, info);
           
           return;
         } catch (e) {
