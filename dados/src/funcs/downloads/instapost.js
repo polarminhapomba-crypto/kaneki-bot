@@ -8,9 +8,10 @@ import axios from 'axios';
 import { mediaClient } from '../../utils/httpClient.js';
 
 const INSTA_APIS = [
-  'https://nayan-video-downloader.vercel.app/ndown',
-  'https://api.vreden.my.id/api/igdl',
-  'https://api.vreden.my.id/api/igstory'
+  'https://api.ayanapi.com.br/api/dowloader/instagram?url=',
+  'https://nayan-video-downloader.vercel.app/ndown?url=',
+  'https://api.vreden.my.id/api/igdl?url=',
+  'https://api.vreden.my.id/api/igstory?url='
 ];
 
 // Cache simples
@@ -77,12 +78,33 @@ async function downloadInstaPost(url) {
     // Tenta em múltiplas APIs para garantir o download
     for (const apiBase of INSTA_APIS) {
       try {
-        const response = await axios.get(`${apiBase}?url=${encodeURIComponent(cleanUrl)}`, {
-          timeout: 45000
+        // Algumas APIs já incluem o ?url=, outras não. Vamos padronizar.
+        const separator = apiBase.includes('?') ? '' : '?url=';
+        const finalUrl = `${apiBase}${separator}${encodeURIComponent(cleanUrl)}`;
+        
+        const response = await axios.get(finalUrl, {
+          timeout: 30000
         });
 
-        const rawData = response.data?.data || response.data?.result || response.data;
-        const mediaList = Array.isArray(rawData) ? rawData : (rawData?.url ? [rawData] : []);
+        // Mapeamento inteligente de diferentes formatos de resposta de APIs
+        const rawData = response.data?.data || response.data?.result || response.data?.results || response.data;
+        
+        // Normaliza para uma lista de mídias
+        let mediaList = [];
+        if (Array.isArray(rawData)) {
+          mediaList = rawData;
+        } else if (rawData && typeof rawData === 'object') {
+          // Se for um objeto com URL direta
+          if (rawData.url || rawData.downloadUrl || rawData.video_url || rawData.image_url) {
+            mediaList = [rawData];
+          } else {
+            // Tenta encontrar qualquer array dentro do objeto
+            const possibleArray = Object.values(rawData).find(val => Array.isArray(val));
+            if (possibleArray) mediaList = possibleArray;
+          }
+        } else if (typeof rawData === 'string' && rawData.startsWith('http')) {
+          mediaList = [{ url: rawData }];
+        }
 
         if (mediaList.length > 0) {
           successData = mediaList;
@@ -107,7 +129,7 @@ async function downloadInstaPost(url) {
     const uniqueUrls = new Set();
 
     for (const item of successData) {
-      const mediaUrl = item.url || item.downloadUrl || (typeof item === 'string' ? item : null);
+      const mediaUrl = item.url || item.downloadUrl || item.video_url || item.image_url || (typeof item === 'string' ? item : null);
       if (!mediaUrl || uniqueUrls.has(mediaUrl)) continue;
       uniqueUrls.add(mediaUrl);
 
@@ -117,13 +139,19 @@ async function downloadInstaPost(url) {
         const contentType = mediaResponse.headers['content-type'] || '';
 
         results.push({
-          type: contentType.startsWith('image/') ? 'image' : 'video',
+          type: (contentType.startsWith('image/') || item.type === 'image') ? 'image' : 'video',
           buff: mediaResponse.data,
           url: mediaUrl,
           mime: contentType || 'application/octet-stream'
         });
       } catch (dlErr) {
-        console.error('[instapost] Erro ao baixar mídia individual:', dlErr.message);
+        // Fallback: se falhar o buffer, tenta enviar o link direto se for vídeo
+        results.push({
+          type: 'video',
+          url: mediaUrl,
+          isLinkOnly: true
+        });
+        console.error('[instapost] Erro ao baixar mídia individual, enviando link:', dlErr.message);
       }
     }
 
@@ -183,6 +211,11 @@ async function handleInstaPost(sock, from, url, info) {
 
     // Enviar cada mídia
     for (const media of result.data) {
+      if (media.isLinkOnly) {
+        await sock.sendMessage(from, { text: `🔗 Link da mídia: ${media.url}` }, { quoted: info });
+        continue;
+      }
+
       const buffer = Buffer.from(media.buff);
 
       if (media.type === 'image') {
