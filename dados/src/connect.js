@@ -1040,22 +1040,8 @@ async function createBotSocket(authDir) {
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
-                console.log('\n\n' + '█'.repeat(50));
-                console.log('█' + ' '.repeat(48) + '█');
-                console.log('█' + '  CÓDIGO DE CONEXÃO WHATSAPP DISPONÍVEL!  '.center(48) + '█');
-                console.log('█' + ' '.repeat(48) + '█');
-                console.log('█' + `         👉  ${formattedCode}  👈         `.center(48) + '█');
-                console.log('█' + ' '.repeat(48) + '█');
-                console.log('█' + '  USE ESTE CÓDIGO NO SEU WHATSAPP AGORA!  '.center(48) + '█');
-                console.log('█' + ' '.repeat(48) + '█');
-                console.log('█'.repeat(50) + '\n\n');
-                
-                console.log(`📋 Instruções para +${phoneNumber}:`);
-                console.log('1️⃣  Abra o WhatsApp no seu celular');
-                console.log('2️⃣  Vá em Dispositivos Conectados');
-                console.log('3️⃣  Toque em Conectar dispositivo');
-                console.log('4️⃣  Toque em "Conectar com número de telefone"');
-                console.log(`5️⃣  Digite o código: ${formattedCode}\n`);
+                console.log(`\n🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
+                console.log(`📲 Use no WhatsApp (+${phoneNumber}): Dispositivos Conectados > Conectar com número de telefone\n`);
                 
                 // Não enviamos mensagem via WhatsApp aqui porque o bot ainda não está conectado.
                 // O código deve ser lido diretamente nos logs do Railway.
@@ -1224,15 +1210,15 @@ async function createBotSocket(authDir) {
                 lastDisconnect,
                 qr
             } = update;
-            // QR Code desabilitado — usando pairing code automático
-            if (qr && !TojiSock.authState.creds.registered && !codeMode) {
+            // QR Code habilitado junto com o pairing code
+            if (qr && !TojiSock.authState.creds.registered) {
                 console.log('🔗 QR Code gerado para autenticação:');
                 qrcode.generate(qr, {
                     small: true
                 }, (qrcodeText) => {
                     console.log(qrcodeText);
                 });
-                console.log('📱 Escaneie o QR code acima com o WhatsApp para autenticar o bot.');
+                console.log('📱 Escaneie o QR code acima OU use o código enviado para o seu número.');
             }
             if (connection === 'open') {
                 console.log(`🔄 Conexão aberta. Inicializando sistema de otimização...`);
