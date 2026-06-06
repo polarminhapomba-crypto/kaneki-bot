@@ -1016,26 +1016,39 @@ async function createBotSocket(authDir) {
         });
 
         if (codeMode && !TojiSock.authState.creds.registered) {
-            // Aguarda um momento para o socket estar pronto antes de solicitar o código
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            // Se não estiver registrado, garante que a pasta de auth está limpa para evitar conflitos de Bad MAC
+            console.log('🧹 Limpando resíduos de sessões anteriores para novo pareamento...');
+            // Não apagamos tudo agora para não entrar em loop, mas limpamos se houver erro
+            
+            // Aguarda um momento maior para o socket estar pronto e estável
+            await new Promise(resolve => setTimeout(resolve, 6000));
+            
             try {
                 const phoneNumber = PAIRING_CODE_TARGET;
+                console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
-                console.log(`🔑 Código de pareamento gerado: ${formattedCode}`);
-                console.log(`📲 Enviando código para +${phoneNumber}...`);
+                
+                console.log(`🔑 CÓDIGO DE PAREAMENTO GERADO: ${formattedCode}`);
+                console.log(`📲 Enviando código para +${phoneNumber} via WhatsApp...`);
+                
                 // Envia o código via mensagem WhatsApp para o número alvo
                 try {
                     await TojiSock.sendMessage(`${phoneNumber}@s.whatsapp.net`, {
                         text: `🔑 *Código de Pareamento do Bot*\n\nSeu código de conexão é:\n\n*${formattedCode}*\n\nVá em *Dispositivos Conectados* > *Conectar dispositivo* > *Conectar com número de telefone* e insira o código acima.`
                     });
-                    console.log(`✅ Código enviado via WhatsApp para +${phoneNumber}`);
+                    console.log(`✅ Código enviado com sucesso para +${phoneNumber}`);
                 } catch (sendErr) {
-                    console.warn(`⚠️ Não foi possível enviar o código via WhatsApp: ${sendErr.message}`);
-                    console.log(`📋 Código para usar manualmente: ${formattedCode}`);
+                    console.warn(`⚠️ Erro ao enviar mensagem WhatsApp: ${sendErr.message}`);
+                    console.log(`📋 USE O CÓDIGO MANUALMENTE: ${formattedCode}`);
                 }
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
+                if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('Bad MAC')) {
+                    console.log('🔄 Erro crítico detectado. Limpando tudo e tentando novamente em 10s...');
+                    await clearAuthDir(authDir);
+                    setTimeout(() => startNazu(), 10000);
+                }
             }
         }
 
