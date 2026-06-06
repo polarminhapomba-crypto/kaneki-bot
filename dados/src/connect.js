@@ -339,8 +339,6 @@ async function initializeOptimizedCaches() {
 }
 // Pairing code sempre ativo — nunca usa QR Code
 const codeMode = true;
-// Número que receberá o pairing code via mensagem WhatsApp
-const PAIRING_CODE_TARGET = '5573996668637';
 
 // Cleanup otimizado do cache de mensagens
 let cacheCleanupInterval = null;
@@ -1026,25 +1024,26 @@ async function createBotSocket(authDir) {
         });
 
         if (codeMode && !TojiSock.authState.creds.registered) {
-            // Se não estiver registrado, garante que a pasta de auth está limpa para evitar conflitos de Bad MAC
-            console.log('🧹 Limpando resíduos de sessões anteriores para novo pareamento...');
-            // Não apagamos tudo agora para não entrar em loop, mas limpamos se houver erro
+            // Aguarda o socket estar 100% pronto
+            await new Promise(resolve => setTimeout(resolve, 5000));
             
-            // Aguarda o socket estar 100% pronto e autenticado internamente antes de pedir o código
-            console.log('⏳ Aguardando estabilização da rede (10s)...');
-            await new Promise(resolve => setTimeout(resolve, 10000));
-            
+            console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
+            let phoneNumber = await ask('--> ');
+            phoneNumber = phoneNumber.replace(/\D/g, '');
+
+            if (!/^\d{10,15}$/.test(phoneNumber)) {
+                console.log('⚠️ Número inválido! Reiniciando processo...');
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                return startNazu();
+            }
+
             try {
-                const phoneNumber = PAIRING_CODE_TARGET;
                 console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
                 console.log(`\n🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
                 console.log(`📲 Use no WhatsApp (+${phoneNumber}): Dispositivos Conectados > Conectar com número de telefone\n`);
-                
-                // Não enviamos mensagem via WhatsApp aqui porque o bot ainda não está conectado.
-                // O código deve ser lido diretamente nos logs do Railway.
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                 if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('Bad MAC')) {
