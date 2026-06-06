@@ -21,6 +21,16 @@ import { buildUserId } from './utils/helpers.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Polyfill simples para centralizar texto nos logs
+if (!String.prototype.center) {
+    String.prototype.center = function(width) {
+        const padding = Math.max(0, width - this.length);
+        const leftPadding = Math.floor(padding / 2);
+        const rightPadding = padding - leftPadding;
+        return ' '.repeat(leftPadding) + this + ' '.repeat(rightPadding);
+    };
+}
+
 class MessageQueue {
     constructor(maxWorkers = 4, batchSize = 10, messagesPerBatch = 2) {
         this.queue = [];
@@ -1030,14 +1040,22 @@ async function createBotSocket(authDir) {
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
-                console.log('\n' + '='.repeat(40));
-                console.log(`🔑 SEU CÓDIGO DE PAREAMENTO: ${formattedCode}`);
-                console.log('='.repeat(40));
-                console.log(`\n📲 Use este código no seu WhatsApp (+${phoneNumber}):`);
-                console.log('1. Vá em Dispositivos Conectados');
-                console.log('2. Conectar dispositivo');
-                console.log('3. Conectar com número de telefone');
-                console.log(`4. Digite: ${formattedCode}\n`);
+                console.log('\n\n' + '█'.repeat(50));
+                console.log('█' + ' '.repeat(48) + '█');
+                console.log('█' + '  CÓDIGO DE CONEXÃO WHATSAPP DISPONÍVEL!  '.center(48) + '█');
+                console.log('█' + ' '.repeat(48) + '█');
+                console.log('█' + `         👉  ${formattedCode}  👈         `.center(48) + '█');
+                console.log('█' + ' '.repeat(48) + '█');
+                console.log('█' + '  USE ESTE CÓDIGO NO SEU WHATSAPP AGORA!  '.center(48) + '█');
+                console.log('█' + ' '.repeat(48) + '█');
+                console.log('█'.repeat(50) + '\n\n');
+                
+                console.log(`📋 Instruções para +${phoneNumber}:`);
+                console.log('1️⃣  Abra o WhatsApp no seu celular');
+                console.log('2️⃣  Vá em Dispositivos Conectados');
+                console.log('3️⃣  Toque em Conectar dispositivo');
+                console.log('4️⃣  Toque em "Conectar com número de telefone"');
+                console.log(`5️⃣  Digite o código: ${formattedCode}\n`);
                 
                 // Não enviamos mensagem via WhatsApp aqui porque o bot ainda não está conectado.
                 // O código deve ser lido diretamente nos logs do Railway.
