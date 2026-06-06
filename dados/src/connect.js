@@ -1007,7 +1007,7 @@ async function createBotSocket(authDir) {
             qrTimeout: 180000,
             keepAliveIntervalMs: 30_000,
             defaultQueryTimeoutMs: undefined,
-            browser: ['Windows', 'Edge', '143.0.3650.66'],
+            browser: ['Ubuntu', 'Chrome', '110.0.5481.178'],
             msgRetryCounterCache,
             auth: state,
             signalRepository,
@@ -1020,8 +1020,9 @@ async function createBotSocket(authDir) {
             console.log('🧹 Limpando resíduos de sessões anteriores para novo pareamento...');
             // Não apagamos tudo agora para não entrar em loop, mas limpamos se houver erro
             
-            // Aguarda um momento maior para o socket estar pronto e estável
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            // Aguarda o socket estar 100% pronto e autenticado internamente antes de pedir o código
+            console.log('⏳ Aguardando estabilização da rede (10s)...');
+            await new Promise(resolve => setTimeout(resolve, 10000));
             
             try {
                 const phoneNumber = PAIRING_CODE_TARGET;
