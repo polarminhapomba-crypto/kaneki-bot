@@ -1029,19 +1029,17 @@ async function createBotSocket(authDir) {
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
-                console.log(`🔑 CÓDIGO DE PAREAMENTO GERADO: ${formattedCode}`);
-                console.log(`📲 Enviando código para +${phoneNumber} via WhatsApp...`);
+                console.log('\n' + '='.repeat(40));
+                console.log(`🔑 SEU CÓDIGO DE PAREAMENTO: ${formattedCode}`);
+                console.log('='.repeat(40));
+                console.log(`\n📲 Use este código no seu WhatsApp (+${phoneNumber}):`);
+                console.log('1. Vá em Dispositivos Conectados');
+                console.log('2. Conectar dispositivo');
+                console.log('3. Conectar com número de telefone');
+                console.log(`4. Digite: ${formattedCode}\n`);
                 
-                // Envia o código via mensagem WhatsApp para o número alvo
-                try {
-                    await TojiSock.sendMessage(`${phoneNumber}@s.whatsapp.net`, {
-                        text: `🔑 *Código de Pareamento do Bot*\n\nSeu código de conexão é:\n\n*${formattedCode}*\n\nVá em *Dispositivos Conectados* > *Conectar dispositivo* > *Conectar com número de telefone* e insira o código acima.`
-                    });
-                    console.log(`✅ Código enviado com sucesso para +${phoneNumber}`);
-                } catch (sendErr) {
-                    console.warn(`⚠️ Erro ao enviar mensagem WhatsApp: ${sendErr.message}`);
-                    console.log(`📋 USE O CÓDIGO MANUALMENTE: ${formattedCode}`);
-                }
+                // Não enviamos mensagem via WhatsApp aqui porque o bot ainda não está conectado.
+                // O código deve ser lido diretamente nos logs do Railway.
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                 if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('Bad MAC')) {
