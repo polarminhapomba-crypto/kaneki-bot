@@ -327,7 +327,10 @@ async function initializeOptimizedCaches() {
         
     }
 }
-const codeMode = process.argv.includes('--code') || process.env.NAZUNA_CODE_MODE === '1';
+// Pairing code sempre ativo — nunca usa QR Code
+const codeMode = true;
+// Número que receberá o pairing code via mensagem WhatsApp
+const PAIRING_CODE_TARGET = '5573996668637';
 
 // Cleanup otimizado do cache de mensagens
 let cacheCleanupInterval = null;
@@ -1013,16 +1016,27 @@ async function createBotSocket(authDir) {
         });
 
         if (codeMode && !TojiSock.authState.creds.registered) {
-            console.log('📱 Insira o número de telefone (com código de país, ex: +14155552671 ou +551199999999): ');
-            let phoneNumber = await ask('--> ');
-            phoneNumber = phoneNumber.replace(/\D/g, '');
-            if (!/^\d{10,15}$/.test(phoneNumber)) {
-                console.log('⚠️ Número inválido! Use um número válido com código de país (ex: +14155552671 ou +551199999999).');
-                process.exit(1);
+            // Aguarda um momento para o socket estar pronto antes de solicitar o código
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            try {
+                const phoneNumber = PAIRING_CODE_TARGET;
+                const code = await TojiSock.requestPairingCode(phoneNumber);
+                const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
+                console.log(`🔑 Código de pareamento gerado: ${formattedCode}`);
+                console.log(`📲 Enviando código para +${phoneNumber}...`);
+                // Envia o código via mensagem WhatsApp para o número alvo
+                try {
+                    await TojiSock.sendMessage(`${phoneNumber}@s.whatsapp.net`, {
+                        text: `🔑 *Código de Pareamento do Bot*\n\nSeu código de conexão é:\n\n*${formattedCode}*\n\nVá em *Dispositivos Conectados* > *Conectar dispositivo* > *Conectar com número de telefone* e insira o código acima.`
+                    });
+                    console.log(`✅ Código enviado via WhatsApp para +${phoneNumber}`);
+                } catch (sendErr) {
+                    console.warn(`⚠️ Não foi possível enviar o código via WhatsApp: ${sendErr.message}`);
+                    console.log(`📋 Código para usar manualmente: ${formattedCode}`);
+                }
+            } catch (pairingErr) {
+                console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
             }
-            const code = await TojiSock.requestPairingCode(phoneNumber.replaceAll('+', '').replaceAll(' ', '').replaceAll('-', ''));
-            console.log(`🔑 Código de pareamento: ${code}`);
-            console.log('📲 Envie este código no WhatsApp para autenticar o bot.');
         }
 
         TojiSock.ev.on('creds.update', saveCreds);
@@ -1180,6 +1194,7 @@ async function createBotSocket(authDir) {
                 lastDisconnect,
                 qr
             } = update;
+            // QR Code desabilitado — usando pairing code automático
             if (qr && !TojiSock.authState.creds.registered && !codeMode) {
                 console.log('🔗 QR Code gerado para autenticação:');
                 qrcode.generate(qr, {
@@ -1268,7 +1283,7 @@ async function createBotSocket(authDir) {
                 
                 if (reason === DisconnectReason.badSession || reason === DisconnectReason.loggedOut) {
                     await clearAuthDir(authDir);
-                    console.log('🔄 Nova autenticação será necessária na próxima inicialização.');
+                    console.log('🔄 Sessão removida. O bot solicitará um novo pairing code automaticamente.');
                 }
                 
                 // Não reconecta se conexão foi substituída (outra instância assumiu)
