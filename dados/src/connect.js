@@ -1281,9 +1281,14 @@ async function createBotSocket(authDir) {
                 // Reset do contador 403 se for outro tipo de erro
                 forbidden403Attempts = 0;
                 
-                if (reason === DisconnectReason.badSession || reason === DisconnectReason.loggedOut) {
+                // Erro de Bad MAC ou sessão corrompida
+                const isBadSession = reason === DisconnectReason.badSession || 
+                                   reason === DisconnectReason.loggedOut || 
+                                   (lastDisconnect?.error?.message?.includes('Bad MAC'));
+
+                if (isBadSession) {
                     await clearAuthDir(authDir);
-                    console.log('🔄 Sessão removida. O bot solicitará um novo pairing code automaticamente.');
+                    console.log('🔄 Sessão corrompida ou finalizada detectada. Limpando e solicitando novo pairing code...');
                 }
                 
                 // Não reconecta se conexão foi substituída (outra instância assumiu)
