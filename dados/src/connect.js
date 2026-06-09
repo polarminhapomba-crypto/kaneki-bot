@@ -17,6 +17,7 @@ import PerformanceOptimizer from './utils/performanceOptimizer.js';
 import RentalExpirationManager from './utils/rentalExpirationManager.js';
 import { loadMsgBotOn } from './utils/database.js';
 import { buildUserId } from './utils/helpers.js';
+import { startHealthCheck } from './utils/healthcheck.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -999,9 +1000,9 @@ async function createBotSocket(authDir) {
             signalRepository
         } = await useMultiFileAuthState(authDir, makeCacheableSignalKeyStore);
         
-        // Versão manual do WhatsApp
-        const version = [2, 3000, 1031821793];
-        console.log(`📱 Usando versão do WhatsApp: ${version.join('.')}`);
+        // Busca a versão mais recente do WhatsApp automaticamente
+        let { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1035194821], isLatest: false }));
+        console.log(`📱 Usando versão do WhatsApp: ${version.join('.')} (${isLatest ? 'mais recente' : 'fallback'})`);
         
         const TojiSock = makeWASocket({
             version,
@@ -1344,6 +1345,9 @@ async function createBotSocket(authDir) {
 }
 
 async function startNazu() {
+    // Inicia o servidor de healthcheck para o Railway
+    startHealthCheck();
+
     // Evita múltiplas instâncias sendo criadas ao mesmo tempo
     if (isReconnecting) {
         console.log('⚠️ Reconexão já em andamento, ignorando chamada duplicada...');

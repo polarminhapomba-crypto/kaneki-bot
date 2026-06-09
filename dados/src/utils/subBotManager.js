@@ -150,7 +150,8 @@ async function initializeSubBot(botId, phoneNumber, ownerNumber, generatePairing
         const { config, dirs } = createSubBotConfig(botId, phoneNumber, ownerNumber);
         
         const { state, saveCreds } = await useMultiFileAuthState(dirs.authDir, makeCacheableSignalKeyStore);
-        const version = [2, 3000, 1031821793];
+        // Busca a versão mais recente do WhatsApp
+        const { version } = await fetchBaileysVersionFromGitHub().catch(() => ({ version: [2, 3000, 1035194821] }));
 
         const msgRetryCounterCache = new NodeCache();
 
