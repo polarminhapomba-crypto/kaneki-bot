@@ -1,0 +1,28 @@
+{
+  "mark": {},
+  "createdAt": "2026-06-10T21:19:44.353Z",
+  "groupName": "ˑ 𓈒 𐔌 Adm\"s ͡꒱ ۫",
+  "modorpg": false,
+  "assistente": true,
+  "assistentePersonality": "misto",
+  "minMessage": null,
+  "moderators": [],
+  "allowedModCommands": [],
+  "mutedUsers": {},
+  "mutedUsers2": {},
+  "levelingEnabled": false,
+  "adminWhitelist": {},
+  "roles": {},
+  "roleMessages": {},
+  "contador": [
+    {
+      "id": "60812727160901@lid",
+      "msg": 1,
+      "cmd": 2,
+      "figu": 0,
+      "pushname": "Vinícius",
+      "firstSeen": "2026-06-10T21:19:44.429Z",
+      "lastActivity": "2026-06-10T21:19:58.007Z"
+    }
+  ]
+}

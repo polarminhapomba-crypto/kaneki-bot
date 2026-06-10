@@ -78,9 +78,9 @@
       "familia": []
     },
     "historico_conversa": {
-      "total_mensagens": 6,
+      "total_mensagens": 7,
       "primeira_conversa": "2026-05-26T13:59:01.000Z",
-      "ultima_conversa": "2026-06-07T03:36:11.000Z",
+      "ultima_conversa": "2026-06-10T21:19:24.000Z",
       "frequencia_interacao": "muito_baixa",
       "topicos_recentes": []
     },
@@ -88,12 +88,14 @@
       "horarios_ativos": {
         "0": 1,
         "10": 2,
-        "14": 3
+        "14": 3,
+        "18": 1
       },
       "dias_semana_ativos": {
         "terça-feira": 2,
         "sábado": 3,
-        "domingo": 1
+        "domingo": 1,
+        "quarta-feira": 1
       },
       "humor_comum": "neutro",
       "tipo_mensagens": {
@@ -111,6 +113,6 @@
       "sentimento": "neutro"
     },
     "notas_importantes": [],
-    "ultima_atualizacao": "2026-06-07T03:36:11.000Z"
+    "ultima_atualizacao": "2026-06-10T21:19:24.000Z"
   }
 }
