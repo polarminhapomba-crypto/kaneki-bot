@@ -1025,6 +1025,11 @@ async function createBotSocket(authDir) {
         });
 
         if (codeMode && !TojiSock.authState.creds.registered) {
+            // Limpa diretório de autenticação para garantir nova sessão
+            console.log('🧹 Limpando sessão antiga para nova conexão...');
+            await clearAuthDir(authDir);
+            await fs.mkdir(authDir, { recursive: true });
+
             // Aguarda o socket estar 100% pronto
             await new Promise(resolve => setTimeout(resolve, 5000));
             
