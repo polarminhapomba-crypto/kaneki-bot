@@ -1014,9 +1014,12 @@ async function createBotSocket(authDir) {
             connectTimeoutMs: 120000,
             retryRequestDelayMs: 5000,
             qrTimeout: 180000,
-            keepAliveIntervalMs: 30_000,
-            defaultQueryTimeoutMs: undefined,
+            keepAliveIntervalMs: 60_000, // Aumentado para manter o socket ativo por mais tempo
+            defaultQueryTimeoutMs: 60_000, // Define um timeout padrão para queries
             browser: ['Ubuntu', 'Chrome', '110.0.5481.178'],
+            syncFullHistory: false, // Reduz o consumo de memória ao não sincronizar todo o histórico
+            maxMsgRetryCount: 5, // Aumenta tentativas de reenvio de mensagens em caso de erro
+            linkPreviewImageThumbnailWidth: 192,
             msgRetryCounterCache,
             auth: state,
             signalRepository,
