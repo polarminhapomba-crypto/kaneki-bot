@@ -996,19 +996,21 @@ async function createBotSocket(authDir) {
     try {
         await fs.mkdir(path.join(DATABASE_DIR, 'grupos'), { recursive: true });
         
-        // No Railway, apenas informa o estado. Não limpa nada automaticamente ao ligar para preservar a sessão.
+        // No Railway, se não estiver registrado, limpa TUDO para garantir um novo código limpo
         if (isCloud) {
-            console.log('☁️ Verificando estado da sessão no Railway...');
+            console.log('☁️ [Railway] Verificando integridade da sessão...');
             const credsFile = path.join(authDir, 'creds.json');
+            let isRegistered = false;
             try {
                 const credsData = JSON.parse(await fs.readFile(credsFile, 'utf-8'));
-                if (credsData.registered) {
-                    console.log('✅ Sessão registrada encontrada. Tentando conectar...');
-                } else {
-                    console.log('⚠️ Sessão incompleta encontrada. Aguardando pareamento...');
-                }
-            } catch (e) {
-                console.log('🆕 Nenhuma sessão encontrada. Iniciando nova conexão...');
+                isRegistered = !!credsData.registered;
+            } catch (e) {}
+
+            if (!isRegistered) {
+                console.log('🧹 [Railway] Sessão não registrada ou corrompida. Limpando para novo pareamento...');
+                await clearAuthDir(authDir);
+            } else {
+                console.log('✅ [Railway] Sessão registrada encontrada. Tentando reconectar...');
             }
         }
 
@@ -1035,8 +1037,8 @@ async function createBotSocket(authDir) {
             qrTimeout: 300000, // 5 minutos de timeout para o código
             keepAliveIntervalMs: 60000,
             defaultQueryTimeoutMs: 60000,
-            // Mudando para macOS para evitar bloqueios comuns em servidores de nuvem
-            browser: ['Mac OS', 'Chrome', '121.0.6167.184'],
+            // Mudando para Linux Chrome (Padrão mais estável para servidores)
+            browser: ['Linux', 'Chrome', '121.0.6167.184'],
             maxMsgRetryCount: 3,
             linkPreviewImageThumbnailWidth: 128,
             msgRetryCounterCache,
@@ -1073,7 +1075,7 @@ async function createBotSocket(authDir) {
                     pairingCodeRequested = true; // Marca como solicitado para não pedir mais
                 } else if (connection === 'connecting' && !TojiSock.authState.creds.registered && !pairingCodeRequested) {
                     pairingCodeRequested = true;
-                    // Tenta solicitar o código após um pequeno delay para estabilizar
+                    // Aumentando delay para 15 segundos para garantir estabilidade total do IP no Railway
                     setTimeout(async () => {
                         try {
                             console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
