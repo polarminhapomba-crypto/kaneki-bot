@@ -1050,8 +1050,8 @@ async function createBotSocket(authDir) {
             let phoneNumber;
             const envPhone = process.env.PHONE_NUMBER || process.env.phone_number;
 
-            if (isCloud && envPhone) {
-                phoneNumber = envPhone.replace(/\D/g, '');
+            if (isCloud) {
+                phoneNumber = (envPhone || numerodono).replace(/\D/g, '');
                 console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
             } else {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
