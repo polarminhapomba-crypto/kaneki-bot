@@ -1080,10 +1080,11 @@ async function createBotSocket(authDir) {
                             const code = await TojiSock.requestPairingCode(phoneNumber);
                             const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                             
-                            console.log('\n' + '='.repeat(40));
-                            console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
-                            console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
-                            console.log('='.repeat(40) + '\n');
+                            console.log('\n' + '🚀'.repeat(20));
+                            console.log(`\n💎 SEU CÓDIGO DE CONEXÃO: ${formattedCode} 💎\n`);
+                            console.log(`📱 DIGITE ESTE CÓDIGO NO SEU WHATSAPP (+${phoneNumber})`);
+                            console.log(`🔗 Caminho: Aparelhos Conectados > Conectar com número de telefone\n`);
+                            console.log('🚀'.repeat(20) + '\n');
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                             if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('401')) {
@@ -1252,15 +1253,14 @@ async function createBotSocket(authDir) {
                 lastDisconnect,
                 qr
             } = update;
-            // QR Code habilitado junto com o pairing code
+            // QR Code desabilitado no log para não poluir, priorizando pairing code
             if (qr && !TojiSock.authState.creds.registered) {
-                console.log('🔗 QR Code gerado para autenticação:');
-                qrcode.generate(qr, {
-                    small: true
-                }, (qrcodeText) => {
-                    console.log(qrcodeText);
-                });
-                console.log('📱 Escaneie o QR code acima OU use o código enviado para o seu número.');
+                if (!isCloud) {
+                    console.log('🔗 QR Code gerado (Use o Pairing Code se preferir):');
+                    qrcode.generate(qr, { small: true }, (qrcodeText) => console.log(qrcodeText));
+                } else {
+                    console.log('ℹ️ QR Code disponível, mas priorizando Pairing Code para o Railway.');
+                }
             }
             if (connection === 'open') {
                 console.log(`🔄 Conexão aberta. Inicializando sistema de otimização...`);
