@@ -1463,11 +1463,11 @@ async function gracefulShutdown(signal) {
         
         clearTimeout(shutdownTimeout);
         console.log('✅ Desligamento concluído');
-        process.exit(0);
+        // process.exit(0); // Removido para evitar que o processo morra prematuramente no Railway
     } catch (error) {
         console.error('❌ Erro durante desligamento:', error.message);
         clearTimeout(shutdownTimeout);
-        process.exit(1);
+        // process.exit(1);
     }
 }
 

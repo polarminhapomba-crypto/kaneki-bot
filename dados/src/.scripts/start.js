@@ -296,13 +296,16 @@ async function main() {
       mensagem('📷 Sessão de QR Code detectada. Conectando automaticamente...');
       startBot(false);
     } else if (isCloud) {
-      // No Railway não há stdin interativo — inicia direto com QR Code
-      // (o bot vai usar o pairing code configurado em connect.js)
       mensagem('☁️ Ambiente de nuvem detectado. Iniciando bot automaticamente...');
-      startBot(false);
+      startBot(true); // Força codeMode no Railway para usar o PHONE_NUMBER da env
     } else {
       const { method } = await promptConnectionMethod();
       startBot(method === 'code');
+    }
+
+    // Mantém o processo vivo indefinidamente no Railway
+    if (isCloud) {
+      setInterval(() => {}, 1000 * 60 * 60); 
     }
   } catch (error) {
     aviso(`❌ Erro inesperado: ${error.message}`);
