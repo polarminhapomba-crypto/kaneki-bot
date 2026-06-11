@@ -1084,7 +1084,7 @@ async function createBotSocket(authDir) {
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                         }
-                    }, 5000);
+                    }, 10000);
                 }
             });
         }
