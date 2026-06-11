@@ -1097,7 +1097,7 @@ async function createBotSocket(authDir) {
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                         }
-                    }, 2000); // Apenas 2 segundos para garantir que o socket subiu
+                    }, 10000); // Delay normal de 10 segundos conforme solicitado pelo usuário
                 }
             });
         }
