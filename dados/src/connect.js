@@ -996,21 +996,19 @@ async function createBotSocket(authDir) {
     try {
         await fs.mkdir(path.join(DATABASE_DIR, 'grupos'), { recursive: true });
         
-        // No Railway, se não estiver registrado, limpa TUDO para garantir um novo código limpo
+        // No Railway, apenas informa o estado. Não limpa nada automaticamente ao ligar para preservar a sessão.
         if (isCloud) {
-            console.log('☁️ [Railway] Verificando integridade da sessão...');
+            console.log('☁️ Verificando estado da sessão no Railway...');
             const credsFile = path.join(authDir, 'creds.json');
-            let isRegistered = false;
             try {
                 const credsData = JSON.parse(await fs.readFile(credsFile, 'utf-8'));
-                isRegistered = !!credsData.registered;
-            } catch (e) {}
-
-            if (!isRegistered) {
-                console.log('🧹 [Railway] Sessão não registrada ou corrompida. Limpando para novo pareamento...');
-                await clearAuthDir(authDir);
-            } else {
-                console.log('✅ [Railway] Sessão registrada encontrada. Tentando reconectar...');
+                if (credsData.registered) {
+                    console.log('✅ Sessão registrada encontrada. Tentando conectar...');
+                } else {
+                    console.log('⚠️ Sessão incompleta encontrada. Aguardando pareamento...');
+                }
+            } catch (e) {
+                console.log('🆕 Nenhuma sessão encontrada. Iniciando nova conexão...');
             }
         }
 
@@ -1022,7 +1020,7 @@ async function createBotSocket(authDir) {
         } = await useMultiFileAuthState(authDir, makeCacheableSignalKeyStore);
         
         // Busca a versão mais recente do WhatsApp automaticamente
-        let { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1015901307], isLatest: false }));
+        let { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1035194821], isLatest: false }));
         console.log(`📱 Usando versão do WhatsApp: ${version.join('.')} (${isLatest ? 'mais recente' : 'fallback'})`);
         
         const TojiSock = makeWASocket({
@@ -1032,13 +1030,13 @@ async function createBotSocket(authDir) {
             generateHighQualityLinkPreview: false, // Economiza RAM ao não processar links pesados
             syncFullHistory: false, // Garantido desativado para 1GB RAM
             markOnlineOnConnect: true,
-            connectTimeoutMs: 120000, // 2 minutos para conectar
-            retryRequestDelayMs: 10000,
-            qrTimeout: 300000, // 5 minutos de timeout para o código
-            keepAliveIntervalMs: 60000,
-            defaultQueryTimeoutMs: 60000,
-            // Mudando para Linux Chrome (Padrão mais estável para servidores)
-            browser: ['Linux', 'Chrome', '121.0.6167.184'],
+            connectTimeoutMs: 60000,
+            retryRequestDelayMs: 5000,
+            qrTimeout: 180000,
+            keepAliveIntervalMs: 30000,
+            defaultQueryTimeoutMs: 30000,
+            // Identificando como Android para melhor compatibilidade
+            browser: ['Android', 'Chrome', '110.0.5481.153'],
             maxMsgRetryCount: 3,
             linkPreviewImageThumbnailWidth: 128,
             msgRetryCounterCache,
@@ -1052,10 +1050,9 @@ async function createBotSocket(authDir) {
             let phoneNumber;
             const envPhone = process.env.PHONE_NUMBER || process.env.phone_number;
 
-            if (isCloud) {
-                // Prioridade para o número que você me passou
-                phoneNumber = "5573999668637";
-                console.log(`\n☁️ Railway detectado. Forçando conexão no número: +${phoneNumber}`);
+            if (isCloud && envPhone) {
+                phoneNumber = envPhone.replace(/\D/g, '');
+                console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
             } else {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
                 phoneNumber = await ask('--> ');
@@ -1068,32 +1065,24 @@ async function createBotSocket(authDir) {
             }
 
             // Aguarda a conexão estar aberta antes de solicitar o código
-            let pairingCodeRequested = false;
             TojiSock.ev.on('connection.update', async (update) => {
                 const { connection } = update;
                 if (connection === 'open') {
-                    pairingCodeRequested = true; // Marca como solicitado para não pedir mais
-                } else if (connection === 'connecting' && !TojiSock.authState.creds.registered && !pairingCodeRequested) {
-                    pairingCodeRequested = true;
-                    // Aumentando delay para 15 segundos para garantir estabilidade total do IP no Railway
+                    // Já está conectado, não precisa de código
+                } else if (connection === 'connecting' && !TojiSock.authState.creds.registered) {
+                    // Tenta solicitar o código após um pequeno delay para estabilizar
                     setTimeout(async () => {
                         try {
                             console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
                             const code = await TojiSock.requestPairingCode(phoneNumber);
                             const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                             
-                            console.log('\n' + '🚀'.repeat(20));
-                            console.log(`\n💎 SEU CÓDIGO DE CONEXÃO: ${formattedCode} 💎\n`);
-                            console.log(`📱 DIGITE ESTE CÓDIGO NO SEU WHATSAPP (+${phoneNumber})`);
-                            console.log(`🔗 Caminho: Aparelhos Conectados > Conectar com número de telefone\n`);
-                            console.log('🚀'.repeat(20) + '\n');
+                            console.log('\n' + '='.repeat(40));
+                            console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
+                            console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
+                            console.log('='.repeat(40) + '\n');
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
-                            if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('401')) {
-                                console.log('🔄 Conexão fechada durante pareamento. Aguardando estabilização...');
-                                // await clearAuthDir(authDir); // Desabilitado para evitar perda de sessão no Railway
-                            }
-                            pairingCodeRequested = false; 
                         }
                     }, 5000);
                 }
@@ -1255,14 +1244,15 @@ async function createBotSocket(authDir) {
                 lastDisconnect,
                 qr
             } = update;
-            // QR Code desabilitado no log para não poluir, priorizando pairing code
+            // QR Code habilitado junto com o pairing code
             if (qr && !TojiSock.authState.creds.registered) {
-                if (!isCloud) {
-                    console.log('🔗 QR Code gerado (Use o Pairing Code se preferir):');
-                    qrcode.generate(qr, { small: true }, (qrcodeText) => console.log(qrcodeText));
-                } else {
-                    console.log('ℹ️ QR Code disponível, mas priorizando Pairing Code para o Railway.');
-                }
+                console.log('🔗 QR Code gerado para autenticação:');
+                qrcode.generate(qr, {
+                    small: true
+                }, (qrcodeText) => {
+                    console.log(qrcodeText);
+                });
+                console.log('📱 Escaneie o QR code acima OU use o código enviado para o seu número.');
             }
             if (connection === 'open') {
                 console.log(`🔄 Conexão aberta. Inicializando sistema de otimização...`);
@@ -1321,8 +1311,9 @@ async function createBotSocket(authDir) {
                     console.log(`⚠️ Erro 403 detectado. Tentativa ${forbidden403Attempts}/${MAX_403_ATTEMPTS}`);
                     
                     if (forbidden403Attempts >= MAX_403_ATTEMPTS) {
-                        console.log('❌ Máximo de tentativas para erro 403 atingido. Mantendo arquivos para nova tentativa...');
-                        // await clearAuthDir(authDir); // Desabilitado para evitar perda de sessão no Railway
+                        console.log('❌ Máximo de tentativas para erro 403 atingido. Apagando QR code e parando...');
+                        await clearAuthDir(authDir);
+                        console.log('🗑️ Autenticação removida. Reinicie o bot para gerar um novo QR code.');
                         process.exit(1);
                     }
                     
@@ -1347,8 +1338,8 @@ async function createBotSocket(authDir) {
                                    (lastDisconnect?.error?.output?.statusCode === 401);
 
                 if (isBadSession) {
-                    console.log('🔄 Erro 401 ou Sessão Expirada detectada. Tentando manter arquivos para reconexão...');
-                    // await clearAuthDir(authDir); // Desabilitado para evitar perda de sessão no Railway
+                    console.log('🔄 Erro 401 ou Sessão Expirada detectada. Limpando arquivos antigos para novo pareamento...');
+                    await clearAuthDir(authDir);
                 }
                 
                 // Não reconecta se conexão foi substituída (outra instância assumiu)
