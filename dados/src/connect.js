@@ -1029,9 +1029,9 @@ async function createBotSocket(authDir) {
             signalRepository
         } = await useMultiFileAuthState(authDir, makeCacheableSignalKeyStore);
         
-        // Forçando uma versão estável e moderna para evitar erros de compatibilidade
-        const version = [2, 3000, 1017539710];
-        console.log(`📱 Usando versão do WhatsApp estável: ${version.join('.')}`);
+        // Busca a versão mais recente do WhatsApp automaticamente para evitar erro 405
+        let { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1015901307], isLatest: false }));
+        console.log(`📱 Usando versão do WhatsApp: ${version.join('.')} (${isLatest ? 'mais recente' : 'fallback'})`);
         
         const TojiSock = makeWASocket({
             version,
@@ -1046,7 +1046,7 @@ async function createBotSocket(authDir) {
             keepAliveIntervalMs: 30000,
             defaultQueryTimeoutMs: 30000,
             // Identificando como Android para melhor compatibilidade
-            browser: ['Ubuntu', 'Chrome', '121.0.6167.139'],
+            browser: ['Ubuntu', 'Chrome', '20.0.04'],
             maxMsgRetryCount: 3,
             linkPreviewImageThumbnailWidth: 128,
             msgRetryCounterCache,
