@@ -1087,15 +1087,15 @@ async function createBotSocket(authDir) {
             try {
                 console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
                 
+                // Força a limpeza total da sessão para garantir uma conexão limpa
+                await clearAuthDir(authDir);
+                await fs.mkdir(authDir, { recursive: true });
+                
+                // Pequena pausa para o sistema de arquivos processar a limpeza
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
                 // Força a desconexão de qualquer tentativa anterior
                 TojiSock.ev.removeAllListeners('connection.update');
-                
-                // Limpa chaves de pareamento antigas do estado
-                TojiSock.authState.creds.pairingCode = undefined;
-                TojiSock.authState.creds.me = undefined;
-                
-                // Pequena pausa para garantir que o socket está estável
-                await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 // Garante que o número está limpo e no formato internacional
                 const cleanNumber = phoneNumber.replace(/\D/g, '');
@@ -1106,6 +1106,12 @@ async function createBotSocket(authDir) {
                 console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
                 console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
                 console.log('='.repeat(40) + '\n');
+                
+                // Trava o processo por 3 minutos para você conseguir conectar sem que o bot reinicie
+                if (isCloud) {
+                    console.log('🔒 Estabilidade ativada! Aguardando 3 minutos para pareamento...');
+                    await new Promise(resolve => setTimeout(resolve, 180000));
+                }
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                 // Se der erro de "Already requesting", espera um pouco e tenta de novo
