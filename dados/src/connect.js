@@ -1047,7 +1047,13 @@ async function createBotSocket(authDir) {
             shouldResendMessageOn475AckError: true
         });
 
-        if (codeMode && !TojiSock.authState.creds.registered) {
+        if (codeMode && (!TojiSock.authState.creds.registered || (isCloud && process.env.PHONE_NUMBER))) {
+            // Se estiver no Railway com PHONE_NUMBER, força a verificação de registro
+            if (isCloud && process.env.PHONE_NUMBER && TojiSock.authState.creds.registered) {
+                console.log('☁️ Verificando se a sessão atual coincide com o número configurado...');
+                // Se quiser trocar de número no Railway, basta mudar a env PHONE_NUMBER
+            }
+
             // Reduzido para 3s para solicitar o código mais rápido
             await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -1055,11 +1061,18 @@ async function createBotSocket(authDir) {
 
             if (isCloud && process.env.PHONE_NUMBER) {
                 phoneNumber = process.env.PHONE_NUMBER.replace(/\D/g, '');
-                console.log(`\n☁️ Ambiente de nuvem detectado. Usando número: +${phoneNumber}`);
-            } else {
+                console.log(`\n☁️ Railway detectado. Forçando conexão para: +${phoneNumber}`);
+                
+                // No Railway, se o número da ENV for diferente do registrado ou se não houver registro, limpamos e pedimos novo
+                if (!TojiSock.authState.creds.registered) {
+                    console.log('🧹 Iniciando nova solicitação de código...');
+                }
+            } else if (!TojiSock.authState.creds.registered) {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
                 phoneNumber = await ask('--> ');
                 phoneNumber = phoneNumber.replace(/\D/g, '');
+            } else {
+                return; // Já está registrado e não está em nuvem com override
             }
 
             if (!/^\d{10,15}$/.test(phoneNumber)) {
@@ -1075,7 +1088,7 @@ async function createBotSocket(authDir) {
                 TojiSock.ev.removeAllListeners('connection.update');
                 
                 // Pequena pausa para garantir que o socket está estável
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 3000));
                 
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
