@@ -338,10 +338,10 @@ async function initializeOptimizedCaches() {
         
     }
 }
-// Pairing code ativo por padrão, mas pode ser alterado via argumento
-const codeMode = process.argv.includes('--code');
 // Detecta ambiente de nuvem (Railway, Heroku, etc.)
 const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME || process.env.DYNO || process.env.RENDER || process.env.FLY_APP_NAME);
+// Pairing code ativo por padrão, forçado no Railway
+const codeMode = process.argv.includes('--code') || isCloud;
 
 // Cleanup otimizado do cache de mensagens
 let cacheCleanupInterval = null;
