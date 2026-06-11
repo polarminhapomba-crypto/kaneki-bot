@@ -1100,12 +1100,6 @@ async function createBotSocket(authDir) {
                 console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
                 console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
                 console.log('='.repeat(40) + '\n');
-                
-                // Mantém a espera de 2 minutos para o usuário ter tempo de parear
-                if (isCloud) {
-                    console.log('⏳ Aguardando pareamento... Não feche os logs.');
-                    await new Promise(resolve => setTimeout(resolve, 120000));
-                }
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                 // Se der erro de "Already requesting", espera um pouco e tenta de novo
@@ -1374,13 +1368,13 @@ async function createBotSocket(authDir) {
                 }
                 
                 // Delay antes de reconectar baseado no motivo
-                let reconnectDelay = isCloud ? 15000 : 5000;
+                let reconnectDelay = 5000;
                 if (reason === DisconnectReason.timedOut) {
-                    reconnectDelay = isCloud ? 10000 : 3000;
+                    reconnectDelay = 3000;
                 } else if (reason === DisconnectReason.connectionLost) {
-                    reconnectDelay = isCloud ? 10000 : 2000;
+                    reconnectDelay = 2000;
                 } else if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
-                    reconnectDelay = isCloud ? 30000 : 10000;
+                    reconnectDelay = 5000;
                 }
                 
                 console.log(`🔄 Aguardando ${reconnectDelay / 1000} segundos antes de reconectar...`);

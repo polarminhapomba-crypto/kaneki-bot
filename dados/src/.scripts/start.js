@@ -234,7 +234,7 @@ function startBot(codeMode = false) {
 }
 
 function restartBot(codeMode) {
-  const delay = isCloud ? 15000 : 500;
+  const delay = 500;
   aviso(`🔄 Reiniciando o bot em ${delay}ms...`);
   setTimeout(() => {
     if (botProcess) botProcess.removeAllListeners();
