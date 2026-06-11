@@ -1031,14 +1031,13 @@ async function createBotSocket(authDir) {
 
         if (codeMode && !TojiSock.authState.creds.registered) {
             // Aguarda o socket estar 100% pronto
-            await new Promise(resolve => setTimeout(resolve, 5000));
+            await new Promise(resolve => setTimeout(resolve, 10000));
 
             let phoneNumber;
 
             if (isCloud && process.env.PHONE_NUMBER) {
-                // No Railway, usa a variável de ambiente PHONE_NUMBER
                 phoneNumber = process.env.PHONE_NUMBER.replace(/\D/g, '');
-                console.log(`\n☁️ Ambiente de nuvem detectado. Usando número da variável PHONE_NUMBER: +${phoneNumber}`);
+                console.log(`\n☁️ Ambiente de nuvem detectado. Usando número: +${phoneNumber}`);
             } else {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
                 phoneNumber = await ask('--> ');
@@ -1047,7 +1046,7 @@ async function createBotSocket(authDir) {
 
             if (!/^\d{10,15}$/.test(phoneNumber)) {
                 console.log('⚠️ Número inválido! Reiniciando processo...');
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 5000));
                 return startNazu();
             }
 
@@ -1058,13 +1057,17 @@ async function createBotSocket(authDir) {
                 
                 console.log(`\n🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
                 console.log(`📲 Use no WhatsApp (+${phoneNumber}): Dispositivos Conectados > Conectar com número de telefone\n`);
+                
+                // Dá 2 minutos para o usuário parear antes de qualquer tentativa de reconexão automática
+                if (isCloud) {
+                    console.log('⏳ Aguardando 2 minutos para você realizar o pareamento...');
+                    await new Promise(resolve => setTimeout(resolve, 120000));
+                }
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
-                if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('Bad MAC')) {
-                    console.log('🔄 Erro crítico detectado. Limpando tudo e tentando novamente em 10s...');
-                    await clearAuthDir(authDir);
-                    setTimeout(() => startNazu(), 10000);
-                }
+                const delay = isCloud ? 30000 : 10000;
+                console.log(`🔄 Tentando novamente em ${delay/1000}s...`);
+                setTimeout(() => startNazu(), delay);
             }
         }
 
@@ -1327,13 +1330,13 @@ async function createBotSocket(authDir) {
                 }
                 
                 // Delay antes de reconectar baseado no motivo
-                let reconnectDelay = 5000;
+                let reconnectDelay = isCloud ? 15000 : 5000;
                 if (reason === DisconnectReason.timedOut) {
-                    reconnectDelay = 3000; // Reconexão mais rápida para timeout
+                    reconnectDelay = isCloud ? 10000 : 3000;
                 } else if (reason === DisconnectReason.connectionLost) {
-                    reconnectDelay = 2000; // Reconexão ainda mais rápida para perda de conexão
+                    reconnectDelay = isCloud ? 10000 : 2000;
                 } else if (reason === DisconnectReason.loggedOut || reason === DisconnectReason.badSession) {
-                    reconnectDelay = 10000; // Delay maior para problemas de autenticação
+                    reconnectDelay = isCloud ? 30000 : 10000;
                 }
                 
                 console.log(`🔄 Aguardando ${reconnectDelay / 1000} segundos antes de reconectar...`);

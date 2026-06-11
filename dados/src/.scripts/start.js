@@ -222,11 +222,12 @@ function startBot(codeMode = false) {
 }
 
 function restartBot(codeMode) {
-  aviso('🔄 Reiniciando o bot em 500ms...');
+  const delay = isCloud ? 15000 : 500;
+  aviso(`🔄 Reiniciando o bot em ${delay}ms...`);
   setTimeout(() => {
     if (botProcess) botProcess.removeAllListeners();
     startBot(codeMode);
-  }, 500);
+  }, delay);
 }
 
 async function checkAutoConnect() {
