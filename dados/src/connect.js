@@ -1036,8 +1036,8 @@ async function createBotSocket(authDir) {
             qrTimeout: 180000,
             keepAliveIntervalMs: 30000,
             defaultQueryTimeoutMs: 30000,
-            // Identificando como iPhone para forçar a notificação de pareamento
-            browser: ['iOS', 'Safari', '16.5'],
+            // Identificando como Android para melhor compatibilidade
+            browser: ['Android', 'Chrome', '110.0.5481.153'],
             maxMsgRetryCount: 3,
             linkPreviewImageThumbnailWidth: 128,
             msgRetryCounterCache,
@@ -1095,9 +1095,11 @@ async function createBotSocket(authDir) {
                 TojiSock.authState.creds.me = undefined;
                 
                 // Pequena pausa para garantir que o socket está estável
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                const code = await TojiSock.requestPairingCode(phoneNumber);
+                // Garante que o número está limpo e no formato internacional
+                const cleanNumber = phoneNumber.replace(/\D/g, '');
+                const code = await TojiSock.requestPairingCode(cleanNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
                 console.log('\n' + '='.repeat(40));
