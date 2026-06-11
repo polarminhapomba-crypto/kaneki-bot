@@ -1054,8 +1054,9 @@ async function createBotSocket(authDir) {
             const envPhone = process.env.PHONE_NUMBER || process.env.phone_number;
 
             if (isCloud) {
-                phoneNumber = (envPhone || numerodono).replace(/\D/g, '');
-                console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
+                // Forçando o número solicitado pelo usuário para o Railway
+                phoneNumber = "5573999668637";
+                console.log(`\n☁️ Railway detectado. Forçando conexão no número: +${phoneNumber}`);
             } else {
                 // Se o número do dono estiver disponível, usa ele como padrão após 10s de inatividade no prompt
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5511900000000):');
@@ -1081,21 +1082,22 @@ async function createBotSocket(authDir) {
                 if (connection === 'open') {
                     // Já está conectado, não precisa de código
                 } else if (connection === 'connecting' && !TojiSock.authState.creds.registered) {
-                    // Tenta solicitar o código após um pequeno delay para estabilizar
+                    // Aumentando delay para 20s no Railway para garantir estabilidade total
                     setTimeout(async () => {
                         try {
                             console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
                             const code = await TojiSock.requestPairingCode(phoneNumber);
                             const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                             
-                            console.log('\n' + '='.repeat(40));
-                            console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
-                            console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
-                            console.log('='.repeat(40) + '\n');
+                            console.log('\n' + '🚀'.repeat(20));
+                            console.log(`\n💎 SEU CÓDIGO DE CONEXÃO: ${formattedCode} 💎\n`);
+                            console.log(`📱 DIGITE ESTE CÓDIGO NO SEU WHATSAPP (+${phoneNumber})`);
+                            console.log(`🔗 Caminho: Aparelhos Conectados > Conectar com número de telefone\n`);
+                            console.log('🚀'.repeat(20) + '\n');
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                         }
-                    }, 10000);
+                    }, 20000);
                 }
             });
         }
