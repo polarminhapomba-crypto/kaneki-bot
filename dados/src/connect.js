@@ -338,8 +338,8 @@ async function initializeOptimizedCaches() {
         
     }
 }
-// Pairing code sempre ativo — nunca usa QR Code
-const codeMode = true;
+// Pairing code ativo por padrão, mas pode ser alterado via argumento
+const codeMode = process.argv.includes('--code');
 // Detecta ambiente de nuvem (Railway, Heroku, etc.)
 const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME || process.env.DYNO || process.env.RENDER || process.env.FLY_APP_NAME);
 
