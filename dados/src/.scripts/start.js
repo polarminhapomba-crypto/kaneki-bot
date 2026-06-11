@@ -27,8 +27,6 @@ const QR_CODE_DIR = path.join(process.cwd(), 'dados', 'database', 'qr-code');
 const CONNECT_FILE = path.join(process.cwd(), 'dados', 'src', 'connect.js');
 const isWindows = os.platform() === 'win32';
 const isTermux = fsSync.existsSync('/data/data/com.termux');
-// Detecta ambiente de nuvem (Railway, Heroku, etc.) onde não há stdin interativo
-const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME || process.env.DYNO || process.env.RENDER || process.env.FLY_APP_NAME);
 
 const colors = {
   reset: '\x1b[0m',
