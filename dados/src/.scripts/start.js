@@ -13,6 +13,8 @@ const QR_CODE_DIR = path.join(process.cwd(), 'dados', 'database', 'qr-code');
 const CONNECT_FILE = path.join(process.cwd(), 'dados', 'src', 'connect.js');
 const isWindows = os.platform() === 'win32';
 const isTermux = fsSync.existsSync('/data/data/com.termux');
+// Detecta ambiente de nuvem (Railway, Heroku, etc.) onde não há stdin interativo
+const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME || process.env.DYNO || process.env.RENDER || process.env.FLY_APP_NAME);
 
 const colors = {
   reset: '\x1b[0m',
@@ -283,11 +285,20 @@ async function main() {
     setupGracefulShutdown();
     await displayHeader();
     await checkPrerequisites();
-    await setupTermuxAutostart();
+
+    // Em ambiente de nuvem (Railway), não configura autostart do Termux
+    if (!isCloud) {
+      await setupTermuxAutostart();
+    }
 
     const hasSession = await checkAutoConnect();
     if (hasSession) {
       mensagem('📷 Sessão de QR Code detectada. Conectando automaticamente...');
+      startBot(false);
+    } else if (isCloud) {
+      // No Railway não há stdin interativo — inicia direto com QR Code
+      // (o bot vai usar o pairing code configurado em connect.js)
+      mensagem('☁️ Ambiente de nuvem detectado. Iniciando bot automaticamente...');
       startBot(false);
     } else {
       const { method } = await promptConnectionMethod();

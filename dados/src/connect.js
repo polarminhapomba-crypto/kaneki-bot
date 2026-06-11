@@ -340,6 +340,8 @@ async function initializeOptimizedCaches() {
 }
 // Pairing code sempre ativo — nunca usa QR Code
 const codeMode = true;
+// Detecta ambiente de nuvem (Railway, Heroku, etc.)
+const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME || process.env.DYNO || process.env.RENDER || process.env.FLY_APP_NAME);
 
 // Cleanup otimizado do cache de mensagens
 let cacheCleanupInterval = null;
@@ -1028,17 +1030,20 @@ async function createBotSocket(authDir) {
         });
 
         if (codeMode && !TojiSock.authState.creds.registered) {
-            // Limpa diretório de autenticação para garantir nova sessão
-            console.log('🧹 Limpando sessão antiga para nova conexão...');
-            await clearAuthDir(authDir);
-            await fs.mkdir(authDir, { recursive: true });
-
             // Aguarda o socket estar 100% pronto
             await new Promise(resolve => setTimeout(resolve, 5000));
-            
-            console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
-            let phoneNumber = await ask('--> ');
-            phoneNumber = phoneNumber.replace(/\D/g, '');
+
+            let phoneNumber;
+
+            if (isCloud && process.env.PHONE_NUMBER) {
+                // No Railway, usa a variável de ambiente PHONE_NUMBER
+                phoneNumber = process.env.PHONE_NUMBER.replace(/\D/g, '');
+                console.log(`\n☁️ Ambiente de nuvem detectado. Usando número da variável PHONE_NUMBER: +${phoneNumber}`);
+            } else {
+                console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
+                phoneNumber = await ask('--> ');
+                phoneNumber = phoneNumber.replace(/\D/g, '');
+            }
 
             if (!/^\d{10,15}$/.test(phoneNumber)) {
                 console.log('⚠️ Número inválido! Reiniciando processo...');
