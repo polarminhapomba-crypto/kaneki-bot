@@ -1,12 +1,25 @@
 #!/usr/bin/env node
 
+import http from 'http';
+
+// Inicia o Healthcheck IMEDIATAMENTE para o Railway não derrubar o bot
+const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_NAME || process.env.DYNO || process.env.RENDER || process.env.FLY_APP_NAME);
+if (isCloud) {
+  const port = process.env.PORT || 8080;
+  http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
+  }).listen(port, '0.0.0.0', () => {
+    console.log(`🌐 [Railway] Healthcheck ultra-precoce ativo na porta ${port}`);
+  });
+}
+
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
 import { spawn, execSync } from 'child_process';
 import readline from 'readline/promises';
 import os from 'os';
-import http from 'http';
 
 const CONFIG_PATH = path.join(process.cwd(), 'dados', 'src', 'config.json');
 const NODE_MODULES_PATH = path.join(process.cwd(), 'node_modules');
@@ -43,18 +56,6 @@ const getVersion = () => {
 
 let botProcess = null;
 const version = getVersion();
-
-function startHealthCheck() {
-  const port = process.env.PORT || 8080;
-  const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
-  });
-  server.listen(port, '0.0.0.0', () => {
-    console.log(`🌐 Servidor de Healthcheck ativo na porta ${port}`);
-  });
-  return server;
-}
 
 async function setupTermuxAutostart() {
   if (!isTermux) {
@@ -297,11 +298,6 @@ async function promptConnectionMethod() {
 async function main() {
   try {
     setupGracefulShutdown();
-    
-    if (isCloud) {
-      startHealthCheck();
-    }
-
     await displayHeader();
     await checkPrerequisites();
 

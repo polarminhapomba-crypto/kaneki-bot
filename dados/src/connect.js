@@ -1058,14 +1058,17 @@ async function createBotSocket(authDir) {
             await new Promise(resolve => setTimeout(resolve, 3000));
 
             let phoneNumber;
+            const envPhone = process.env.PHONE_NUMBER || process.env.phone_number;
 
-            if (isCloud && process.env.PHONE_NUMBER) {
-                phoneNumber = process.env.PHONE_NUMBER.replace(/\D/g, '');
+            if (isCloud && envPhone) {
+                phoneNumber = envPhone.replace(/\D/g, '');
                 console.log(`\n☁️ Railway detectado. Forçando conexão para: +${phoneNumber}`);
                 
-                // No Railway, se o número da ENV for diferente do registrado ou se não houver registro, limpamos e pedimos novo
+                // Força a limpeza se não estiver registrado para garantir que o código seja solicitado
                 if (!TojiSock.authState.creds.registered) {
-                    console.log('🧹 Iniciando nova solicitação de código...');
+                    console.log('🧹 Limpando vestígios para nova solicitação...');
+                    await clearAuthDir(authDir);
+                    await fs.mkdir(authDir, { recursive: true });
                 }
             } else if (!TojiSock.authState.creds.registered) {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
