@@ -367,12 +367,15 @@ const startCacheCleanup = () => {
 const ask = (question) => {
     const rl = readline.createInterface({
         input: process.stdin,
-        output: process.stdout
+        output: process.stdout,
+        terminal: true
     });
-    return new Promise((resolve) => rl.question(question, (answer) => {
-        rl.close();
-        resolve(answer.trim());
-    }));
+    return new Promise((resolve) => {
+        rl.question(question, (answer) => {
+            rl.close();
+            resolve(answer.trim());
+        });
+    });
 };
 
 async function clearAuthDir(dirToRemove = AUTH_DIR) {
@@ -1054,7 +1057,7 @@ async function createBotSocket(authDir) {
                 phoneNumber = (envPhone || numerodono).replace(/\D/g, '');
                 console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
             } else {
-                console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
+                console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5511900000000):');
                 phoneNumber = await ask('--> ');
                 phoneNumber = phoneNumber.replace(/\D/g, '');
             }

@@ -279,9 +279,12 @@ async function promptConnectionMethod() {
       mensagem('🔑 Iniciando conexão via código de pareamento...');
       // Limpa a sessão antiga para garantir que um novo código seja gerado
       if (fsSync.existsSync(QR_CODE_DIR)) {
-        fsSync.readdirSync(QR_CODE_DIR).forEach(file => {
-          fsSync.rmSync(path.join(QR_CODE_DIR, file), { recursive: true, force: true });
-        });
+        try {
+          const files = fsSync.readdirSync(QR_CODE_DIR);
+          for (const file of files) {
+            fsSync.rmSync(path.join(QR_CODE_DIR, file), { recursive: true, force: true });
+          }
+        } catch (e) {}
       }
       return { method: 'code' };
     case '3':
