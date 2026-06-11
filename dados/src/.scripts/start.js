@@ -6,6 +6,7 @@ import path from 'path';
 import { spawn, execSync } from 'child_process';
 import readline from 'readline/promises';
 import os from 'os';
+import http from 'http';
 
 const CONFIG_PATH = path.join(process.cwd(), 'dados', 'src', 'config.json');
 const NODE_MODULES_PATH = path.join(process.cwd(), 'node_modules');
@@ -42,6 +43,18 @@ const getVersion = () => {
 
 let botProcess = null;
 const version = getVersion();
+
+function startHealthCheck() {
+  const port = process.env.PORT || 8080;
+  const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok', uptime: process.uptime() }));
+  });
+  server.listen(port, '0.0.0.0', () => {
+    console.log(`🌐 Servidor de Healthcheck ativo na porta ${port}`);
+  });
+  return server;
+}
 
 async function setupTermuxAutostart() {
   if (!isTermux) {
@@ -284,10 +297,14 @@ async function promptConnectionMethod() {
 async function main() {
   try {
     setupGracefulShutdown();
+    
+    if (isCloud) {
+      startHealthCheck();
+    }
+
     await displayHeader();
     await checkPrerequisites();
 
-    // Em ambiente de nuvem (Railway), não configura autostart do Termux
     if (!isCloud) {
       await setupTermuxAutostart();
     }
@@ -298,13 +315,12 @@ async function main() {
       startBot(false);
     } else if (isCloud) {
       mensagem('☁️ Ambiente de nuvem detectado. Iniciando bot automaticamente...');
-      startBot(true); // Força codeMode no Railway para usar o PHONE_NUMBER da env
+      startBot(true); 
     } else {
       const { method } = await promptConnectionMethod();
       startBot(method === 'code');
     }
 
-    // Mantém o processo vivo indefinidamente no Railway
     if (isCloud) {
       setInterval(() => {}, 1000 * 60 * 60); 
     }

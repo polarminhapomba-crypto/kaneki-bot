@@ -1389,9 +1389,10 @@ async function createBotSocket(authDir) {
 }
 
 async function startNazu() {
-    // Inicia o servidor de healthcheck para o Railway
-    startHealthCheck();
-
+    // Inicia o servidor de healthcheck apenas se não estiver em nuvem (já iniciado pelo start.js)
+    if (!isCloud) {
+        startHealthCheck();
+    }
     // Evita múltiplas instâncias sendo criadas ao mesmo tempo
     if (isReconnecting) {
         console.log('⚠️ Reconexão já em andamento, ignorando chamada duplicada...');
