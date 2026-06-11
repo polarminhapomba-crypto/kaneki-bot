@@ -999,19 +999,25 @@ async function createBotSocket(authDir) {
     try {
         await fs.mkdir(path.join(DATABASE_DIR, 'grupos'), { recursive: true });
         
-        // No Railway, apenas informa o estado. Não limpa nada automaticamente ao ligar para preservar a sessão.
+        // No Railway, verifica se o arquivo existe antes de tentar ler para evitar o erro ENOENT
         if (isCloud) {
-            console.log('☁️ Verificando estado da sessão no Railway...');
+            console.log('☁️ [Railway] Verificando integridade da sessão...');
             const credsFile = path.join(authDir, 'creds.json');
+            let isRegistered = false;
+            
             try {
-                const credsData = JSON.parse(await fs.readFile(credsFile, 'utf-8'));
-                if (credsData.registered) {
-                    console.log('✅ Sessão registrada encontrada. Tentando conectar...');
-                } else {
-                    console.log('⚠️ Sessão incompleta encontrada. Aguardando pareamento...');
-                }
+                const credsContent = await fs.readFile(credsFile, 'utf-8');
+                const credsData = JSON.parse(credsContent);
+                isRegistered = !!credsData.registered;
             } catch (e) {
-                console.log('🆕 Nenhuma sessão encontrada. Iniciando nova conexão...');
+                // Se o arquivo não existe ou está corrompido, apenas marca como não registrado
+                isRegistered = false;
+            }
+
+            if (!isRegistered) {
+                console.log('🧹 [Railway] Iniciando nova sessão de pareamento...');
+            } else {
+                console.log('✅ [Railway] Sessão registrada encontrada. Tentando reconectar...');
             }
         }
 
