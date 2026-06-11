@@ -1022,9 +1022,9 @@ async function createBotSocket(authDir) {
             signalRepository
         } = await useMultiFileAuthState(authDir, makeCacheableSignalKeyStore);
         
-        // Busca a versão mais recente do WhatsApp automaticamente
-        let { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1035194821], isLatest: false }));
-        console.log(`📱 Usando versão do WhatsApp: ${version.join('.')} (${isLatest ? 'mais recente' : 'fallback'})`);
+        // Forçando uma versão estável e moderna para evitar erros de compatibilidade
+        const version = [2, 3000, 1017539710];
+        console.log(`📱 Usando versão do WhatsApp estável: ${version.join('.')}`);
         
         const TojiSock = makeWASocket({
             version,
@@ -1095,7 +1095,13 @@ async function createBotSocket(authDir) {
                             console.log(`🔗 Caminho: Aparelhos Conectados > Conectar com número de telefone\n`);
                             console.log('🚀'.repeat(20) + '\n');
                         } catch (pairingErr) {
-                            console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
+                            console.error(`❌ ERRO CRÍTICO NO PAREAMENTO: ${pairingErr.message}`);
+                            if (pairingErr.message.includes('rate-overlimit')) {
+                                console.log('⚠️ AVISO: O WhatsApp bloqueou temporariamente o seu número por excesso de tentativas. Aguarde 24h ou tente outro número.');
+                            } else if (pairingErr.message.includes('Connection Closed')) {
+                                console.log('⚠️ AVISO: A conexão caiu antes do código ser gerado. Tentando estabilizar...');
+                            }
+                            console.log('📦 Detalhes técnicos do erro:', JSON.stringify(pairingErr, null, 2));
                         }
                     }, 10000); // Delay normal de 10 segundos conforme solicitado pelo usuário
                 }
