@@ -1047,71 +1047,33 @@ async function createBotSocket(authDir) {
             shouldResendMessageOn475AckError: true
         });
 
-        if (codeMode && (!TojiSock.authState.creds.registered || (isCloud && process.env.PHONE_NUMBER))) {
-            // Se estiver no Railway com PHONE_NUMBER, força a verificação de registro
-            if (isCloud && process.env.PHONE_NUMBER && TojiSock.authState.creds.registered) {
-                console.log('☁️ Verificando se a sessão atual coincide com o número configurado...');
-                // Se quiser trocar de número no Railway, basta mudar a env PHONE_NUMBER
-            }
-
-            // Reduzido para 3s para solicitar o código mais rápido
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
+        if (codeMode && !TojiSock.authState.creds.registered) {
             let phoneNumber;
             const envPhone = process.env.PHONE_NUMBER || process.env.phone_number;
 
             if (isCloud && envPhone) {
                 phoneNumber = envPhone.replace(/\D/g, '');
-                console.log(`\n☁️ Railway detectado. Forçando conexão para: +${phoneNumber}`);
-                
-                // Força a limpeza se não estiver registrado para garantir que o código seja solicitado
-                if (!TojiSock.authState.creds.registered) {
-                    console.log('🧹 Limpando vestígios para nova solicitação...');
-                    await clearAuthDir(authDir);
-                    await fs.mkdir(authDir, { recursive: true });
-                }
-            } else if (!TojiSock.authState.creds.registered) {
+                console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
+            } else {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
                 phoneNumber = await ask('--> ');
                 phoneNumber = phoneNumber.replace(/\D/g, '');
-            } else {
-                return; // Já está registrado e não está em nuvem com override
             }
 
             if (!/^\d{10,15}$/.test(phoneNumber)) {
                 console.log('⚠️ Número inválido! Reiniciando processo...');
-                await new Promise(resolve => setTimeout(resolve, 3000));
                 return startNazu();
             }
 
             try {
                 console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
-                
-                // Força a limpeza total da sessão para garantir uma conexão limpa
-                await clearAuthDir(authDir);
-                await fs.mkdir(authDir, { recursive: true });
-                
-                // Pequena pausa para o sistema de arquivos processar a limpeza
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                // Força a desconexão de qualquer tentativa anterior
-                TojiSock.ev.removeAllListeners('connection.update');
-                
-                // Garante que o número está limpo e no formato internacional
-                const cleanNumber = phoneNumber.replace(/\D/g, '');
-                const code = await TojiSock.requestPairingCode(cleanNumber);
+                const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
                 console.log('\n' + '='.repeat(40));
                 console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
                 console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
                 console.log('='.repeat(40) + '\n');
-                
-                // Trava o processo por 3 minutos para você conseguir conectar sem que o bot reinicie
-                if (isCloud) {
-                    console.log('🔒 Estabilidade ativada! Aguardando 3 minutos para pareamento...');
-                    await new Promise(resolve => setTimeout(resolve, 180000));
-                }
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                 // Se der erro de "Already requesting", espera um pouco e tenta de novo
