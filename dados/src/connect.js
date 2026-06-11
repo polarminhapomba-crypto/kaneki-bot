@@ -1030,11 +1030,11 @@ async function createBotSocket(authDir) {
             generateHighQualityLinkPreview: false, // Economiza RAM ao não processar links pesados
             syncFullHistory: false, // Garantido desativado para 1GB RAM
             markOnlineOnConnect: true,
-            connectTimeoutMs: 60000,
-            retryRequestDelayMs: 5000,
-            qrTimeout: 180000,
-            keepAliveIntervalMs: 30000,
-            defaultQueryTimeoutMs: 30000,
+            connectTimeoutMs: 120000, // 2 minutos para conectar
+            retryRequestDelayMs: 10000,
+            qrTimeout: 300000, // 5 minutos de timeout para o código
+            keepAliveIntervalMs: 60000,
+            defaultQueryTimeoutMs: 60000,
             // Identificando como Android para melhor compatibilidade
             browser: ['Android', 'Chrome', '110.0.5481.153'],
             maxMsgRetryCount: 3,
