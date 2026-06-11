@@ -1057,9 +1057,17 @@ async function createBotSocket(authDir) {
                 phoneNumber = (envPhone || numerodono).replace(/\D/g, '');
                 console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
             } else {
+                // Se o número do dono estiver disponível, usa ele como padrão após 10s de inatividade no prompt
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5511900000000):');
-                phoneNumber = await ask('--> ');
+                console.log(`💡 Dica: Se você não digitar nada, usarei o número do dono (${numerodono}) em 5 segundos.`);
+                
+                const timeoutPromise = new Promise((resolve) => {
+                    setTimeout(() => resolve(numerodono), 5000);
+                });
+                
+                phoneNumber = await Promise.race([ask('--> '), timeoutPromise]);
                 phoneNumber = phoneNumber.replace(/\D/g, '');
+                console.log(`✅ Usando número: +${phoneNumber}`);
             }
 
             if (!/^\d{10,15}$/.test(phoneNumber)) {
