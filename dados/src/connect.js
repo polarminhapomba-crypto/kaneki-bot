@@ -1010,7 +1010,6 @@ async function createBotSocket(authDir) {
                 const credsData = JSON.parse(credsContent);
                 isRegistered = !!credsData.registered;
             } catch (e) {
-                // Se o arquivo não existe ou está corrompido, apenas marca como não registrado
                 isRegistered = false;
             }
 
@@ -1021,7 +1020,9 @@ async function createBotSocket(authDir) {
             }
         }
 
+        // Garante que a pasta de autenticação exista antes de iniciar o estado para evitar ENOENT
         await fs.mkdir(authDir, { recursive: true });
+        
         const {
             state,
             saveCreds,
@@ -1045,7 +1046,7 @@ async function createBotSocket(authDir) {
             keepAliveIntervalMs: 30000,
             defaultQueryTimeoutMs: 30000,
             // Identificando como Android para melhor compatibilidade
-            browser: ['Android', 'Chrome', '110.0.5481.153'],
+            browser: ['Ubuntu', 'Chrome', '121.0.6167.139'],
             maxMsgRetryCount: 3,
             linkPreviewImageThumbnailWidth: 128,
             msgRetryCounterCache,
@@ -1365,6 +1366,7 @@ async function createBotSocket(authDir) {
                 if (isBadSession) {
                     console.log('🔄 Erro 401 ou Sessão Expirada detectada. Limpando arquivos antigos para novo pareamento...');
                     await clearAuthDir(authDir);
+                    await fs.mkdir(authDir, { recursive: true }); // Recria a pasta imediatamente para o próximo startNazu()
                 }
                 
                 // Não reconecta se conexão foi substituída (outra instância assumiu)
