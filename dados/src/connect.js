@@ -1088,8 +1088,8 @@ async function createBotSocket(authDir) {
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                             if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('401')) {
-                                console.log('🔄 Conexão fechada durante pareamento. Limpando sessão para tentar novamente...');
-                                await clearAuthDir(authDir);
+                                console.log('🔄 Conexão fechada durante pareamento. Aguardando estabilização...');
+                                // await clearAuthDir(authDir); // Desabilitado para evitar perda de sessão no Railway
                             }
                             pairingCodeRequested = false; 
                         }
@@ -1319,9 +1319,8 @@ async function createBotSocket(authDir) {
                     console.log(`⚠️ Erro 403 detectado. Tentativa ${forbidden403Attempts}/${MAX_403_ATTEMPTS}`);
                     
                     if (forbidden403Attempts >= MAX_403_ATTEMPTS) {
-                        console.log('❌ Máximo de tentativas para erro 403 atingido. Apagando QR code e parando...');
-                        await clearAuthDir(authDir);
-                        console.log('🗑️ Autenticação removida. Reinicie o bot para gerar um novo QR code.');
+                        console.log('❌ Máximo de tentativas para erro 403 atingido. Mantendo arquivos para nova tentativa...');
+                        // await clearAuthDir(authDir); // Desabilitado para evitar perda de sessão no Railway
                         process.exit(1);
                     }
                     
@@ -1346,8 +1345,8 @@ async function createBotSocket(authDir) {
                                    (lastDisconnect?.error?.output?.statusCode === 401);
 
                 if (isBadSession) {
-                    console.log('🔄 Erro 401 ou Sessão Expirada detectada. Limpando arquivos antigos para novo pareamento...');
-                    await clearAuthDir(authDir);
+                    console.log('🔄 Erro 401 ou Sessão Expirada detectada. Tentando manter arquivos para reconexão...');
+                    // await clearAuthDir(authDir); // Desabilitado para evitar perda de sessão no Railway
                 }
                 
                 // Não reconecta se conexão foi substituída (outra instância assumiu)
