@@ -1064,22 +1064,29 @@ async function createBotSocket(authDir) {
                 return startNazu();
             }
 
-            try {
-                console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
-                const code = await TojiSock.requestPairingCode(phoneNumber);
-                const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
-                
-                console.log('\n' + '='.repeat(40));
-                console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
-                console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
-                console.log('='.repeat(40) + '\n');
-            } catch (pairingErr) {
-                console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
-                // Se der erro de "Already requesting", espera um pouco e tenta de novo
-                const delay = pairingErr.message.includes('already') ? 10000 : (isCloud ? 20000 : 5000);
-                console.log(`🔄 Tentando novamente em ${delay/1000}s...`);
-                setTimeout(() => startNazu(), delay);
-            }
+            // Aguarda a conexão estar aberta antes de solicitar o código
+            TojiSock.ev.on('connection.update', async (update) => {
+                const { connection } = update;
+                if (connection === 'open') {
+                    // Já está conectado, não precisa de código
+                } else if (connection === 'connecting' && !TojiSock.authState.creds.registered) {
+                    // Tenta solicitar o código após um pequeno delay para estabilizar
+                    setTimeout(async () => {
+                        try {
+                            console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
+                            const code = await TojiSock.requestPairingCode(phoneNumber);
+                            const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
+                            
+                            console.log('\n' + '='.repeat(40));
+                            console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
+                            console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
+                            console.log('='.repeat(40) + '\n');
+                        } catch (pairingErr) {
+                            console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
+                        }
+                    }, 5000);
+                }
+            });
         }
 
         TojiSock.ev.on('creds.update', saveCreds);
