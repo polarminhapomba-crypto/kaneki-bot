@@ -1026,20 +1026,20 @@ async function createBotSocket(authDir) {
         
         const TojiSock = makeWASocket({
             version,
-            emitOwnEvents: true,
-            fireInitQueries: true,
-            generateHighQualityLinkPreview: true,
-            syncFullHistory: true,
+            emitOwnEvents: false, // Reduz processamento de eventos próprios
+            fireInitQueries: false, // Desativa queries iniciais pesadas para economizar RAM
+            generateHighQualityLinkPreview: false, // Economiza RAM ao não processar links pesados
+            syncFullHistory: false, // Garantido desativado para 1GB RAM
             markOnlineOnConnect: true,
-            connectTimeoutMs: 120000,
+            connectTimeoutMs: 60000,
             retryRequestDelayMs: 5000,
             qrTimeout: 180000,
-            keepAliveIntervalMs: 60_000, // Aumentado para manter o socket ativo por mais tempo
-            defaultQueryTimeoutMs: 60_000, // Define um timeout padrão para queries
-            browser: ['Ubuntu', 'Chrome', '110.0.5481.178'],
-            syncFullHistory: false, // Reduz o consumo de memória ao não sincronizar todo o histórico
-            maxMsgRetryCount: 5, // Aumenta tentativas de reenvio de mensagens em caso de erro
-            linkPreviewImageThumbnailWidth: 192,
+            keepAliveIntervalMs: 30000,
+            defaultQueryTimeoutMs: 30000,
+            // Navegador configurado como macOS para melhor recepção de pairing code
+            browser: ['Mac OS', 'Chrome', '114.0.5735.198'],
+            maxMsgRetryCount: 3,
+            linkPreviewImageThumbnailWidth: 128,
             msgRetryCounterCache,
             auth: state,
             signalRepository,
