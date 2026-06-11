@@ -1083,13 +1083,12 @@ async function createBotSocket(authDir) {
                 return startNazu();
             }
 
-            // Aguarda a conexão estar aberta antes de solicitar o código
-            TojiSock.ev.on('connection.update', async (update) => {
-                const { connection } = update;
-                if (connection === 'open') {
-                    // Já está conectado, não precisa de código
-                } else if (connection === 'connecting' && !TojiSock.authState.creds.registered) {
-                    // Solicitando pairing code imediatamente (tempo normal)
+            // Aguarda o salvamento das credenciais iniciais antes de pedir o código (Resolve Erro 428)
+            TojiSock.ev.on('creds.update', async () => {
+                if (!TojiSock.authState.creds.registered && !TojiSock.pairingCodeSent) {
+                    TojiSock.pairingCodeSent = true; // Evita pedidos duplicados
+                    
+                    console.log(`⏳ Aguardando 10s para estabilizar conexão antes de solicitar o código...`);
                     setTimeout(async () => {
                         try {
                             console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
@@ -1102,15 +1101,13 @@ async function createBotSocket(authDir) {
                             console.log(`🔗 Caminho: Aparelhos Conectados > Conectar com número de telefone\n`);
                             console.log('🚀'.repeat(20) + '\n');
                         } catch (pairingErr) {
-                            console.error(`❌ ERRO CRÍTICO NO PAREAMENTO: ${pairingErr.message}`);
-                            if (pairingErr.message.includes('rate-overlimit')) {
-                                console.log('⚠️ AVISO: O WhatsApp bloqueou temporariamente o seu número por excesso de tentativas. Aguarde 24h ou tente outro número.');
-                            } else if (pairingErr.message.includes('Connection Closed')) {
-                                console.log('⚠️ AVISO: A conexão caiu antes do código ser gerado. Tentando estabilizar...');
+                            TojiSock.pairingCodeSent = false;
+                            console.error(`❌ ERRO NO PAREAMENTO: ${pairingErr.message}`);
+                            if (pairingErr.message.includes('428') || pairingErr.message.includes('Connection Closed')) {
+                                console.log('🔄 Tentando novamente em 10 segundos (Erro 428/Closed)...');
                             }
-                            console.log('📦 Detalhes técnicos do erro:', JSON.stringify(pairingErr, null, 2));
                         }
-                    }, 10000); // Delay normal de 10 segundos conforme solicitado pelo usuário
+                    }, 10000);
                 }
             });
         }
