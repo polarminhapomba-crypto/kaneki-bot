@@ -996,20 +996,19 @@ async function createBotSocket(authDir) {
     try {
         await fs.mkdir(path.join(DATABASE_DIR, 'grupos'), { recursive: true });
         
-        // No Railway, se não estiver registrado, limpa a pasta de auth para evitar conflitos de cache
+        // No Railway, apenas informa o estado. Não limpa nada automaticamente ao ligar para preservar a sessão.
         if (isCloud) {
             console.log('☁️ Verificando estado da sessão no Railway...');
             const credsFile = path.join(authDir, 'creds.json');
             try {
                 const credsData = JSON.parse(await fs.readFile(credsFile, 'utf-8'));
-                if (!credsData.registered) {
-                    console.log('🧹 Sessão incompleta detectada. Limpando para nova tentativa...');
-                    await clearAuthDir(authDir);
+                if (credsData.registered) {
+                    console.log('✅ Sessão registrada encontrada. Tentando conectar...');
+                } else {
+                    console.log('⚠️ Sessão incompleta encontrada. Aguardando pareamento...');
                 }
             } catch (e) {
-                // Se o arquivo não existe ou está corrompido, limpa por segurança
-                console.log('🧹 Nenhuma sessão válida encontrada. Iniciando do zero...');
-                await clearAuthDir(authDir);
+                console.log('🆕 Nenhuma sessão encontrada. Iniciando nova conexão...');
             }
         }
 
