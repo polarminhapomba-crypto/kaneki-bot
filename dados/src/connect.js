@@ -995,6 +995,24 @@ const RECONNECT_DELAY_BASE = 5000; // 5 segundos base
 async function createBotSocket(authDir) {
     try {
         await fs.mkdir(path.join(DATABASE_DIR, 'grupos'), { recursive: true });
+        
+        // No Railway, se não estiver registrado, limpa a pasta de auth para evitar conflitos de cache
+        if (isCloud) {
+            console.log('☁️ Verificando estado da sessão no Railway...');
+            const credsFile = path.join(authDir, 'creds.json');
+            try {
+                const credsData = JSON.parse(await fs.readFile(credsFile, 'utf-8'));
+                if (!credsData.registered) {
+                    console.log('🧹 Sessão incompleta detectada. Limpando para nova tentativa...');
+                    await clearAuthDir(authDir);
+                }
+            } catch (e) {
+                // Se o arquivo não existe ou está corrompido, limpa por segurança
+                console.log('🧹 Nenhuma sessão válida encontrada. Iniciando do zero...');
+                await clearAuthDir(authDir);
+            }
+        }
+
         await fs.mkdir(authDir, { recursive: true });
         const {
             state,
@@ -1052,18 +1070,24 @@ async function createBotSocket(authDir) {
 
             try {
                 console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
-                // Limpa qualquer estado pendente antes de solicitar
+                
+                // Força a desconexão de qualquer tentativa anterior
                 TojiSock.ev.removeAllListeners('connection.update');
+                
+                // Pequena pausa para garantir que o socket está estável
+                await new Promise(resolve => setTimeout(resolve, 2000));
                 
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
-                console.log(`\n🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
-                console.log(`📲 Use no WhatsApp (+${phoneNumber}): Dispositivos Conectados > Conectar com número de telefone\n`);
+                console.log('\n' + '='.repeat(40));
+                console.log(`🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
+                console.log(`📲 Use no WhatsApp (+${phoneNumber})`);
+                console.log('='.repeat(40) + '\n');
                 
                 // Mantém a espera de 2 minutos para o usuário ter tempo de parear
                 if (isCloud) {
-                    console.log('⏳ Código gerado! Aguardando 2 minutos para você realizar o pareamento...');
+                    console.log('⏳ Aguardando pareamento... Não feche os logs.');
                     await new Promise(resolve => setTimeout(resolve, 120000));
                 }
             } catch (pairingErr) {
