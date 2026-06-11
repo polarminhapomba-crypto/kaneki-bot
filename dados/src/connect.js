@@ -1082,7 +1082,7 @@ async function createBotSocket(authDir) {
                 if (connection === 'open') {
                     // Já está conectado, não precisa de código
                 } else if (connection === 'connecting' && !TojiSock.authState.creds.registered) {
-                    // Aumentando delay para 20s no Railway para garantir estabilidade total
+                    // Solicitando pairing code imediatamente (tempo normal)
                     setTimeout(async () => {
                         try {
                             console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
@@ -1097,7 +1097,7 @@ async function createBotSocket(authDir) {
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
                         }
-                    }, 20000);
+                    }, 2000); // Apenas 2 segundos para garantir que o socket subiu
                 }
             });
         }
