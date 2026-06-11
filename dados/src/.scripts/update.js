@@ -12,7 +12,7 @@ const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const REPO_URL = 'https://github.com/hiudyy/toji.git';
+const REPO_URL = 'https://github.com/polarminhapomba-crypto/kaneki-bot.git';
 const BACKUP_DIR = path.join(process.cwd(), `backup_${new Date().toISOString().replace(/[:.]/g, '_').replace(/T/, '_')}`);
 const TEMP_DIR = path.join(process.cwd(), 'temp_toji');
 const isWindows = os.platform() === 'win32';
@@ -110,18 +110,8 @@ async function confirmUpdate() {
   printWarning('🛑 Pressione Ctrl+C para cancelar a qualquer momento.');
 
   return new Promise((resolve) => {
-    let countdown = 5;
-    const timer = setInterval(() => {
-      process.stdout.write(`\r⏳ Iniciando em ${countdown} segundos...${' '.repeat(20)}`);
-      countdown--;
-
-      if (countdown < 0) {
-        clearInterval(timer);
-        process.stdout.write('\r                                  \n');
-        printMessage('🚀 Prosseguindo com a atualização...');
-        resolve();
-      }
-    }, 1000);
+    printMessage('🚀 Iniciando atualização agora...');
+    resolve();
   });
 }
 
