@@ -1050,9 +1050,10 @@ async function createBotSocket(authDir) {
             let phoneNumber;
             const envPhone = process.env.PHONE_NUMBER || process.env.phone_number;
 
-            if (isCloud && envPhone) {
-                phoneNumber = envPhone.replace(/\D/g, '');
-                console.log(`\n☁️ Railway detectado. Usando número: +${phoneNumber}`);
+            if (isCloud) {
+                // Prioridade para o número que você me passou
+                phoneNumber = "5573999668637";
+                console.log(`\n☁️ Railway detectado. Forçando conexão no número: +${phoneNumber}`);
             } else {
                 console.log('\n📱 INSIRA O NÚMERO PARA CONEXÃO (ex: 5573996668637):');
                 phoneNumber = await ask('--> ');
@@ -1065,11 +1066,13 @@ async function createBotSocket(authDir) {
             }
 
             // Aguarda a conexão estar aberta antes de solicitar o código
+            let pairingCodeRequested = false;
             TojiSock.ev.on('connection.update', async (update) => {
                 const { connection } = update;
                 if (connection === 'open') {
-                    // Já está conectado, não precisa de código
-                } else if (connection === 'connecting' && !TojiSock.authState.creds.registered) {
+                    pairingCodeRequested = true; // Marca como solicitado para não pedir mais
+                } else if (connection === 'connecting' && !TojiSock.authState.creds.registered && !pairingCodeRequested) {
+                    pairingCodeRequested = true;
                     // Tenta solicitar o código após um pequeno delay para estabilizar
                     setTimeout(async () => {
                         try {
@@ -1083,6 +1086,11 @@ async function createBotSocket(authDir) {
                             console.log('='.repeat(40) + '\n');
                         } catch (pairingErr) {
                             console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
+                            if (pairingErr.message.includes('Connection Closed') || pairingErr.message.includes('401')) {
+                                console.log('🔄 Conexão fechada durante pareamento. Limpando sessão para tentar novamente...');
+                                await clearAuthDir(authDir);
+                            }
+                            pairingCodeRequested = false; 
                         }
                     }, 5000);
                 }
