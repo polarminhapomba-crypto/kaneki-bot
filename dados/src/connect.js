@@ -1030,8 +1030,8 @@ async function createBotSocket(authDir) {
         });
 
         if (codeMode && !TojiSock.authState.creds.registered) {
-            // Aguarda o socket estar 100% pronto
-            await new Promise(resolve => setTimeout(resolve, 10000));
+            // Reduzido para 3s para solicitar o código mais rápido
+            await new Promise(resolve => setTimeout(resolve, 3000));
 
             let phoneNumber;
 
@@ -1046,26 +1046,30 @@ async function createBotSocket(authDir) {
 
             if (!/^\d{10,15}$/.test(phoneNumber)) {
                 console.log('⚠️ Número inválido! Reiniciando processo...');
-                await new Promise(resolve => setTimeout(resolve, 5000));
+                await new Promise(resolve => setTimeout(resolve, 3000));
                 return startNazu();
             }
 
             try {
                 console.log(`📡 Solicitando pairing code para +${phoneNumber}...`);
+                // Limpa qualquer estado pendente antes de solicitar
+                TojiSock.ev.removeAllListeners('connection.update');
+                
                 const code = await TojiSock.requestPairingCode(phoneNumber);
                 const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
                 
                 console.log(`\n🔑 CÓDIGO DE CONEXÃO: ${formattedCode}`);
                 console.log(`📲 Use no WhatsApp (+${phoneNumber}): Dispositivos Conectados > Conectar com número de telefone\n`);
                 
-                // Dá 2 minutos para o usuário parear antes de qualquer tentativa de reconexão automática
+                // Mantém a espera de 2 minutos para o usuário ter tempo de parear
                 if (isCloud) {
-                    console.log('⏳ Aguardando 2 minutos para você realizar o pareamento...');
+                    console.log('⏳ Código gerado! Aguardando 2 minutos para você realizar o pareamento...');
                     await new Promise(resolve => setTimeout(resolve, 120000));
                 }
             } catch (pairingErr) {
                 console.error(`❌ Erro ao solicitar pairing code: ${pairingErr.message}`);
-                const delay = isCloud ? 30000 : 10000;
+                // Se der erro de "Already requesting", espera um pouco e tenta de novo
+                const delay = pairingErr.message.includes('already') ? 10000 : (isCloud ? 20000 : 5000);
                 console.log(`🔄 Tentando novamente em ${delay/1000}s...`);
                 setTimeout(() => startNazu(), delay);
             }
